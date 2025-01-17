@@ -20,7 +20,7 @@ class SideBar(QWidget):
         self.notifications = NotificationPane(self)
 
         # Add individual tabs
-        self.file_tab = ImageTab(self.storage)
+        self.file_tab = ImageTab(self.processor)
         self.halftone_tab = HalftoneTab(self.processor)
 
         self.tabs.addTab(self.file_tab, "Image")

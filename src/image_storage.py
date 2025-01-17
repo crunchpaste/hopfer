@@ -4,6 +4,7 @@ import numpy as np
 from PIL.ImageQt import ImageQt
 from PySide6.QtGui import QPixmap
 from helpers.image_conversion import numpy_to_pixmap
+from algorithms.static import luminance
 
 class ImageStorage:
     """
@@ -42,9 +43,9 @@ class ImageStorage:
             self.save_path = image_path
 
             # Open the image and convert to grayscale
-            pil_image = Image.open(image_path).convert("L")
+            pil_image = Image.open(image_path).convert("RGB")
             self.original_image = np.array(pil_image) / self.NORMALIZED_MAX
-            self.save_path_edited = False  # Reset the save path status
+            # self.grayscale_image = luminance(self.original_image)
         except (FileNotFoundError, UnidentifiedImageError) as e:
             self.show_notification(f"Error: Unable to open image.\n{str(e)}", duration=10000)
         except Exception as e:
@@ -103,6 +104,14 @@ class ImageStorage:
         """
         return self.original_image
 
+    def get_grayscale_image(self):
+        """
+        Return the grayscale image as a NumPy array (normalized to [0, 1]).
+
+        :return: Grayscale image array.
+        """
+        return self.grayscale_image
+
     def get_original_pixmap(self):
         """
         Convert the original image to a QPixmap.
@@ -110,6 +119,14 @@ class ImageStorage:
         :return: QPixmap of the original image.
         """
         return self._get_image_pixmap(self.original_image)
+
+    def get_grayscale_pixmap(self):
+        """
+        Convert the grayscale image to a QPixmap.
+
+        :return: QPixmap of the grayscale image.
+        """
+        return self._get_image_pixmap(self.grayscale_image)
 
     def get_processed_image(self):
         """

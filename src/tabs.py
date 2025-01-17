@@ -1,6 +1,7 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Signal
 from controls.halftone_combo import HalftoneCombo
+from controls.grayscale_combo import GrayscaleCombo
 from settings import NoneSettings, ErrorDiffusionSettings
 from image_processor import ImageProcessor
 
@@ -97,25 +98,21 @@ class HalftoneTab(QWidget):
 class ImageTab(QWidget):
     file_opened_signal = Signal()
 
-    def __init__(self, storage):
+    def __init__(self, processor):
         """
         Initialize the ImageTab widget, which would offer some basic image adjustments in the future.
         """
         super().__init__()
-        self.storage = storage
+        self.processor = processor
 
         self._initialize_ui()
 
     def _initialize_ui(self):
         self.layout = QVBoxLayout()
 
-        # Label to display the selected file path
-        self.file_label = QLabel("Coming soon.")
-        self.layout.addWidget(self.file_label)
-
-        # Label to display the current width
-        self.width_label = QLabel("Width: 0 px")
-        self.layout.addWidget(self.width_label)
+        self.combobox = GrayscaleCombo()
+        self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
+        self.layout.addWidget(self.combobox)
 
         # Add stretch to the layout
         self.layout.addStretch()
@@ -123,7 +120,15 @@ class ImageTab(QWidget):
         # Set the layout for the widget
         self.setLayout(self.layout)
 
-    def resizeEvent(self, event):
-        """Update the width label whenever the widget is resized."""
-        super().resizeEvent(event)
-        self.width_label.setText(f"Width: {self.width()} px")
+    def on_mode_changed(self, mode_name):
+        """
+        Handle the change of grayscaling mode and trigger re-processing.
+
+        Args:
+            mode_name (str): The selected grayscaling mode.
+        """
+        # print(f"Mode changed to: {mode_name}")
+
+        self.processor.grayscale_mode = mode_name
+        self.processor.convert = True
+        self.processor.start()

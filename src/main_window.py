@@ -51,6 +51,8 @@ class MainWindow(QMainWindow):
 
     def image_opened(self):
         """Handle image opened event and start processing."""
+        print("MainWindow")
+        self.processor.convert = True
         self.processor.start()
         self.viewer.resetView()
 

@@ -1,9 +1,10 @@
+from numba import prange
 from numba.pycc import CC
 import numpy as np
 
 # Initialize the compiler
 cc = CC('static')
-cc.output_dir = "src/algorithms/compiled"
+cc.output_dir = "src/algorithms"
 
 # Export the function with the appropriate signature (for example, using f8 for float64)
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
@@ -76,6 +77,73 @@ def eds(img, kernel, str_value):
 
     if flipped:
         output_img = np.fliplr(output_img)
+
+    return output_img
+
+@cc.export('luminance', 'f8[:,:](f8[:,:,:])')
+def luminance(img):
+
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w))
+
+    for y in prange(h):
+        for x in prange(w):
+            r, g, b = img[y, x, 0:3]
+            output_img[y, x] = (0.22 * r + 0.72 * g + 0.06 * b)
+
+    return output_img
+
+@cc.export('luma', 'f8[:,:](f8[:,:,:])')
+def luma(img):
+
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w))
+
+    for y in prange(h):
+        for x in prange(w):
+            r, g, b = img[y, x, 0:3]
+            output_img[y, x] = (0.30 * r + 0.59 * g + 0.11 * b)
+
+    return output_img
+
+@cc.export('average', 'f8[:,:](f8[:,:,:])')
+def average(img):
+
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w))
+
+    for y in prange(h):
+        for x in prange(w):
+            r, g, b = img[y, x, 0:3]
+            output_img[y, x] = (r + g + b) / 3
+
+    return output_img
+
+@cc.export('value', 'f8[:,:](f8[:,:,:])')
+def value(img):
+
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w))
+
+    for y in prange(h):
+        for x in prange(w):
+            values = img[y, x, 0:3]
+            output_img[y, x] = np.max(values)
+
+    return output_img
+
+@cc.export('lightness', 'f8[:,:](f8[:,:,:])')
+def lightness(img):
+
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w))
+
+    for y in prange(h):
+        for x in prange(w):
+            values = img[y, x, 0:3]
+            max = np.max(values)
+            min = np.min(values)
+            output_img[y, x] = (max + min) * .5
 
     return output_img
 

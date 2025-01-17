@@ -6,8 +6,8 @@ def error_diffusion(img, kernel, settings):
     serpentine = settings['serpentine']
     print(str, serpentine)
     if serpentine:
-        output_img = static.eds(img, kernel, str)
+        output_img = eds(img, kernel, str)
     else:
-        output_img = static.ed(img, kernel, str)
+        output_img = ed(img, kernel, str)
 
     return output_img
