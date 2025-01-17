@@ -1,0 +1,250 @@
+/*
+white: @primary
+black: @secondary
+ */
+
+/* @primary: @primary;
+@secondary: @secondary; */
+
+* {
+    font-family: "JetBrains Mono";
+    font-weight: bold;
+    font-size: 14px;
+
+}
+
+QWidget {
+    background-color: @secondary;
+    color: @primary;
+    font-size: 14px;
+}
+/* QWidget:focus {
+    background-color: @secondary;
+    border: 1px solid @accent;
+    color: @accent;
+    font-size: 14px;
+} */
+QPushButton {
+    color: @secondary;
+    background-color: @primary;
+    border: 2px solid @primary;
+    border-radius: 2px;
+    padding: 5px;
+}
+QPushButton:hover {
+    color: @primary;
+    background-color: @secondary;
+}
+QPushButton:focus {
+    color: @accent;
+    background-color: @secondary;
+    border-color: @accent;
+    outline: none;                   /* No outline */
+    /* text-selection-color: transparent;
+    text-selection-background-color: transparent;
+    text-selection-border: none; */
+}
+QComboBox {
+    background-color: @secondary;        /* Solid background color */
+    border: 1px solid @primary;        /* Flat border */
+    border-radius: 0px;            /* Optional: slightly rounded corners */
+    padding: 4px;                  /* Some padding for inner spacing */
+    color: @primary;                  /* Text color */
+}
+QComboBox:focus {
+    border: 1px solid @accent;        /* Flat border */
+    color: @accent;                  /* Text color */
+}
+QComboBox::drop-down {
+    border: none;
+    background-color: transparent; /* Make the background transparent */
+    width: 20px;                   /* Optional: Adjust width of the dropdown button */
+}
+QComboBox::down-arrow {
+    image: url('@res/icons/menu-down.svg');
+}
+/* Dropdown List */
+QComboBox QAbstractItemView {
+    background-color: @secondary;
+    border: 1px solid @primary;
+    border-radius: 2px;
+    padding: 5px;
+    outline: 0;
+}
+QComboBox QAbstractItemView::item {
+  padding: 5px;
+}
+
+QComboBox QAbstractItemView::item:hover {
+  padding: 5px;
+  background: @primary;
+  color: @secondary;
+}
+QComboBox QAbstractItemView::item:selected {
+  padding: 5px;
+  background: @primary;
+  color: @secondary;
+}
+QTabWidget {
+    background-color: @secondary;
+    border: 1px solid @primary;
+    min-width: 275px;
+}
+
+#toolbox {
+    max-width: 46px;  /* Set the maximum width */
+    width: 46px;      /* Optional, ensures the width stays fixed */
+}
+
+#toolbox QHBoxLayout {
+    max-width: 46px;  /* Set the maximum width */
+    width: 46px;      /* Optional, ensures the width stays fixed */
+}
+
+#toolbox QHBoxLayout {
+  padding: 0px;
+  margin: 0px;
+}
+
+#toolbox QPushButton {
+  qproperty-iconSize: 18px;
+  color: @primary;
+  background-color: @secondary;
+  border: 2px solid @primary;
+  border-radius: 2px;
+  margin-top: 1px;
+  margin-bottom: 5px;
+}
+
+#toolbox #last-button {
+  margin-bottom: 0;
+}
+
+#toolbox QPushButton:hover {
+    background-color: @primary;
+}
+
+#toolbox QPushButton:focus {
+  border: 2px solid @accent;
+}
+
+QPushButton#settings {
+    margin-bottom: 0px;
+}
+
+QToolTip {
+    color: @primary;                   /* Text color */
+    background-color: @secondary;        /* Background color */
+    border: 2px solid @primary;        /* Border style */
+    border-radius: 2px;               /* Rounded corners */
+    padding: 2px 5px 2px 5px;
+    font-size: 14px;                  /* Text size */
+    /* opacity: 200; */
+}
+
+QTabWidget::tab-bar {
+    alignment: left;
+}
+
+QTabBar::tab {
+    background-color: @secondary;
+    border: 1px solid @primary;
+    padding: 5px 10px;
+    /* margin-right: 1px; */
+}
+
+QTabBar::tab:selected {
+    background-color: @primary;
+    color: @secondary;
+}
+
+QTabBar::tab:focus {
+    background: @accent;
+    outline: none;  /* Remove the focus outline */
+    selection-color: transparent;  /* Disable text selection color */
+    selection-background-color: transparent;  /* Disable text selection background */
+}
+
+QTabBar::tab:hover {
+    background-color: #777;
+}
+
+QTabWidget::pane {
+    border: 1px solid @primary;
+    background-color: transparent;
+}
+
+QSlider::groove:horizontal {
+    border: 2px solid @primary;
+    height: 4px;
+    border-radius: 2px;
+    background: none;  /* No background for the groove itself */
+    margin: 6px 0;
+}
+QSlider::groove:horizontal:focus {
+    border: 2px solid @accent;
+    height: 4px;
+    border-radius: 2px;
+    background: none;  /* No background for the groove itself */
+    margin: 6px 0;
+}
+/* Left of the handle: White fill inside the groove only */
+QSlider::sub-page:horizontal {
+    background: @primary;
+    /* border-radius: 2px; */
+    height: 6px;                 /* Same height as the groove */
+    margin: 6px 0;               /* Align with the groove */
+}
+/* Left of the handle: White fill inside the groove only */
+QSlider::sub-page:horizontal:focus {
+    background: @accent;
+    /* border-radius: 2px; */
+    height: 6px;                 /* Same height as the groove */
+    margin: 6px 0;               /* Align with the groove */
+}
+/* Right of the handle: Transparent, matching the groove size */
+QSlider::add-page:horizontal {
+    background: none;
+    /* border-radius: 2px; */
+    height: 6px;                 /* Same height as the groove */
+    margin: 6px 0;               /* Align with the groove */
+}
+
+/* Right of the handle: Transparent, matching the groove size */
+QSlider::add-page:horizontal {
+    background: none;
+    /* border-radius: 2px; */
+    height: 6px;                 /* Same height as the groove */
+    margin: 6px 0;               /* Align with the groove */
+}
+QSlider::handle:horizontal {
+    background: @primary;
+    border: 3px solid @secondary;
+    width: 5px;
+    margin: -6px 0;
+    border-radius: 0px;
+}
+#toggleSlider {
+    /* margin: 5px 10px; */
+    max-width: 25px;
+}
+
+#notificationPane {
+  border: 1px solid @accent;
+}
+
+#notificationPane QPushButton {
+  border: none;
+  background: transparent;
+  margin: 0;
+}
+
+
+QGraphicsView {
+  margin: 10px;
+  min-width: 225px;
+  background: url('@res/background.svg') no-repeat center center;
+}
+QGraphicsView focus{
+  border: 1px solid @accent;
+}
