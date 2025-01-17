@@ -16,6 +16,7 @@ def load_qss(app, qss_file_path):
         primary_color = '#f0f6f0'  # Primary color in hex
         secondary_color = '#222323'  # Secondary color in hex
         accent_color = '#fa8072'  # Accent color in hex
+        disabled_color = '#6a6d6b' # Color for disabled elements
 
         # Get the resource path
         menu_down_path = get_path('res')
@@ -25,6 +26,7 @@ def load_qss(app, qss_file_path):
         qss_content = qss_content.replace('@primary', primary_color)
         qss_content = qss_content.replace('@secondary', secondary_color)
         qss_content = qss_content.replace('@accent', accent_color)
+        qss_content = qss_content.replace('@disabled', disabled_color)
 
         # Apply the QSS content to the application
         app.setStyleSheet(qss_content)

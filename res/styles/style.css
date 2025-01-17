@@ -128,6 +128,10 @@ QTabWidget {
   border: 2px solid @accent;
 }
 
+#toolbox QPushButton:disabled {
+  border: 2px solid @disabled;
+}
+
 QPushButton#settings {
     margin-bottom: 0px;
 }

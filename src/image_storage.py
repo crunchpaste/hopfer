@@ -45,7 +45,7 @@ class ImageStorage:
             # Open the image and convert to grayscale
             pil_image = Image.open(image_path).convert("RGB")
             self.original_image = np.array(pil_image) / self.NORMALIZED_MAX
-            # self.grayscale_image = luminance(self.original_image)
+            self.main_window.sidebar.toolbox.enable_save()
         except (FileNotFoundError, UnidentifiedImageError) as e:
             self.show_notification(f"Error: Unable to open image.\n{str(e)}", duration=10000)
         except Exception as e:

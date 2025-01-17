@@ -24,10 +24,34 @@ class Toolbox(QWidget):
         icon_path = get_path("res/icons")
 
         # Create the buttons
-        self.open = self._create_button(icon_path + "/open.svg", icon_path + "/dark/open.svg", icon_path + "/salmon/open.svg", "Open image", self.open_file_dialog)
-        self.save = self._create_button(icon_path + "/save.svg", icon_path + "/dark/save.svg", icon_path + "/salmon/save.svg", "Save image", self.storage.save_image)
-        self.saveas = self._create_button(icon_path + "/save_as.svg", icon_path + "/dark/save_as.svg", icon_path + "/salmon/save_as.svg", "Save as", None)
-        self.settings = self._create_button(icon_path + "/settings.svg", icon_path + "/dark/settings.svg", icon_path + "/salmon/settings.svg", "Settings", None)
+        self.open = self._create_button(
+            icon_path + "/open.svg",
+            icon_path + "/dark/open.svg",
+            icon_path + "/salmon/open.svg",
+            icon_path + "/disabled/open.svg",
+            "Open image", self.open_file_dialog)
+        self.save = self._create_button(
+            icon_path + "/save.svg",
+            icon_path + "/dark/save.svg",
+            icon_path + "/salmon/save.svg",
+            icon_path + "/disabled/save.svg",
+            "Save image", self.storage.save_image)
+        self.save.setEnabled(False) # Initial state is disabled
+
+        self.saveas = self._create_button(
+            icon_path + "/save_as.svg",
+            icon_path + "/dark/save_as.svg",
+            icon_path + "/salmon/save_as.svg",
+            icon_path + "/disabled/save_as.svg",
+            "Save as", None)
+        self.saveas.setEnabled(False) # Initial state is disabled
+
+        self.settings = self._create_button(
+            icon_path + "/settings.svg",
+            icon_path + "/dark/settings.svg",
+            icon_path + "/salmon/settings.svg",
+            icon_path + "/disabled/settings.svg",
+            "Settings", None)
         self.settings.setObjectName("last-button")
         # Add buttons to layout
         toolbox_layout.addWidget(self.open)
@@ -36,7 +60,7 @@ class Toolbox(QWidget):
         toolbox_layout.addStretch()
         toolbox_layout.addWidget(self.settings)
 
-    def _create_button(self, icon_default, icon_hover, icon_focus, tooltip, click_handler):
+    def _create_button(self, icon_default, icon_hover, icon_focus, icon_disabled, tooltip, click_handler):
         """
         Creates a button with the specified icons, tooltip, and click handler.
 
@@ -56,6 +80,7 @@ class Toolbox(QWidget):
         button.setStyleSheet(
             f'QPushButton:hover {{ icon: url({icon_hover}); }}'
             f'QPushButton:focus {{ icon: url({icon_focus}); }}'
+            f'QPushButton:disabled {{ icon: url({icon_disabled}); }}'
         )
         button.setToolTip(tooltip)
 
@@ -77,3 +102,8 @@ class Toolbox(QWidget):
             self.storage.load_image(file_path)
             print(f"Selected file: {file_path}")
             self.file_opened_signal.emit()
+
+    def enable_save(self):
+        """Enables the save buttons when an image is available"""
+        self.save.setEnabled(True)
+        self.saveas.setEnabled(True)
