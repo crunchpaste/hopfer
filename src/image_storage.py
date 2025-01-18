@@ -132,6 +132,7 @@ class ImageStorage:
 
         :return: QPixmap of the grayscale image.
         """
+
         return self._get_image_pixmap(self.grayscale_image)
 
     def get_processed_image(self):
@@ -140,6 +141,7 @@ class ImageStorage:
 
         :return: Processed image array.
         """
+
         return self.processed_image
 
     def get_processed_pixmap(self):
@@ -149,7 +151,21 @@ class ImageStorage:
 
         :return: QPixmap of the processed image (or original if not processed).
         """
-        return self._get_image_pixmap(self.processed_image) or self.get_original_pixmap()
+        if self.main_window.processor.algorithm == "None":
+            return self._get_image_pixmap(self.processed_image) or self.get_original_pixmap()
+        else:
+            color_dark = np.array((34, 35, 35))
+            color_light = np.array((240, 246, 246))
+
+            h, w = self.processed_image.shape
+            # Create a themed preview
+            themed_image = np.zeros((h, w, 3), dtype=np.uint8)
+
+            # Use boolean indexing to set the color for ones and zeros
+            themed_image[self.processed_image == 1] = color_light
+            themed_image[self.processed_image == 0] = color_dark
+
+            return self._get_image_pixmap(themed_image) or self.get_original_pixmap()
 
     def _get_image_pixmap(self, image_array):
         """
