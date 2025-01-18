@@ -4,7 +4,6 @@ import numpy as np
 from PIL.ImageQt import ImageQt
 from PySide6.QtGui import QPixmap
 from helpers.image_conversion import numpy_to_pixmap
-from algorithms.static import luminance
 
 class ImageStorage:
     """
