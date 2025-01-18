@@ -12,7 +12,6 @@ class ImageStorage:
     """
 
     # Constants for image processing and saving
-    IMAGE_FORMAT = "png"
     MAX_SAVE_ATTEMPTS = 100
     NORMALIZED_MAX = 255.0
 
@@ -39,7 +38,10 @@ class ImageStorage:
         """
         try:
             self.image_path = image_path
-            self.save_path = image_path
+
+            path_without_ext = image_path.rsplit('.', 1)[0]
+            save_path = path_without_ext + ".png"
+            self.save_path = save_path
 
             # Open the image and convert to grayscale
             pil_image = Image.open(image_path).convert("RGB")
@@ -59,6 +61,7 @@ class ImageStorage:
         """
         if self.processed_image is None:
             print("No processed image to save!")
+            self.show_notification("Oops! It seems like you haven't opened an image yet. Open an image and then you can save it.", duration=3000)
             return
 
         # Ensure the base name and directory are properly set
@@ -67,7 +70,7 @@ class ImageStorage:
             return
 
         base_dir = os.path.dirname(self.save_path)
-        base_name = os.path.splitext(os.path.basename(self.save_path))[0]
+        base_name = os.path.basename(self.save_path)
         save_path = self.generate_unique_save_path(base_dir, base_name)
 
         # Convert processed image to PIL format and save
@@ -83,14 +86,18 @@ class ImageStorage:
         a counter is appended to the base filename.
 
         :param base_dir: The directory to save the image.
-        :param base_name: The base name of the file (without extension).
+        :param base_name: The base name of the file (including extension).
         :return: A unique file path for saving.
         """
+        # Extract the file extension (format) from the base_name
+        base_name_without_ext = base_name.rsplit('.', 1)[0]
+        file_format = '.' + base_name.rsplit('.', 1)[1] if '.' in base_name else '.png'
+
         counter = 1
-        save_path = os.path.join(base_dir, f"{base_name}.{self.IMAGE_FORMAT}")
+        save_path = os.path.join(base_dir, f"{base_name_without_ext}{file_format}")
 
         while os.path.exists(save_path) and counter < self.MAX_SAVE_ATTEMPTS:
-            save_path = os.path.join(base_dir, f"{base_name}_{counter:03d}.{self.IMAGE_FORMAT}")
+            save_path = os.path.join(base_dir, f"{base_name_without_ext}_{counter:03d}{file_format}")
             counter += 1
 
         return save_path

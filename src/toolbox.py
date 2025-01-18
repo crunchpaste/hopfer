@@ -30,6 +30,7 @@ class Toolbox(QWidget):
             icon_path + "/salmon/open.svg",
             icon_path + "/disabled/open.svg",
             "Open image", self.open_file_dialog)
+
         self.save = self._create_button(
             icon_path + "/save.svg",
             icon_path + "/dark/save.svg",
@@ -43,7 +44,7 @@ class Toolbox(QWidget):
             icon_path + "/dark/save_as.svg",
             icon_path + "/salmon/save_as.svg",
             icon_path + "/disabled/save_as.svg",
-            "Save as", None)
+            "Save as", self.save_file_dialog)
         self.saveas.setEnabled(False) # Initial state is disabled
 
         self.settings = self._create_button(
@@ -96,12 +97,36 @@ class Toolbox(QWidget):
             "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
             "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
         )
-        file_path, _ = file_dialog.getOpenFileName(None, "Open File", "", file_filter)
+
+        if self.storage.image_path == None:
+            origin = ""
+        else:
+            origin = self.storage.image_path
+
+        file_path, _ = file_dialog.getOpenFileName(None, "Open File", origin, file_filter)
 
         if file_path:
             self.storage.load_image(file_path)
             print(f"Selected file: {file_path}")
             self.file_opened_signal.emit()
+
+    def save_file_dialog(self):
+        """This method is called when the button is clicked to open a file dialog."""
+        if self.storage.image_path is not None:
+            file_dialog = QFileDialog(self)
+            file_filter = (
+                "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
+                "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
+            )
+            file_path, _ = file_dialog.getSaveFileName(None, "Save File", self.storage.save_path, file_filter)
+
+            if file_path:
+                self.storage.save_path = file_path
+                self.storage.save_image()
+                # self.file_opened_signal.emit()
+        else:
+            # This is just so that an error pops in the notification pane. 
+            self.storage.save_image()
 
     def enable_save(self):
         """Enables the save buttons when an image is available"""
