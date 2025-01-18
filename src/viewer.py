@@ -38,7 +38,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35)))
             self.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
             self._photo.setPixmap(pixmap)
-            self._setTransformationModeBasedOnSize()
         else:
             self._empty = True
             self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
@@ -52,16 +51,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             scale = max(1, scale)  # Ensure scale is at least 1
             if self.hasValidPhoto():
                 self._scaleToFit(rect, scale)
-                self._setTransformationModeBasedOnSize()
                 self.centerOn(self._photo)
                 self.updateCoordinates()
-
-    def _setTransformationModeBasedOnSize(self):
-        """Helper method to set the transformation mode based on the image size."""
-        if self._photo.pixmap().size().width() * self._photo.pixmap().size().height() >= self.viewport().size().width() * self.viewport().size().height():
-            self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
-        else:
-            self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
 
     def _scaleToFit(self, rect, scale):
         """Helper method to scale the photo to fit the viewport."""
@@ -80,6 +71,20 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self._zoom = zoom
             factor = self.SCALE_FACTOR ** abs(step) if step > 0 else 1 / (self.SCALE_FACTOR ** abs(step))
             self.scale(factor, factor) if self._zoom > 0 else self.resetView()
+
+        # Get the bounding rectangle of the photo
+        rect = self._photo.boundingRect()
+        # Apply the current transformation matrix to the rectangle
+        transformed_rect = self.transform().mapRect(rect)
+
+        print(rect, "\n", transformed_rect)
+
+        if rect.width() > transformed_rect.width() / 2:
+            print("zoomed out")
+            self._photo.setTransformationMode(QtCore.Qt.TransformationMode.SmoothTransformation)
+        else:
+            print("zoomed in")
+            self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
 
     def wheelEvent(self, event):
         """Handle zooming via mouse wheel."""

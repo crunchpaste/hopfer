@@ -53,16 +53,20 @@ class MainWindow(QMainWindow):
         """Handle image opened event and start processing."""
         print("MainWindow")
         self.processor.convert = True
+        self.processor.reset = True
         self.processor.start()
-        self.viewer.resetView()
+        # self.viewer.resetView()
 
     def update_progress(self, progress):
         """Update the UI based on progress."""
         print(f"Processing progress: {progress}%")
 
-    def display_processed_image(self):
+    def display_processed_image(self, reset):
         """Display the processed image in the photo viewer."""
         if self.storage.processed_image is not None:
             pixmap = self.storage.get_processed_pixmap()
             self.viewer.setPhoto(pixmap)
             print("Processing complete!")
+            if reset:
+                self.viewer.resetView()
+                self.viewer._zoom = 0

@@ -18,7 +18,7 @@ class ImageProcessor(QThread):
     """
 
     progress_signal = Signal(int)
-    result_signal = Signal(object)
+    result_signal = Signal(bool)
 
     def __init__(self, algorithm, settings, storage, parent=None):
         """
@@ -32,8 +32,9 @@ class ImageProcessor(QThread):
         self.storage = storage
         self.algorithm = algorithm
         self.grayscale_mode = "Luminance" # Initialize the processor with Luminance as the grayscale mode as it is the best.
-        self.convert = True
         self.settings = settings
+        self.convert = True # Does the image need reconversion from RGB to Grayscale
+        self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
 
     def run(self):
         """ The run method is executed in the separate thread to process the image. """
@@ -51,11 +52,13 @@ class ImageProcessor(QThread):
             # Store the processed image in the storage
             self.storage.set_processed_image(processed_image)
             # Emit the processed image back to the main thread
-            self.result_signal.emit(processed_image)
+            self.result_signal.emit(self.reset)
+            self.reset = False
         except Exception as e:
             # Handle errors if any occur during processing
             print(f"Error during processing: {e}")
-            self.result_signal.emit(None)  # Emit None if processing fails
+            self.result_signal.emit(self.reset)  # Emit None if processing fails
+            self.reset = False
 
     def convert_to_grayscale(self, image):
 
@@ -71,8 +74,6 @@ class ImageProcessor(QThread):
             return lightness(image)
         else:
             return luminance(image)
-
-
 
     def apply_algorithm(self, image, settings):
         """
