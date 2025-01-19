@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter, QHBoxLayout, QWidget
+from PySide6.QtWidgets import QMainWindow, QSplitter, QHBoxLayout, QWidget, QStackedWidget, QPushButton
 from PySide6.QtCore import Qt
 from sidebar import SideBar
 from viewer import PhotoViewer
@@ -34,7 +34,8 @@ class MainWindow(QMainWindow):
 
         self.sidebar = SideBar(self.processor, self.storage)
         self.viewer = PhotoViewer()
-        self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus
+        )
 
         self.sidebar.toolbox.file_opened_signal.connect(self.image_opened)
 

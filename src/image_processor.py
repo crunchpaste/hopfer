@@ -1,8 +1,15 @@
 from PySide6.QtCore import QThread, Signal
-from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
-from algorithms.error_diffusionc import error_diffusion
-from algorithms.static import luminance, luma, average, value, lightness
 import numpy as np
+
+from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
+try:
+    from algorithms.error_diffusionc import error_diffusion
+except ImportError:
+    from algorithms.error_diffusion import error_diffusion
+try:
+    from algorithms.static import luminance, luma, average, value, lightness
+except ImportError:
+    from algorithms.grayscale import luminance, luma, average, value, lightness
 
 class ImageProcessor(QThread):
     """

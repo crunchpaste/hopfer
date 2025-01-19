@@ -42,7 +42,7 @@ def main():
     if sys.platform.startswith('linux') or platform.system() == "Linux":
         desktop_file_path = setup_linux_icon()
 
-    # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet styled.
+    # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet st
     # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
     app = QApplication(sys.argv)
 
