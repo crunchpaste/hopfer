@@ -3,7 +3,7 @@ import sys
 import platform
 
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QFont, QFontDatabase
+from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtCore import Qt, QCoreApplication
 
 from main_window import MainWindow
@@ -45,6 +45,7 @@ def main():
     # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet stiled.
     # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(get_path("res/hopfer.png")))
 
     # Load resources and configurations
     load_font(app)
@@ -53,6 +54,7 @@ def main():
 
     # Initialize main components
     window = MainWindow()
+    window.setWindowIcon(QIcon(get_path("res/hopfer.png")))
     shortcuts = Shortcuts(app, window)
     window.show()
 
