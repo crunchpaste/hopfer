@@ -3,6 +3,8 @@ from PySide6.QtGui import QIcon
 from PySide6.QtCore import QSize, Signal
 from res_loader import get_path
 
+import os
+
 
 class Toolbox(QWidget):
     file_opened_signal = Signal()
@@ -23,35 +25,40 @@ class Toolbox(QWidget):
 
         icon_path = get_path("res/icons")
 
+        if os.name == 'nt':
+            _ext = "png"
+        else:
+            _ext = "svg"
+
         # Create the buttons
         self.open = self._create_button(
-            icon_path + "/open.svg",
-            icon_path + "/dark/open.svg",
-            icon_path + "/salmon/open.svg",
-            icon_path + "/disabled/open.svg",
+            icon_path + f"/open.{_ext}",
+            icon_path + f"/dark/open.{_ext}",
+            icon_path + f"/salmon/open.{_ext}",
+            icon_path + f"/disabled/open.{_ext}",
             "Open image", self.open_file_dialog)
 
         self.save = self._create_button(
-            icon_path + "/save.svg",
-            icon_path + "/dark/save.svg",
-            icon_path + "/salmon/save.svg",
-            icon_path + "/disabled/save.svg",
+            icon_path + f"/save.{_ext}",
+            icon_path + f"/dark/save.{_ext}",
+            icon_path + f"/salmon/save.{_ext}",
+            icon_path + f"/disabled/save.{_ext}",
             "Save image", self.storage.save_image)
         self.save.setEnabled(False) # Initial state is disabled
 
         self.saveas = self._create_button(
-            icon_path + "/save_as.svg",
-            icon_path + "/dark/save_as.svg",
-            icon_path + "/salmon/save_as.svg",
-            icon_path + "/disabled/save_as.svg",
+            icon_path + f"/save_as.{_ext}",
+            icon_path + f"/dark/save_as.{_ext}",
+            icon_path + f"/salmon/save_as.{_ext}",
+            icon_path + f"/disabled/save_as.{_ext}",
             "Save as", self.save_file_dialog)
         self.saveas.setEnabled(False) # Initial state is disabled
 
         self.settings = self._create_button(
-            icon_path + "/settings.svg",
-            icon_path + "/dark/settings.svg",
-            icon_path + "/salmon/settings.svg",
-            icon_path + "/disabled/settings.svg",
+            icon_path + f"/settings.{_ext}",
+            icon_path + f"/dark/settings.{_ext}",
+            icon_path + f"/salmon/settings.{_ext}",
+            icon_path + f"/disabled/settings.{_ext}",
             "Settings", None)
         self.settings.setObjectName("last-button")
         # Add buttons to layout
@@ -125,7 +132,7 @@ class Toolbox(QWidget):
                 self.storage.save_image()
                 # self.file_opened_signal.emit()
         else:
-            # This is just so that an error pops in the notification pane. 
+            # This is just so that an error pops in the notification pane.
             self.storage.save_image()
 
     def enable_save(self):
