@@ -61,7 +61,7 @@ QComboBox::drop-down {
     width: 20px;                   /* Optional: Adjust width of the dropdown button */
 }
 QComboBox::down-arrow {
-    image: url('@res/icons/menu-down.svg');
+    image: url('@res/icons/menu-down.@ext');
 }
 /* Dropdown List */
 QComboBox QAbstractItemView {
@@ -247,7 +247,7 @@ QSlider::handle:horizontal {
 QGraphicsView {
   margin: 10px;
   min-width: 225px;
-  background: url('@res/background.svg') no-repeat center center;
+  background: url('@res/background.@ext') no-repeat center center;
 }
 QGraphicsView focus{
   border: 1px solid @accent;

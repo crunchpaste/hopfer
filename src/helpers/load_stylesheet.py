@@ -1,4 +1,5 @@
 from res_loader import get_path
+import os
 
 def load_qss(app, qss_file_path):
     """
@@ -8,6 +9,12 @@ def load_qss(app, qss_file_path):
         app (QApplication): The application instance.
         qss_file_path (str): Path to the QSS file.
     """
+
+    if os.name == 'nt':
+        _ext = "png"
+    else:
+        _ext = "svg"
+
     try:
         with open(qss_file_path, 'r') as file:
             qss_content = file.read()
@@ -27,6 +34,7 @@ def load_qss(app, qss_file_path):
         qss_content = qss_content.replace('@secondary', secondary_color)
         qss_content = qss_content.replace('@accent', accent_color)
         qss_content = qss_content.replace('@disabled', disabled_color)
+        qss_content = qss_content.replace('@ext', _ext)
 
         # Apply the QSS content to the application
         app.setStyleSheet(qss_content)
