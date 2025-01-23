@@ -193,7 +193,7 @@ class ImageStorage(QObject):
 
         :param processed_image: Processed image as a NumPy array.
         """
-        print("Processed image set")
+        
         self.processed_image = processed_image
         self.result_signal.emit(reset)
 

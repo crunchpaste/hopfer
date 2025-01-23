@@ -101,8 +101,6 @@ class ImageProcessor(QObject):
         # Start the worker thread
         self.threadpool.start(worker)
 
-        self.reset = False
-
     def convert_to_grayscale(self, image, mode):
 
         if mode == "Luminance":
@@ -240,6 +238,10 @@ class ImageProcessor(QObject):
 
     def send_result(self, image):
         self.storage.set_processed_image(image, self.reset)
+
+        # Go back to default behavior
+        if self.reset:
+            self.reset = False
 
     def handle_error(self, error_message):
         """Handle any errors during processing."""

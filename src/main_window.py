@@ -65,7 +65,6 @@ class MainWindow(QMainWindow):
         if self.storage.processed_image is not None:
             pixmap = self.storage.get_processed_pixmap()
             self.viewer.setPhoto(pixmap)
-            print("Processing complete!")
             if reset:
                 self.viewer.resetView()
                 self.viewer._zoom = 0
