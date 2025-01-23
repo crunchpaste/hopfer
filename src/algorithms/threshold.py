@@ -1,14 +1,18 @@
 import numpy as np
 from numba import njit
 
-@njit(parallel=True)
-def threshold(img, threshold_value=.5):
+def threshold(img, settings):
+    value = settings["threshold_value"] / 100
+    return thresh(img, value)
+
+@njit
+def thresh(img, threshold_value=.5):
     # Apply thresholding
     output_img = img.copy()
     h,w = img.shape
     # output = image.flatten()
-    for i in prange(h):
-        for j in prange(w):
+    for i in range(h):
+        for j in range(w):
             if output_img[i, j] > threshold_value:
                 output_img[i, j] = 1
             else:

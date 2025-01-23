@@ -37,7 +37,7 @@ class HalftoneCombo(QWidget):
         """
         combobox = QComboBox()
         algorithms = [
-            "None", "Floyd-Steinberg", "False Floyd-Steinberg",
+            "None", "Threshold", "Floyd-Steinberg", "False Floyd-Steinberg",
             "Jarvis", "Stucki", "Stucki Small", "Stucki Large",
             "Atkinson", "Burkes", "Sierra", "Sierra2",
             "Sierra2 4A", "Nakano"

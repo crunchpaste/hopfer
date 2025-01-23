@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Signal
 from controls.halftone_combo import HalftoneCombo
 from controls.grayscale_combo import GrayscaleCombo
-from settings import NoneSettings, ErrorDiffusionSettings
+from settings import *
 from image_processor import ImageProcessor
 
 
@@ -42,7 +42,9 @@ class HalftoneTab(QWidget):
         Returns:
             QWidget: The corresponding settings widget.
         """
-        if algorithm_name in [
+        if algorithm_name == "Threshold":
+            return ThresholdSettings()
+        elif algorithm_name in [
             "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki",
             "Stucki Small", "Stucki Large", "Atkinson", "Burkes", "Sierra",
             "Sierra2", "Sierra2 4A", "Nakano"

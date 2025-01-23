@@ -5,10 +5,17 @@ import traceback
 from worker import Worker
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
+
+try:
+    from algorithms.static import threshold
+except ImportError:
+    from algorithms.threshold import threshold
+
 try:
     from algorithms.error_diffusionc import error_diffusion
 except ImportError:
     from algorithms.error_diffusion import error_diffusion
+
 try:
     from algorithms.static import luminance, luma, average, value, lightness
 except ImportError:
@@ -107,7 +114,10 @@ class ImageProcessor(QObject):
         print(f"Applying {algorithm} to the image with settings: {settings}")
 
         # Apply the chosen halftoning algorithm using the respective kernel
-        if algorithm == "Floyd-Steinberg":
+        if algorithm == "Threshold":
+            processed_image = threshold(image, settings)
+
+        elif algorithm == "Floyd-Steinberg":
             kernel = np.array([[0, 0, 0],
                                [0, 0, 7],
                                [3, 5, 1]], dtype=float) / 16.0
