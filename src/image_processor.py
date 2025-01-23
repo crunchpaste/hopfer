@@ -21,6 +21,11 @@ try:
 except ImportError:
     from algorithms.grayscale import luminance, luma, average, value, lightness
 
+try:
+    from algorithms.static import sharpen
+except ImportError:
+    from algorithms.sharpen import sharpen
+
 class ImageProcessor(QObject):
     """
     This class processes images using various halftoning algorithms in a separate thread.
@@ -51,6 +56,11 @@ class ImageProcessor(QObject):
         self.algorithm = "None"
         self.grayscale_mode = "Luminance" # Initialize the processor with Luminance as the grayscale mode as it is the best.
         self.settings = {}
+
+        self.image_settings = {
+        "sharpness": 0.0
+        }
+
         self.convert = True # Does the image need reconversion from RGB to Grayscale
         self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
 
@@ -64,12 +74,17 @@ class ImageProcessor(QObject):
             self.convert = False
 
         mode = self.grayscale_mode
+
         algorithm = self.algorithm
         settings = self.settings
+        im_settings = self.image_settings
 
-        def worker_fn(image, convert, mode, algorithm, settings):
+        def worker_fn(image, convert, mode, algorithm, im_settings, settings):
+            print(image.dtype)
             if convert:
                 image = self.convert_to_grayscale(image, mode)
+            if im_settings["sharpness"] > 0:
+                image = sharpen(image, im_settings["sharpness"])
             processed_image = self.apply_algorithm(image,
                                                    algorithm,
                                                    settings)
@@ -77,7 +92,7 @@ class ImageProcessor(QObject):
         # Create the worker with the function and image
         worker = Worker(worker_fn, image,
                         convert, mode, algorithm,
-                        settings)
+                        im_settings, settings)
 
         # Connect signals from the worker to the processor's signal
         worker.signals.result.connect(self.send_result)

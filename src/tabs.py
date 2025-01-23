@@ -2,8 +2,10 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
 from PySide6.QtCore import Signal
 from controls.halftone_combo import HalftoneCombo
 from controls.grayscale_combo import GrayscaleCombo
+from controls.slider_control import SliderControl
 from settings import *
 from image_processor import ImageProcessor
+
 
 
 class HalftoneTab(QWidget):
@@ -114,7 +116,12 @@ class ImageTab(QWidget):
 
         self.combobox = GrayscaleCombo()
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
+        self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
+        self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
+        self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
+
         self.layout.addWidget(self.combobox)
+        self.layout.addWidget(self.sharpness)
 
         # Add stretch to the layout
         self.layout.addStretch()
@@ -134,3 +141,16 @@ class ImageTab(QWidget):
         self.processor.grayscale_mode = mode_name
         self.processor.convert = True
         self.processor.start()
+
+    def on_settings_changed(self):
+        """
+        Trigger image processing when settings are changed.
+
+        """
+        if not self.sharpness.is_dragging:
+            settings = {
+                "sharpness": self.sharpness.slider.value()
+            }
+            print(settings)
+            self.processor.image_settings = settings
+            self.processor.start()
