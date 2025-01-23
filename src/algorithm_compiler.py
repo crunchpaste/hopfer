@@ -6,7 +6,21 @@ import numpy as np
 cc = CC('static')
 cc.output_dir = "src/algorithms"
 
-# Export the function with the appropriate signature (for example, using f8 for float64)
+@cc.export('thresh', 'f8[:,:](f8[:,:], f8)')
+def thresh(img, threshold_value):
+    # Apply thresholding
+    output_img = img.copy()
+    h,w = img.shape
+    # output = image.flatten()
+    for i in range(h):
+        for j in range(w):
+            if output_img[i, j] > threshold_value:
+                output_img[i, j] = 1
+            else:
+                output_img[i, j] = 0
+    # thresholded_image = np.where(image >= threshold_value, 1, 0)
+
+    return output_img
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def ed(img, kernel, str_value):
     """
