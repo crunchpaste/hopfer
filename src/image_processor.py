@@ -7,7 +7,7 @@ from worker import Worker
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 
 try:
-    from algorithms.static import threshold
+    from algorithms.thresholdc import threshold
 except ImportError:
     from algorithms.threshold import threshold
 

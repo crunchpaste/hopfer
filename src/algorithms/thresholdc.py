@@ -1,4 +1,4 @@
-from .static import threshold
+from .static import thresh
 
 def threshold(img, settings):
     value = settings["threshold_value"] / 100
