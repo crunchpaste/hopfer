@@ -16,11 +16,11 @@ class MainWindow(QMainWindow):
         current_algorithm = "None"
         current_settings = {}
         self.storage = ImageStorage(self)
-        self.processor = ImageProcessor(current_algorithm, current_settings, self.storage)
+        self.processor = ImageProcessor(self.storage)
 
         # Should be implemented at some point, maybe.
         # self.processor.progress_signal.connect(self.update_progress)
-        self.processor.result_signal.connect(self.display_processed_image)
+        self.storage.result_signal.connect(self.display_processed_image)
 
     def _setup_ui(self):
         """Setup the main window layout and UI components."""
@@ -37,7 +37,7 @@ class MainWindow(QMainWindow):
         self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus
         )
 
-        self.sidebar.toolbox.file_opened_signal.connect(self.image_opened)
+        # self.sidebar.toolbox.file_opened_signal.connect(self.image_opened)
 
         self.splitter.addWidget(self.sidebar)
         self.splitter.addWidget(self.viewer)
@@ -50,12 +50,11 @@ class MainWindow(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
-    def image_opened(self):
-        """Handle image opened event and start processing."""
-        print("MainWindow")
-        self.processor.convert = True
-        self.processor.reset = True
-        self.processor.start()
+    # def image_opened(self):
+    #     """Handle image opened event and start processing."""
+    #     print("MainWindow")
+    #     self.processor.convert = True
+    #     self.processor.reset = True
 
     def update_progress(self, progress):
         """Update the UI based on progress."""

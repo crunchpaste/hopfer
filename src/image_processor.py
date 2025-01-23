@@ -1,5 +1,8 @@
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject, QThreadPool, Signal
 import numpy as np
+import traceback
+
+from worker import Worker
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 try:
@@ -27,7 +30,7 @@ class ImageProcessor(QObject):
     progress_signal = Signal(int)
     result_signal = Signal(bool)
 
-    def __init__(self, algorithm, settings, storage, parent=None):
+    def __init__(self, storage, parent=None):
         """
         Initialize the ImageProcessor with the selected algorithm, settings, and storage instance.
 
@@ -36,53 +39,64 @@ class ImageProcessor(QObject):
         :param storage: The ImageStorage instance for accessing image data.
         """
         super().__init__(parent)
+        self.threadpool = QThreadPool()
         self.storage = storage
-        self.algorithm = algorithm
+        self.algorithm = "None"
         self.grayscale_mode = "Luminance" # Initialize the processor with Luminance as the grayscale mode as it is the best.
-        self.settings = settings
+        self.settings = {}
         self.convert = True # Does the image need reconversion from RGB to Grayscale
         self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
 
     def start(self):
-        """ The run method is executed in the separate thread to process the image. """
-        try:
-            if self.convert:
-                original = np.copy(self.storage.get_original_image())
-                grayscale = self.convert_to_grayscale(original)
-                self.convert = False
-                self.storage.grayscale_image = grayscale
-                print("Luminance!")
-            # Get the original image from storage
-            original = np.copy(self.storage.get_grayscale_image())
-            # Apply the selected algorithm to the image
-            processed_image = self.apply_algorithm(original, self.settings)
-            # Store the processed image in the storage
-            self.storage.set_processed_image(processed_image)
-            # Emit the processed image back to the main thread
-            self.result_signal.emit(self.reset)
-            self.reset = False
-        except Exception as e:
-            # Handle errors if any occur during processing
-            print(f"Error during processing: {e}")
-            self.result_signal.emit(self.reset)  # Emit None if processing fails
-            self.reset = False
+        """Start the image processing in a separate thread."""
+        convert = self.convert
+        if self.convert:
+            image = self.storage.get_original_image()
+        else:
+            image = self.storage.get_grayscale_image()
+            self.convert = False
 
-    def convert_to_grayscale(self, image):
+        mode = self.grayscale_mode
+        algorithm = self.algorithm
+        settings = self.settings
 
-        if self.grayscale_mode == "Luminance":
+        def worker_fn(image, convert, mode, algorithm, settings):
+            if convert:
+                image = self.convert_to_grayscale(image, mode)
+            processed_image = self.apply_algorithm(image,
+                                                   algorithm,
+                                                   settings)
+            return processed_image
+        # Create the worker with the function and image
+        worker = Worker(worker_fn, image,
+                        convert, mode, algorithm,
+                        settings)
+
+        # Connect signals from the worker to the processor's signal
+        worker.signals.result.connect(self.send_result)
+        worker.signals.error.connect(self.handle_error)
+
+        # Start the worker thread
+        self.threadpool.start(worker)
+
+        self.reset = False
+
+    def convert_to_grayscale(self, image, mode):
+
+        if mode == "Luminance":
             return luminance(image)
-        if self.grayscale_mode == "Luma":
+        if mode == "Luma":
             return luma(image)
-        elif self.grayscale_mode == "Average":
+        elif mode == "Average":
             return average(image)
-        elif self.grayscale_mode == "Value":
+        elif mode == "Value":
             return value(image)
-        elif self.grayscale_mode == "Lightness":
+        elif mode == "Lightness":
             return lightness(image)
         else:
             return luminance(image)
 
-    def apply_algorithm(self, image, settings):
+    def apply_algorithm(self, image, algorithm, settings):
         """
         Apply the selected halftoning algorithm to the image.
 
@@ -90,22 +104,22 @@ class ImageProcessor(QObject):
         :param settings: Settings for the algorithm (like threshold, dither levels).
         :return: The processed image as a NumPy array.
         """
-        print(f"Applying {self.algorithm} to the image with settings: {settings}")
+        print(f"Applying {algorithm} to the image with settings: {settings}")
 
         # Apply the chosen halftoning algorithm using the respective kernel
-        if self.algorithm == "Floyd-Steinberg":
+        if algorithm == "Floyd-Steinberg":
             kernel = np.array([[0, 0, 0],
                                [0, 0, 7],
                                [3, 5, 1]], dtype=float) / 16.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "False Floyd-Steinberg":
+        elif algorithm == "False Floyd-Steinberg":
             kernel = np.array([[0, 0, 0],
                                [0, 0, 3],
                                [0, 3, 2]], dtype=float) / 8.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Jarvis":
+        elif algorithm == "Jarvis":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 7, 5],
@@ -113,7 +127,7 @@ class ImageProcessor(QObject):
                                [1, 3, 5, 3, 1]], dtype=float) / 48.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Stucki":
+        elif algorithm == "Stucki":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 8, 4],
@@ -121,7 +135,7 @@ class ImageProcessor(QObject):
                                [1, 2, 4, 2, 1]], dtype=float) / 42.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Stucki Small":
+        elif algorithm == "Stucki Small":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 8, 2],
@@ -129,7 +143,7 @@ class ImageProcessor(QObject):
                                [0, 0, 2, 0, 0]], dtype=float) / 24.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Stucki Large":
+        elif algorithm == "Stucki Large":
             kernel = np.array([[0, 0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0, 0, 0],
@@ -139,7 +153,7 @@ class ImageProcessor(QObject):
                                [2, 2, 2, 2, 2, 2, 2]], dtype=float) / 88.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Atkinson":
+        elif algorithm == "Atkinson":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 1, 1],
@@ -147,7 +161,7 @@ class ImageProcessor(QObject):
                                [0, 0, 1, 0, 0]], dtype=float) / 8
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Burkes":
+        elif algorithm == "Burkes":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 8, 4],
@@ -155,7 +169,7 @@ class ImageProcessor(QObject):
                                [0, 0, 0, 0, 0]], dtype=float) / 32.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Sierra":
+        elif algorithm == "Sierra":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 5, 3],
@@ -163,7 +177,7 @@ class ImageProcessor(QObject):
                                [0, 2, 3, 2, 0]], dtype=float) / 32.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Sierra2":
+        elif algorithm == "Sierra2":
             kernel = np.array([[0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0],
                                [0, 0, 0, 4, 3],
@@ -171,13 +185,13 @@ class ImageProcessor(QObject):
                                [0, 0, 0, 0, 0]], dtype=float) / 16.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Sierra2 4A":
+        elif algorithm == "Sierra2 4A":
             kernel = np.array([[0, 0, 0],
                                [0, 0, 2],
                                [1, 1, 0]], dtype=float) / 4.0
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "Nakano":
+        elif algorithm == "Nakano":
             kernel = np.array([[0, 0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0, 0, 0],
                                [0, 0, 0, 0, 0, 0, 0],
@@ -188,13 +202,20 @@ class ImageProcessor(QObject):
             kernel /= float(np.sum(kernel))  # Normalize the kernel
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif self.algorithm == "None":
+        elif algorithm == "None":
             # No processing, return the original image
             processed_image = image
 
         else:
             # Default case: No processing applied if algorithm is unknown
-            print(f"Algorithm {self.algorithm} not recognized, no processing applied.")
+            print(f"Algorithm {algorithm} not recognized, no processing applied.")
             processed_image = image
 
         return processed_image
+
+    def send_result(self, image):
+        self.storage.set_processed_image(image, self.reset)
+
+    def handle_error(self, error_message):
+        """Handle any errors during processing."""
+        print(f"Error during processing: {error_message}")

@@ -2,10 +2,11 @@ import os
 from PIL import Image, UnidentifiedImageError
 import numpy as np
 from PIL.ImageQt import ImageQt
+from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QPixmap
 from helpers.image_conversion import numpy_to_pixmap
 
-class ImageStorage:
+class ImageStorage(QObject):
     """
     Class for managing the loading, processing, and saving of images.
     Handles original and processed images.
@@ -15,12 +16,16 @@ class ImageStorage:
     MAX_SAVE_ATTEMPTS = 100
     NORMALIZED_MAX = 255.0
 
+    # Result signal to update PhotoViewer captured by the main window
+    result_signal = Signal(bool)
+
     def __init__(self, main_window):
         """
         Initialize the image storage with the main window context for notifications.
 
         :param main_window: The main window of the application, used for showing notifications.
         """
+        super().__init__()
         self.main_window = main_window
         self.image_path = None
         self.save_path = None
@@ -46,6 +51,9 @@ class ImageStorage:
             # Open the image and convert to grayscale
             pil_image = Image.open(image_path).convert("RGB")
             self.original_image = np.array(pil_image) / self.NORMALIZED_MAX
+            self.main_window.processor.convert = True
+            self.main_window.processor.reset = True
+            self.main_window.processor.start()
             self.main_window.sidebar.toolbox.enable_save()
         except (FileNotFoundError, UnidentifiedImageError) as e:
             self.show_notification(f"Error: Unable to open image.\n{str(e)}", duration=10000)
@@ -179,7 +187,7 @@ class ImageStorage:
         else:
             return QPixmap()  # Return an empty pixmap if image is None
 
-    def set_processed_image(self, processed_image):
+    def set_processed_image(self, processed_image, reset):
         """
         Store the processed image.
 
@@ -187,6 +195,7 @@ class ImageStorage:
         """
         print("Processed image set")
         self.processed_image = processed_image
+        self.result_signal.emit(reset)
 
     def show_notification(self, message, duration=3000):
         """
