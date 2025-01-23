@@ -56,7 +56,6 @@ class MainWindow(QMainWindow):
         self.processor.convert = True
         self.processor.reset = True
         self.processor.start()
-        # self.viewer.resetView()
 
     def update_progress(self, progress):
         """Update the UI based on progress."""

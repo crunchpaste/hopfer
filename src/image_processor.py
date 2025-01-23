@@ -1,4 +1,4 @@
-from PySide6.QtCore import QThread, Signal
+from PySide6.QtCore import QObject, Signal
 import numpy as np
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
@@ -11,7 +11,7 @@ try:
 except ImportError:
     from algorithms.grayscale import luminance, luma, average, value, lightness
 
-class ImageProcessor(QThread):
+class ImageProcessor(QObject):
     """
     This class processes images using various halftoning algorithms in a separate thread.
     It emits progress updates and processed images back to the main thread.
@@ -43,7 +43,7 @@ class ImageProcessor(QThread):
         self.convert = True # Does the image need reconversion from RGB to Grayscale
         self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
 
-    def run(self):
+    def start(self):
         """ The run method is executed in the separate thread to process the image. """
         try:
             if self.convert:
