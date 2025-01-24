@@ -1,7 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter, QHBoxLayout, QWidget, QStackedWidget, QPushButton
+from PySide6.QtWidgets import QMainWindow, QSplitter, QHBoxLayout, QVBoxLayout, QWidget, QStackedWidget, QPushButton
 from PySide6.QtCore import Qt
 from sidebar import SideBar
 from viewer import PhotoViewer
+from viewer_controls import ViewerControls
 from image_processor import ImageProcessor
 from image_storage import ImageStorage
 
@@ -18,8 +19,6 @@ class MainWindow(QMainWindow):
         self.storage = ImageStorage(self)
         self.processor = ImageProcessor(self.storage)
 
-        # Should be implemented at some point, maybe.
-        # self.processor.progress_signal.connect(self.update_progress)
         self.storage.result_signal.connect(self.display_processed_image)
 
     def _setup_ui(self):
@@ -33,11 +32,11 @@ class MainWindow(QMainWindow):
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self.sidebar = SideBar(self.processor, self.storage)
+
         self.viewer = PhotoViewer()
         self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus
         )
-
-        # self.sidebar.toolbox.file_opened_signal.connect(self.image_opened)
+        # self.viewer_controls = ViewerControls(self.viewer)
 
         self.splitter.addWidget(self.sidebar)
         self.splitter.addWidget(self.viewer)
@@ -49,12 +48,6 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(self.splitter)
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
-
-    # def image_opened(self):
-    #     """Handle image opened event and start processing."""
-    #     print("MainWindow")
-    #     self.processor.convert = True
-    #     self.processor.reset = True
 
     def update_progress(self, progress):
         """Update the UI based on progress."""

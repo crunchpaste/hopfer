@@ -1,4 +1,5 @@
 from PySide6 import QtCore, QtGui, QtWidgets
+from viewer_controls import ViewerControls
 
 class PhotoViewer(QtWidgets.QGraphicsView):
     """Quite literally taken from ekhumoro's answer at https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview. It's not perfect and glitches every once in a while, but it gets the job done for now.
@@ -27,6 +28,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35, 0)))
         self.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
 
+        self.controls = ViewerControls(self)
+
+        # Connect the button event for the controller class
+        self.controls.fit.clicked.connect(self.resetView)
+        self.controls.x1.clicked.connect(self.resetOriginal)
+        self.controls.x2.clicked.connect(lambda: self.resetToScale(scale=2))
+
     def hasValidPhoto(self):
         """Check if the viewer currently has a valid photo."""
         return not self._empty
@@ -53,6 +61,33 @@ class PhotoViewer(QtWidgets.QGraphicsView):
                 self._scaleToFit(rect, scale)
                 self.centerOn(self._photo)
                 self.updateCoordinates()
+                self._zoom = 1
+
+    def resetOriginal(self):
+        """Reset the view to display the photo at its original size."""
+        rect = QtCore.QRectF(self._photo.pixmap().rect())
+        if not rect.isNull():
+            self.setSceneRect(rect)
+            self.resetTransform()
+            self.setTransform(QtGui.QTransform())
+            self.centerOn(self._photo)
+
+            self.updateCoordinates()
+
+    def resetToScale(self, scale=1):
+        """Reset the view to display the photo at an arbitrary scale."""
+        rect = QtCore.QRectF(self._photo.pixmap().rect())
+        if not rect.isNull():
+            self.setSceneRect(rect)
+            scale = max(1, scale)  # Ensure scale is at least 1
+            if self.hasValidPhoto():
+                # Apply the custom scale factor
+                self.setTransform(QtGui.QTransform())  # Reset any previous transformations
+                self.scale(scale, scale)  # Apply custom scale factor
+                self.centerOn(self._photo)
+
+                self.updateCoordinates()
+                self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
 
     def _scaleToFit(self, rect, scale):
         """Helper method to scale the photo to fit the viewport."""
@@ -95,6 +130,18 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         """Reset the view when the widget is resized."""
         super().resizeEvent(event)
         self.resetView()
+        # Get the size of the viewer
+        viewer_width = self.width()
+        viewer_height = self.height()
+
+        # Get the dimensions of the controls widget
+        controls_width = 300#self.controls.width()
+        controls_height = 64 #self.controls.height()
+
+        # Position the controls widget in the top-right corner
+        x = viewer_width - controls_width - 5 # 10px padding from the right
+        y = viewer_height - controls_height # 10px padding from the top
+        self.controls.setGeometry(x, y, controls_width, controls_height)
 
     def toggleDragMode(self):
         """Toggle between scroll hand drag mode and no drag mode."""
