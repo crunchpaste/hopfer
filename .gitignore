@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# Ignoring Nuitka temp folders
+hopfer*/
+
 # Distribution / packaging
 .Python
 build/

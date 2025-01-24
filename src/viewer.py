@@ -113,13 +113,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         # Apply the current transformation matrix to the rectangle
         transformed_rect = self.transform().mapRect(rect)
 
-        print(rect, "\n", transformed_rect)
+        # print(rect, "\n", transformed_rect)
 
         if rect.width() > transformed_rect.width() / 2:
-            print("zoomed out")
             self._photo.setTransformationMode(QtCore.Qt.TransformationMode.SmoothTransformation)
         else:
-            print("zoomed in")
             self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
 
     def wheelEvent(self, event):
