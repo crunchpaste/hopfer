@@ -243,7 +243,6 @@ QSlider::handle:horizontal {
   margin: 0;
 }
 
-
 QGraphicsView {
   margin: 10px;
   min-width: 225px;
@@ -251,4 +250,11 @@ QGraphicsView {
 }
 QGraphicsView focus{
   border: 1px solid @accent;
+}
+
+#viewer-controls QPushButton {
+  background-color: @secondary;
+  border: 2px solid @primary;
+  margin-left: 5px;
+  min-width: 24px;
 }
