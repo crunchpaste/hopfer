@@ -1,4 +1,3 @@
-
 from PySide6 import QtCore, QtGui, QtWidgets
 from viewer_controls import ViewerControls
 
@@ -19,6 +18,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
         self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
         self._photo.setShapeMode(QtWidgets.QGraphicsPixmapItem.ShapeMode.BoundingRectShape)
+        self._blur = QtWidgets.QGraphicsBlurEffect()
+        self._blur.setBlurHints(QtWidgets.QGraphicsBlurEffect.PerformanceHint)
+        self._blur.setBlurRadius(1.1)
+        self._blur.setEnabled(False)
+        self._photo.setGraphicsEffect(self._blur)
         self._scene.addItem(self._photo)
         self.setScene(self._scene)
 
@@ -35,6 +39,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.controls.fit.clicked.connect(self.resetView)
         self.controls.x1.clicked.connect(self.resetOriginal)
         self.controls.x2.clicked.connect(lambda: self.resetToScale(scale=2))
+        self.controls.blur.clicked.connect(
+            lambda: self._blur.setEnabled(not self._blur.isEnabled()))
 
     def hasValidPhoto(self):
         """Check if the viewer currently has a valid photo."""

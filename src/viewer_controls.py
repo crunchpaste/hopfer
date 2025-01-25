@@ -32,10 +32,18 @@ class ViewerControls(QWidget):
         self.x2.setFixedSize(34, 34)
         self.x2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
+        self.blur = QPushButton()
+        self.blur.setIcon(QIconifyIcon("material-symbols:deblur",
+                                     color='#f0f6f0'))
+        self.blur.setIconSize(QSize(22,22))
+        self.blur.setFixedSize(34, 34)
+        self.blur.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+
         layout.addStretch()
         layout.addWidget(self.x1)
         layout.addWidget(self.x2)
         layout.addWidget(self.fit)
+        layout.addWidget(self.blur)
 
         # Set the layout for the widget
         self.setLayout(layout)

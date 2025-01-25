@@ -6,8 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
-# Ignoring Nuitka temp folders
+# Ignoring Nuitka temp folders and files
 hopfer*/
+*.bin
 
 # Distribution / packaging
 .Python
