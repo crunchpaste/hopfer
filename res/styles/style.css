@@ -253,3 +253,10 @@ QGraphicsView focus{
 #viewer-controls QPushButton:hover {
   background-color: @primary;
 }
+
+#processing-indicator QLabel {
+  color: @accent;
+  padding: 15px;
+  padding-left: 25px;
+  border: 2px solid @accent;
+}

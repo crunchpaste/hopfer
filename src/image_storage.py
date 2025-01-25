@@ -193,8 +193,10 @@ class ImageStorage(QObject):
 
         :param processed_image: Processed image as a NumPy array.
         """
-        
+
         self.processed_image = processed_image
+        
+        # Sending the signal to main_window
         self.result_signal.emit(reset)
 
     def show_notification(self, message, duration=3000):

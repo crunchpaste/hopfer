@@ -42,7 +42,7 @@ class ImageProcessor(QObject):
     progress_signal = Signal(int)
     result_signal = Signal(bool)
 
-    def __init__(self, storage, parent=None):
+    def __init__(self, main_window, storage, parent=None):
         """
         Initialize the ImageProcessor with the selected algorithm, settings, and storage instance.
 
@@ -53,6 +53,7 @@ class ImageProcessor(QObject):
         super().__init__(parent)
         self.threadpool = QThreadPool()
         self.storage = storage
+        self.main_window = main_window
         self.algorithm = "None"
         self.grayscale_mode = "Luminance" # Initialize the processor with Luminance as the grayscale mode as it is the best.
         self.settings = {}
@@ -65,6 +66,7 @@ class ImageProcessor(QObject):
         self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
 
     def start(self):
+        self.main_window.viewer.labelVisible(True)
         """Start the image processing in a separate thread."""
         convert = self.convert
         if self.convert:

@@ -17,7 +17,7 @@ class MainWindow(QMainWindow):
         current_algorithm = "None"
         current_settings = {}
         self.storage = ImageStorage(self)
-        self.processor = ImageProcessor(self.storage)
+        self.processor = ImageProcessor(self, self.storage)
 
         self.storage.result_signal.connect(self.display_processed_image)
 

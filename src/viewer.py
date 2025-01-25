@@ -1,5 +1,6 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from viewer_controls import ViewerControls
+from processing_label import ProcessingIndicator
 from res_loader import get_path
 
 class PhotoViewer(QtWidgets.QGraphicsView):
@@ -34,6 +35,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35, 0)))
         self.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
 
+        self.label = ProcessingIndicator(self)
+        self.label.show()
+        self.label.setVisible(False)
+
         self.controls = ViewerControls(self)
 
         # Connect the button event for the controller class
@@ -57,6 +62,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self._empty = True
             self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
+        self.labelVisible(False)
 
     def toggleBlur(self):
         # Toggle the blur effect and apply a style to the button
@@ -163,10 +169,17 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         controls_width = 300#self.controls.width()
         controls_height = 64 #self.controls.height()
 
+        label_width = self.label.width()
+        label_height = self.label.height()
+
         # Position the controls widget in the top-right corner
         x = viewer_width - controls_width - 5 # 10px padding from the right
         y = viewer_height - controls_height # 10px padding from the top
         self.controls.setGeometry(x, y, controls_width, controls_height)
+
+        x = viewer_width // 2 - label_width  // 2
+        y = viewer_height // 2 - label_height // 2
+        self.label.setGeometry(x, y, label_width, label_height)
 
     def toggleDragMode(self):
         """Toggle between scroll hand drag mode and no drag mode."""
@@ -193,3 +206,6 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         """Handle mouse leave event."""
         self.coordinatesChanged.emit(QtCore.QPoint())
         super().leaveEvent(event)
+
+    def labelVisible(self, state):
+        self.label.setVisible(state)
