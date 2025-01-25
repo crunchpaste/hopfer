@@ -20,7 +20,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._photo.setShapeMode(QtWidgets.QGraphicsPixmapItem.ShapeMode.BoundingRectShape)
         self._blur = QtWidgets.QGraphicsBlurEffect()
         self._blur.setBlurHints(QtWidgets.QGraphicsBlurEffect.PerformanceHint)
-        self._blur.setBlurRadius(1.1)
+        self._blur.setBlurRadius(1.05)
         self._blur.setEnabled(False)
         self._photo.setGraphicsEffect(self._blur)
         self._scene.addItem(self._photo)

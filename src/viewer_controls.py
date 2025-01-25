@@ -1,5 +1,6 @@
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QApplication
 from PySide6.QtCore import Qt, QSize
+from PySide6.QtGui import QKeySequence
 from superqt import QIconifyIcon
 
 class ViewerControls(QWidget):

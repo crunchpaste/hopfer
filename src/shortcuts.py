@@ -25,6 +25,11 @@ class Shortcuts:
         self.saveas_shortcut.activated.connect(self.main_window.sidebar.toolbox.save_file_dialog)
 
         # Image viewer shortcuts
+        # Toggles the preview blurring
+        self.blur_shortcut = QShortcut(QKeySequence("Ctrl+B"), self.main_window)
+        self.blur_shortcut.activated.connect(
+            lambda: self.main_window.viewer._blur.setEnabled(
+                not self.main_window.viewer._blur.isEnabled()))
         # Fit the image to the viewer size. This is Ctrl+Zero, not Ctrl+O
         self.fit_shortcut = QShortcut(QKeySequence("Ctrl+0"), self.main_window)
         self.fit_shortcut.activated.connect(self.main_window.viewer.resetView)
