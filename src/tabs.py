@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
-from PySide6.QtCore import Signal
+from PySide6.QtCore import QCoreApplication, Signal
 from controls.halftone_combo import HalftoneCombo
 from controls.grayscale_combo import GrayscaleCombo
 from controls.slider_control import SliderControl
@@ -75,6 +75,7 @@ class HalftoneTab(QWidget):
 
         # Connect the settings changed signal to the processing function
         self.settings_widget.settingsChanged.connect(self.on_settings_changed)
+        QCoreApplication.processEvents()
 
         # Trigger settings change immediately to apply changes
         self.settings_widget.emit_settings_changed()
@@ -82,6 +83,7 @@ class HalftoneTab(QWidget):
     def _remove_old_settings_widget(self):
         """Remove the previous settings widget from the layout."""
         if self.settings_widget is not None:
+            self.settings_widget.setVisible(False)
             self.settings_widget.deleteLater()
 
     def on_settings_changed(self, settings):
