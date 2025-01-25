@@ -40,7 +40,7 @@ class ViewerControls(QWidget):
             icon_path + f"/dark/1x.{_ext}",
             icon_path + f"/salmon/1x.{_ext}",
             icon_path + f"/disabled/1x.{_ext}",
-            "Fit to viewer")
+            "Original size")
         self.x1.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.x2 = self._create_button(
@@ -48,7 +48,7 @@ class ViewerControls(QWidget):
             icon_path + f"/dark/2x.{_ext}",
             icon_path + f"/salmon/2x.{_ext}",
             icon_path + f"/disabled/2x.{_ext}",
-            "Fit to viewer")
+            "Double size")
         self.x2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.blur = self._create_button(
@@ -56,7 +56,7 @@ class ViewerControls(QWidget):
             icon_path + f"/dark/blur.{_ext}",
             icon_path + f"/salmon/blur.{_ext}",
             icon_path + f"/disabled/blur.{_ext}",
-            "Fit to viewer")
+            "Blur preview")
         self.blur.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         layout.addStretch()

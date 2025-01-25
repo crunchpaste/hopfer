@@ -1,5 +1,6 @@
 from PySide6 import QtCore, QtGui, QtWidgets
 from viewer_controls import ViewerControls
+from res_loader import get_path
 
 class PhotoViewer(QtWidgets.QGraphicsView):
     """Quite literally taken from ekhumoro's answer at https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview. It's not perfect and glitches every once in a while, but it gets the job done for now.
@@ -39,8 +40,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.controls.fit.clicked.connect(self.resetView)
         self.controls.x1.clicked.connect(self.resetOriginal)
         self.controls.x2.clicked.connect(lambda: self.resetToScale(scale=2))
-        self.controls.blur.clicked.connect(
-            lambda: self._blur.setEnabled(not self._blur.isEnabled()))
+        self.controls.blur.clicked.connect(self.toggleBlur)
 
     def hasValidPhoto(self):
         """Check if the viewer currently has a valid photo."""
@@ -57,6 +57,26 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self._empty = True
             self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
             self._photo.setPixmap(QtGui.QPixmap())
+
+    def toggleBlur(self):
+        # Toggle the blur effect and apply a style to the button
+        self._blur.setEnabled(not self._blur.isEnabled())
+        icon_path = get_path("res/icons")
+        if self._blur.isEnabled():
+            self.controls.blur.setStyleSheet(
+                f'QPushButton {{background-color: #f0f6f0;}}'
+                f'QPushButton {{icon: url({icon_path}/dark/blur.svg);}}'
+                f'QPushButton:hover {{background-color: #222323;}}'
+                f'QPushButton:hover {{icon: url({icon_path}/blur.svg);}}'
+            )
+        else:
+            self.controls.blur.setStyleSheet(
+                f'QPushButton {{background-color: #222323;}}'
+                f'QPushButton {{icon: url({icon_path}/blur.svg);}}'
+                f'QPushButton:hover {{background-color: #f0f6f0;}}'
+                f'QPushButton:hover {{icon: url({icon_path}/dark/blur.svg);}}'
+            )
+
 
     def resetView(self, scale=1):
         """Reset the view to fit the photo within the viewport."""
