@@ -24,6 +24,15 @@ class Shortcuts:
         self.saveas_shortcut = QShortcut(QKeySequence("Ctrl+Shift+S"), self.main_window)
         self.saveas_shortcut.activated.connect(self.main_window.sidebar.toolbox.save_file_dialog)
 
+        # Navigation
+        self.image_shortcut = QShortcut(QKeySequence("Ctrl+I"),self.main_window)
+        self.image_shortcut.activated.connect(
+            lambda: self.main_window.sidebar.activateTab(0))
+
+        self.halftone_shortcut = QShortcut(QKeySequence("Ctrl+H"),
+                                                        self.main_window)
+        self.halftone_shortcut.activated.connect(
+            lambda: self.main_window.sidebar.activateTab(1))
         # Image viewer shortcuts
         # Toggles the preview blurring
         self.blur_shortcut = QShortcut(QKeySequence("Ctrl+B"), self.main_window)

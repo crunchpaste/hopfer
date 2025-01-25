@@ -24,9 +24,9 @@ class HalftoneTab(QWidget):
         self.layout = QVBoxLayout()
 
         # Add the combobox for algorithm selection
-        combobox = HalftoneCombo()
-        combobox.combobox.currentTextChanged.connect(self.on_algorithm_changed)
-        self.layout.addWidget(combobox)
+        self.combobox = HalftoneCombo()
+        self.combobox.combobox.currentTextChanged.connect(self.on_algorithm_changed)
+        self.layout.addWidget(self.combobox)
 
         # Initialize settings widget
         self.settings_widget = self._get_settings_widget(self.current_algorithm)
