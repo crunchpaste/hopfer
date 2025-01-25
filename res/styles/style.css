@@ -248,5 +248,8 @@ QGraphicsView focus{
   background-color: @secondary;
   border: 2px solid @primary;
   margin-left: 5px;
-  min-width: 24px;
+}
+
+#viewer-controls QPushButton:hover {
+  background-color: @primary;
 }
