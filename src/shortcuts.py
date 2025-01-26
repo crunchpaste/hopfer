@@ -38,41 +38,52 @@ class Shortcuts:
         self.blur_shortcut = QShortcut(QKeySequence("Ctrl+B"), self.main_window)
         self.blur_shortcut.activated.connect(self.main_window.viewer.toggleBlur)
         # Fit the image to the viewer size. This is Ctrl+Zero, not Ctrl+O
-        self.fit_shortcut = QShortcut(QKeySequence("Ctrl+0"), self.main_window)
+        self.fit_shortcut = QShortcut(self.main_window)
+        self.fit_shortcut.setKeys([QKeySequence(
+            "Ctrl+0"),QKeySequence("0")])
         self.fit_shortcut.activated.connect(self.main_window.viewer.resetView)
         # Preview the image in its original size
-        self.x1_shortcut = QShortcut(QKeySequence("Ctrl+1"), self.main_window)
+        self.x1_shortcut = QShortcut(self.main_window)
+        self.x1_shortcut.setKeys([QKeySequence("Ctrl+1"),QKeySequence("1")])
         self.x1_shortcut.activated.connect(self.main_window.viewer.resetOriginal)
         # All the rest of the sizes
-        self.x2_shortcut = QShortcut(QKeySequence("Ctrl+2"), self.main_window)
+        self.x2_shortcut = QShortcut(self.main_window)
+        self.x2_shortcut.setKeys([QKeySequence("Ctrl+2"),QKeySequence("2")])
         self.x2_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(2))
 
-        self.x3_shortcut = QShortcut(QKeySequence("Ctrl+3"), self.main_window)
+        self.x3_shortcut = QShortcut(self.main_window)
+        self.x3_shortcut.setKeys([QKeySequence("Ctrl+3"),QKeySequence("3")])
         self.x3_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(3))
 
-        self.x4_shortcut = QShortcut(QKeySequence("Ctrl+4"), self.main_window)
+        self.x4_shortcut = QShortcut(self.main_window)
+        self.x4_shortcut.setKeys([QKeySequence("Ctrl+4"),QKeySequence("4")])
         self.x4_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(4))
 
-        self.x5_shortcut = QShortcut(QKeySequence("Ctrl+5"), self.main_window)
+        self.x5_shortcut = QShortcut(self.main_window)
+        self.x5_shortcut.setKeys([QKeySequence("Ctrl+5"),QKeySequence("5")])
         self.x5_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(5))
 
-        self.x6_shortcut = QShortcut(QKeySequence("Ctrl+6"), self.main_window)
+        self.x6_shortcut = QShortcut(self.main_window)
+        self.x6_shortcut.setKeys([QKeySequence("Ctrl+6"),QKeySequence("6")])
         self.x6_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(6))
 
-        self.x7_shortcut = QShortcut(QKeySequence("Ctrl+7"), self.main_window)
+        self.x7_shortcut = QShortcut(self.main_window)
+        self.x7_shortcut.setKeys([QKeySequence("Ctrl+7"),QKeySequence("7")])
         self.x7_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(7))
 
-        self.x8_shortcut = QShortcut(QKeySequence("Ctrl+8"), self.main_window)
+        self.x8_shortcut = QShortcut(self.main_window)
+        self.x8_shortcut.setKeys([QKeySequence("Ctrl+8"),QKeySequence("8")])
         self.x8_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(8))
 
-        self.x9_shortcut = QShortcut(QKeySequence("Ctrl+9"), self.main_window)
+        self.x9_shortcut = QShortcut(self.main_window)
+        self.x9_shortcut.setKeys([QKeySequence("Ctrl+9"),QKeySequence("9")])
         self.x9_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(9))
 
