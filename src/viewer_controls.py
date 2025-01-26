@@ -2,7 +2,6 @@ import os
 from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QApplication
 from PySide6.QtCore import Qt, QSize
 from PySide6.QtGui import QIcon
-from superqt import QIconifyIcon
 from res_loader import get_path
 
 class ViewerControls(QWidget):
@@ -16,13 +15,6 @@ class ViewerControls(QWidget):
         icon_path = get_path("res/icons")
 
         _ext = "svg"
-
-        # Add buttons to the layout
-        # self.fit = QPushButton()
-        # self.fit.setIcon(QIconifyIcon("material-symbols:filter-center-focus",
-        #                               color='#f0f6f0'))
-        # self.fit.setIconSize(QSize(22,22))
-        # self.fit.setFixedSize(34, 34)
 
         self.fit = self._create_button(
             icon_path + f"/fit.{_ext}",
