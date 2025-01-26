@@ -43,6 +43,12 @@ QComboBox {
     padding: 4px;                  /* Some padding for inner spacing */
     color: @primary;                  /* Text color */
 }
+QComboBox:disabled {
+    border: 1px solid @disabled;        /* Flat border */
+    border-radius: 0px;            /* Optional: slightly rounded corners */
+    padding: 4px;                  /* Some padding for inner spacing */
+    color: @disabled;                  /* Text color */
+}
 QComboBox:focus {
     border: 1px solid @accent;        /* Flat border */
     color: @accent;                  /* Text color */

@@ -112,6 +112,7 @@ class ImageTab(QWidget):
         """
         super().__init__()
         self.processor = processor
+        self.processor.storage.grayscale_signal.connect(self.on_grayscale_signal)
 
         self._initialize_ui()
 
@@ -122,7 +123,8 @@ class ImageTab(QWidget):
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
         self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
         self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
-        self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sharpness.slider.sliderReleased.connect(lambda:                    self.on_settings_changed(self.sharpness.slider.value))
+
 
         self.layout.addWidget(self.combobox)
         self.layout.addWidget(self.sharpness)
@@ -141,22 +143,28 @@ class ImageTab(QWidget):
         Args:
             mode_name (str): The selected grayscaling mode.
         """
-        # print(f"Mode changed to: {mode_name}")
 
         self.processor.grayscale_mode = mode_name
         self.processor.convert = True
         self.processor.start()
 
     @debounce(0.5)
-    def on_settings_changed(self):
+    def on_settings_changed(self, value):
         """
         Trigger image processing when settings are changed.
         """
-        
+        storage = self.processor.storage
         if not self.sharpness.is_dragging:
             settings = {
                 "sharpness": self.sharpness.slider.value()
             }
-            print(settings)
             self.processor.image_settings = settings
-            self.processor.start()
+            if storage.original_image is not None:
+                self.processor.start()
+
+    def on_grayscale_signal(self, is_grayscale):
+        if is_grayscale:
+            self.combobox.combobox.setDisabled(is_grayscale)
+            self.combobox.combobox.setCurrentIndex(0)
+        else:
+            self.combobox.combobox.setDisabled(is_grayscale)

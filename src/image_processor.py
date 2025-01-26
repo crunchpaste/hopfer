@@ -223,6 +223,8 @@ class ImageProcessor(QObject):
     @debounce(0.5)
     def start(self):
         """Start the image processing in a separate process."""
+        if self.storage.original_image is None:
+            return
 
         # Displays the Processing... label in the viewer
         self.main_window.viewer.labelVisible(True)

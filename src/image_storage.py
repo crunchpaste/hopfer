@@ -18,6 +18,7 @@ class ImageStorage(QObject):
 
     # Result signal to update PhotoViewer captured by the main window
     result_signal = Signal(bool)
+    grayscale_signal = Signal(bool)
 
     def __init__(self, main_window):
         """
@@ -51,9 +52,9 @@ class ImageStorage(QObject):
             save_path = path_without_ext + ".png"
             self.save_path = save_path
 
-            # Open the image and convert to grayscale
             pil_image = Image.open(image_path)
             self.original_image, self.alpha = self.extract_alpha(pil_image)
+            self.grayscale_signal.emit(self.original_grayscale)
             self.main_window.processor.reset = True
             self.main_window.processor.start()
             self.main_window.sidebar.toolbox.enable_save()
