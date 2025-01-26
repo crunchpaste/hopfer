@@ -32,7 +32,8 @@ def worker_p(queue, image, convert, mode, algorithm, im_settings, settings):
 
     print('W STARTED')
     if convert:
-            image = convert_to_grayscale(image, mode)
+        print("CONVERTING")
+        image = convert_to_grayscale(image, mode)
     if im_settings["sharpness"] > 0:
         image = sharpen(image, im_settings["sharpness"])
     processed_image = apply_algorithm(image, algorithm, settings)
@@ -233,12 +234,11 @@ class ImageProcessor(QObject):
         except:
             pass
 
-        convert = self.convert
-        if self.convert:
-            image = self.storage.get_original_image()
-        else:
-            image = self.storage.get_grayscale_image()
-            self.convert = False
+        convert = not self.storage.original_grayscale
+
+        print('Conver: ', convert)
+
+        image = self.storage.get_original_image()
 
         mode = self.grayscale_mode
 
@@ -249,7 +249,7 @@ class ImageProcessor(QObject):
         # Creates the subprocess
         self.process = Process(target=worker_p, args=(self.queue,
                                                       image,
-                                                      True,
+                                                      convert,
                                                       mode,
                                                       algorithm,
                                                       im_settings,

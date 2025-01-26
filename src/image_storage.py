@@ -30,7 +30,10 @@ class ImageStorage(QObject):
         self.image_path = None
         self.save_path = None
         self.original_image = None
+        self.original_grayscale = False
         self.grayscale_image = None
+        self.alpha = None
+        self.ignore_alpha = False
         self.edited_image = None
         self.processed_image = None
         self.save_path_edited = False  # Track if the save path has been altered
@@ -49,9 +52,8 @@ class ImageStorage(QObject):
             self.save_path = save_path
 
             # Open the image and convert to grayscale
-            pil_image = Image.open(image_path).convert("RGB")
-            self.original_image = np.array(pil_image) / self.NORMALIZED_MAX
-            self.main_window.processor.convert = True
+            pil_image = Image.open(image_path)
+            self.original_image, self.alpha = self.extract_alpha(pil_image)
             self.main_window.processor.reset = True
             self.main_window.processor.start()
             self.main_window.sidebar.toolbox.enable_save()
@@ -59,6 +61,39 @@ class ImageStorage(QObject):
             self.show_notification(f"Error: Unable to open image.\n{str(e)}", duration=10000)
         except Exception as e:
             self.show_notification(f"An unexpected error occurred: {str(e)}", duration=10000)
+
+    def extract_alpha(self, image):
+        if image.mode == "LA":
+            np_image = np.array(image) / self.NORMALIZED_MAX
+            L = np_image[:,:,0]
+            A = np_image[:,:,1]
+            self.original_grayscale = True
+            return L, A
+        elif image.mode == "L":
+            np_image = np.array(image) / self.NORMALIZED_MAX
+            L = np_image
+            A = None
+            self.original_grayscale = True
+            return L, A
+        elif image.mode == "RGBA":
+            np_image = np.array(image) / self.NORMALIZED_MAX
+            RGB = np_image[:,:,:3]
+            A = np_image[:,:,:4]
+            self.original_grayscale = False
+            return RGB, A
+        elif image.mode == "RGB":
+            np_image = np.array(image) / self.NORMALIZED_MAX
+            RGB = np_image
+            A = None
+            self.original_grayscale = False
+            return RGB, A
+        else:
+            image = image.convert("RGB")
+            np_image = np.array(image) / self.NORMALIZED_MAX
+            RGB = np_image
+            A = None
+            self.original_grayscale = False
+            return RGB, A
 
     def save_image(self):
         """
@@ -81,8 +116,14 @@ class ImageStorage(QObject):
         base_name = os.path.basename(self.save_path)
         save_path = self.generate_unique_save_path(base_dir, base_name)
 
+        image = (self.processed_image * 255).astype(np.uint8)
         # Convert processed image to PIL format and save
-        pil_image = Image.fromarray((self.processed_image * 255).astype(np.uint8))
+        if self.ignore_alpha or self.alpha is None:
+            pil_image = Image.fromarray(image)
+        else:
+            alpha = (self.alpha * 255).astype(np.uint8)
+            image_w_alpha = np.dstack((image, alpha))
+            pil_image = Image.fromarray(image_w_alpha)
         pil_image.save(save_path)
 
         self.show_notification(f"Image saved to {save_path}", duration=3000)
@@ -173,7 +214,13 @@ class ImageStorage(QObject):
             themed_image[self.processed_image == 1] = color_light
             themed_image[self.processed_image == 0] = color_dark
 
-            return self._get_image_pixmap(themed_image) or self.get_original_pixmap()
+            if self.alpha is not None:
+                alpha = np.copy(self.alpha) * 255
+                result = np.dstack((themed_image, alpha.astype(np.uint8)))
+            else:
+                result = themed_image
+
+            return self._get_image_pixmap(result) or self.get_original_pixmap()
 
     def _get_image_pixmap(self, image_array):
         """
@@ -195,7 +242,7 @@ class ImageStorage(QObject):
         """
 
         self.processed_image = processed_image
-        
+
         # Sending the signal to main_window
         self.result_signal.emit(reset)
 

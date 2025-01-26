@@ -15,7 +15,7 @@ def numpy_to_pixmap(image_array):
     if image_array.dtype != np.uint8:
         image_array = (image_array * 255).clip(0, 255).astype(np.uint8)
     pil_image = Image.fromarray(image_array)
-    pil_image.convert("RGB")
+    pil_image.convert("RGBA")
     qimage = ImageQt(pil_image)
     pixmap = QPixmap.fromImage(qimage)
 
