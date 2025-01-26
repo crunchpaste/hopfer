@@ -15,10 +15,7 @@ class ViewerControls(QWidget):
 
         icon_path = get_path("res/icons")
 
-        if os.name == 'nt':
-            _ext = "png"
-        else:
-            _ext = "svg"
+        _ext = "svg"
 
         # Add buttons to the layout
         # self.fit = QPushButton()

@@ -10,10 +10,7 @@ def load_qss(app, qss_file_path):
         qss_file_path (str): Path to the QSS file.
     """
 
-    if os.name == 'nt':
-        _ext = "png"
-    else:
-        _ext = "svg"
+    _ext = "svg"
 
     try:
         with open(qss_file_path, 'r') as file:

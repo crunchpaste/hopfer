@@ -25,10 +25,7 @@ class Toolbox(QWidget):
 
         icon_path = get_path("res/icons")
 
-        if os.name == 'nt':
-            _ext = "png"
-        else:
-            _ext = "svg"
+        _ext = "svg"
 
         # Create the buttons
         self.open = self._create_button(
