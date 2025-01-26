@@ -1,5 +1,6 @@
 import time
 import threading
+from functools import wraps
 
 def debounce(wait):
     """
@@ -9,6 +10,7 @@ def debounce(wait):
     """
 
     def decorator(fn):
+        @wraps(fn) # Without wrapping the deboucer breaks in Nuitka
         def debounced(*args, **kwargs):
             def call_it():
                 debounced._timer = None
