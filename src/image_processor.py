@@ -233,6 +233,7 @@ class ImageProcessor(QObject):
         try:
             if self.process.is_alive():
                 self.process.terminate()
+                self.pocess.join()
         except:
             pass
 
