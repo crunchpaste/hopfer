@@ -5,6 +5,7 @@ from controls.grayscale_combo import GrayscaleCombo
 from controls.slider_control import SliderControl
 from settings import *
 from image_processor import ImageProcessor
+from helpers.debounce import debounce
 
 
 
@@ -86,6 +87,7 @@ class HalftoneTab(QWidget):
             self.settings_widget.setVisible(False)
             self.settings_widget.deleteLater()
 
+    @debounce(0.5)
     def on_settings_changed(self, settings):
         """
         Trigger image processing when settings are changed.
@@ -131,6 +133,7 @@ class ImageTab(QWidget):
         # Set the layout for the widget
         self.setLayout(self.layout)
 
+    @debounce(0.5)
     def on_mode_changed(self, mode_name):
         """
         Handle the change of grayscaling mode and trigger re-processing.
@@ -144,11 +147,12 @@ class ImageTab(QWidget):
         self.processor.convert = True
         self.processor.start()
 
+    @debounce(0.5)
     def on_settings_changed(self):
         """
         Trigger image processing when settings are changed.
-
         """
+        
         if not self.sharpness.is_dragging:
             settings = {
                 "sharpness": self.sharpness.slider.value()
