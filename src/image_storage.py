@@ -78,22 +78,39 @@ class ImageStorage(QObject):
         elif image.mode == "RGBA":
             np_image = np.array(image) / self.NORMALIZED_MAX
             RGB = np_image[:,:,:3]
+            RGB, is_gray = self.check_grayscale(RGB)
             A = np_image[:,:,:4]
-            self.original_grayscale = False
+            self.original_grayscale = is_gray
             return RGB, A
         elif image.mode == "RGB":
             np_image = np.array(image) / self.NORMALIZED_MAX
             RGB = np_image
+            RGB, is_gray = self.check_grayscale(RGB)
             A = None
-            self.original_grayscale = False
+            self.original_grayscale = is_gray
             return RGB, A
         else:
             image = image.convert("RGB")
             np_image = np.array(image) / self.NORMALIZED_MAX
             RGB = np_image
+            RGB, is_gray = self.check_grayscale(RGB)
             A = None
-            self.original_grayscale = False
+            self.original_grayscale = is_gray
             return RGB, A
+
+    def check_grayscale(self, rgb):
+        r = np.copy(rgb[:,:,0])
+        g = np.copy(rgb[:,:,1])
+        b = np.copy(rgb[:,:,2])
+
+        diff = r - b - g # should be a zero array if the image is grayscale
+
+        if np.max(diff) == 0:
+            print("Is grayscale")
+            return r, True
+        else:
+            return rgb, False
+
 
     def save_image(self):
         """
