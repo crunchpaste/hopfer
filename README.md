@@ -1,6 +1,6 @@
 ![hopfer](thumbnail.svg)
 
-#hopfer
+# hopfer
 
 **hopfer** is a Python-based GUI application that implements a wide range of halftoning algorithms from scratch, primarily designed for printmaking purposes.
 
