@@ -3,6 +3,7 @@ from PySide6.QtCore import Qt
 from sidebar import SideBar
 from viewer import PhotoViewer
 from viewer_controls import ViewerControls
+from preferences import PreferencesDialog
 from image_processor import ImageProcessor
 from image_storage import ImageStorage
 
@@ -49,9 +50,17 @@ class MainWindow(QMainWindow):
         main_widget.setLayout(main_layout)
         self.setCentralWidget(main_widget)
 
+        # Connect preferences button
+        p_button = self.sidebar.toolbox.preferences
+        p_button.clicked.connect(self.open_preferences)
+
     def update_progress(self, progress):
         """Update the UI based on progress."""
         print(f"Processing progress: {progress}%")
+
+    def open_preferences(self):
+        dialog = PreferencesDialog(self)
+        dialog.exec()
 
     def display_processed_image(self, reset):
         """Display the processed image in the photo viewer."""

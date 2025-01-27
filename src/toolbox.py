@@ -51,19 +51,19 @@ class Toolbox(QWidget):
             "Save as", self.save_file_dialog)
         self.saveas.setEnabled(False) # Initial state is disabled
 
-        self.settings = self._create_button(
+        self.preferences = self._create_button(
             icon_path + f"/settings.{_ext}",
             icon_path + f"/dark/settings.{_ext}",
             icon_path + f"/salmon/settings.{_ext}",
             icon_path + f"/disabled/settings.{_ext}",
-            "Settings", None)
-        self.settings.setObjectName("last-button")
+            "Preferences", None)
+        self.preferences.setObjectName("last-button")
         # Add buttons to layout
         toolbox_layout.addWidget(self.open)
         toolbox_layout.addWidget(self.save)
         toolbox_layout.addWidget(self.saveas)
         toolbox_layout.addStretch()
-        toolbox_layout.addWidget(self.settings)
+        toolbox_layout.addWidget(self.preferences)
 
     def _create_button(self, icon_default, icon_hover, icon_focus, icon_disabled, tooltip, click_handler):
         """

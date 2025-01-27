@@ -266,3 +266,10 @@ QGraphicsView focus{
   padding-left: 25px;
   border: 2px solid @accent;
 }
+#shortcut {
+  border: 2px solid @primary;
+  padding: 5px;
+}
+p{
+  line-height: 10pt;
+}

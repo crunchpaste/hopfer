@@ -31,12 +31,28 @@ def load_font(app):
         font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
         app.setFont(QFont(font_family, 14))
 
+import subprocess
+
+def get_latest_hash():
+    try:
+        hash = subprocess.check_output(
+            ['git', 'rev-parse', '--short', 'HEAD'],
+            cwd='.',
+            text=True
+        ).strip()
+        with open(get_path("res/hash.txt"), "w") as file:
+            file.write(hash)
+    except:
+        print('Not in a git folder.')
+
+    print(f"{hash}")
+
 def main():
     """
-    The main loop.
     TODO: Create a splash screen.
     """
     desktop_file_path = None
+    get_latest_hash()
 
     # Setup Linux environment if applicable
     if sys.platform.startswith('linux') or platform.system() == "Linux":
@@ -47,18 +63,15 @@ def main():
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(get_path("res/hopfer.png")))
 
-    # Load resources and configurations
     load_font(app)
     # In ths case a .css file is used insread of .qss as it easier to highlight in an editor.
     load_qss(app, get_path("res/styles/style.css"))
 
-    # Initialize main components
     window = MainWindow()
     window.setWindowIcon(QIcon(get_path("res/hopfer.png")))
     shortcuts = Shortcuts(app, window)
     window.show()
 
-    # Run the application and clean up
     try:
         sys.exit(app.exec())
     finally:
