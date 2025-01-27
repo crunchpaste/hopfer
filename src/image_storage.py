@@ -100,14 +100,12 @@ class ImageStorage(QObject):
             return RGB, A
 
     def check_grayscale(self, rgb):
-        """This is just a small function to check if an RGB image is actually grayscale. It saves time and resources on converting it to grayscale later on."""
-        r = np.copy(rgb[:,:,0])
-        g = np.copy(rgb[:,:,1])
-        b = np.copy(rgb[:,:,2])
+        """This is just a small function to check if an RGB image is actually grayscale. It saves time and resources on converting it to grayscale later on. Turns out using numpy's array_equal is much faster."""
 
-        diff = r - b - g # should be a zero array if the image is grayscale
+        if np.array_equal(rgb[:,:,0], rgb[:,:,1]) and \
+           np.array_equal(rgb[:,:,0], rgb[:,:,2]):
 
-        if np.max(diff) == 0:
+            r = np.copy(rgb[:,:,0])
             return r, True
         else:
             return rgb, False
