@@ -6,21 +6,36 @@ import numpy as np
 cc = CC('static')
 cc.output_dir = "src/algorithms"
 
+@cc.export('style_image', 'u1[:,:,:](f8[:,:], u1[:], u1[:])')
+def style_image(img, black, white):
+    h, w = img.shape
+    output_img = np.zeros((h, w, 3), dtype=np.uint8)
+
+    for y in range(h):
+        for x in range(w):
+            if img[y, x] == 0:
+                output_img[y, x, 0] = black[0]
+                output_img[y, x, 1] = black[1]
+                output_img[y, x, 2] = black[2]
+            else:
+                output_img[y, x, 0] = white[0]
+                output_img[y, x, 1] = white[1]
+                output_img[y, x, 2] = white[2]
+    return output_img
+
 @cc.export('thresh', 'f8[:,:](f8[:,:], f8)')
 def thresh(img, threshold_value):
     # Apply thresholding
-    output_img = img.copy()
     h,w = img.shape
-    # output = image.flatten()
+    output_img = np.zeros((h,w), dtype=np.float64)
     for i in range(h):
         for j in range(w):
-            if output_img[i, j] > threshold_value:
-                output_img[i, j] = 1
+            if img[i, j] > threshold_value:
+                output_img[i, j] = 1.0
             else:
-                output_img[i, j] = 0
-    # thresholded_image = np.where(image >= threshold_value, 1, 0)
-
+                output_img[i, j] = 0.0
     return output_img
+
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def ed(img, kernel, str_value):
     """
@@ -98,13 +113,12 @@ def eds(img, kernel, str_value):
 def luminance(img):
 
     h, w, _ = img.shape
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float64)
 
-    for y in prange(h):
-        for x in prange(w):
+    for y in range(h):
+        for x in range(w):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = (0.22 * r + 0.72 * g + 0.06 * b)
-
     return output_img
 
 @cc.export('luma', 'f8[:,:](f8[:,:,:])')

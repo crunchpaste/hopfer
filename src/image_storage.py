@@ -6,6 +6,11 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QPixmap
 from helpers.image_conversion import numpy_to_pixmap
 
+try:
+    from algorithms.static import style_image
+except ImportError:
+    from algorithms.style_preview import style_image
+
 class ImageStorage(QObject):
     """
     Class for managing the loading, processing, and saving of images.
@@ -219,16 +224,12 @@ class ImageStorage(QObject):
         if self.main_window.processor.algorithm == "None":
             return self._get_image_pixmap(self.processed_image) or self.get_original_pixmap()
         else:
-            color_dark = np.array((34, 35, 35))
-            color_light = np.array((240, 246, 246))
+            color_dark = np.array((34, 35, 35)).astype(np.uint8)
+            color_light = np.array((240, 246, 246)).astype(np.uint8)
 
-            h, w = self.processed_image.shape
-            # Create a themed preview
-            themed_image = np.zeros((h, w, 3), dtype=np.uint8)
-
-            # Use boolean indexing to set the color for ones and zeros
-            themed_image[self.processed_image == 1] = color_light
-            themed_image[self.processed_image == 0] = color_dark
+            themed_image = style_image(self.processed_image,
+                                       color_dark,
+                                       color_light)
 
             if self.alpha is not None:
                 alpha = np.copy(self.alpha) * 255
