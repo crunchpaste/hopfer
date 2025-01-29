@@ -37,7 +37,7 @@ def thresh(img, threshold_value):
     return output_img
 
 @cc.export('ed_old', 'f8[:,:](f8[:,:], f8[:,:], f8)')
-def ed(img, kernel, str_value):
+def ed_old(img, kernel, str_value):
     """
     Applies a dithering algorithm using a kernel to an image.
     """
@@ -68,26 +68,22 @@ def ed(img, kernel, str_value):
     return output_img
 
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
-def ed_new(img, kernel, str_value):
+def ed(img, kernel, str_value):
     """
     A generic error diffusion fuction. Expects the image, the kernel (see src/image_processor for example) and a strength of diffusion as a float between 0 and 1 which controls the amount of error to be diffused.
     """
-    
-    height, width = img.shape # the padded shape
 
-    # iterating over aranges seems much faster than the python range() for big arrays
+    height, width = img.shape
 
+    # iterating over aranges seems much faster than the python range() for big arrays. tried using ndenumerate but it was slower and flatiter but it isn't fully supported.
     h, w = np.arange(height), \
            np.arange(width)
-
-    # output_img = np.zeros_like(img) # No need for a copy, justi did it in place
 
     kernel_height, kernel_width = kernel.shape[0],\
                                   kernel.shape[1]
 
     kernel_center_x, kernel_center_y = kernel_width // 2, \
                                        kernel_height // 2
-
 
     for y in h:
         for x in w:
@@ -109,37 +105,38 @@ def ed_new(img, kernel, str_value):
 
     return img # return the image in a dithered form
 
-@cc.export('ed_padded', 'f8[:,:](f8[:,:], f8[:,:], f8)')
-def ed_padded(img, kernel, str_value):
+@cc.export('ed_flat', 'f8[:,:](f8[:,:], f8[:,:], f8)')
+def ed_flat(img, kernel, str_value):
     """
-    Applies a dithering algorithm using a kernel to an image.
+    A generic error diffusion fuction. Expects the image, the kernel (see src/image_processor for example) and a strength of diffusion as a float between 0 and 1 which controls the amount of error to be diffused.
     """
-    height, width = img.shape # the padded shape
-    h, w = height - 5, width - 5 # Remove the padding. 5px on each side should be enough even for the bigger matrices.
 
-    output_img = np.zeros((h-5,w-5)) # Zeros with fully removed padding
+    height, width = img.shape
 
-    kernel_height, kernel_width = kernel.shape
-    kernel_center_x, kernel_center_y = kernel_width // 2, kernel_height // 2
+    kernel_height, kernel_width = kernel.shape[0],\
+                                  kernel.shape[1]
 
-    for y in range(5, h):
-        for x in range(5, w):
-            old_pixel = img[y, x]
+    kernel_center_x, kernel_center_y = kernel_width // 2, \
+                                       kernel_height // 2
 
-            if old_pixel >= 0.5:
-                new_pixel = 1
-            else:
-                new_pixel = 0
 
-            output_img[y, x] = new_pixel
-            error = (old_pixel - new_pixel) * str_value
+    for idx, pixel in np.ndenumerate(img):
+        y, x = idx
+        old_pixel = pixel
+        new_pixel = np.rint(pixel)
+        error = (pixel - new_pixel) * str_value
+        img[y, x] = new_pixel
 
-            window = img[y - kernel_center_y:y + kernel_center_y,
-                         x - kernel_center_x:x + kernel_center_x]
+        for ky in range(kernel_height):
+            for kx in range(kernel_width):
+                if kernel[ky,kx] != 0:
+                    if (0 <= y + ky - kernel_center_y < height and
+                        0 <= x + kx - kernel_center_x < width):
 
-            window += kernel * error
+                        img[y + ky - kernel_center_y,
+                            x + kx - kernel_center_x] += error * kernel[ky, kx]
 
-    return output_img
+    return img
 
 @cc.export('eds', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def eds(img, kernel, str_value):
