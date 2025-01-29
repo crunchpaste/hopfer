@@ -45,6 +45,7 @@ class MainWindow(QMainWindow):
         self.splitter.setStretchFactor(0, 0)
         self.splitter.setStretchFactor(1, 1)
         self.splitter.setCollapsible(0, False)
+        self.splitter.setCollapsible(1, False)
 
         main_layout.addWidget(self.splitter)
         main_widget.setLayout(main_layout)
