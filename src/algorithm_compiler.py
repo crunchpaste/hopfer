@@ -36,37 +36,6 @@ def thresh(img, threshold_value):
                 output_img[i, j] = 0.0
     return output_img
 
-@cc.export('ed_old', 'f8[:,:](f8[:,:], f8[:,:], f8)')
-def ed_old(img, kernel, str_value):
-    """
-    Applies a dithering algorithm using a kernel to an image.
-    """
-    height, width = img.shape
-    output_img = np.zeros_like(img)
-
-    kernel_height, kernel_width = kernel.shape
-    kernel_center_x, kernel_center_y = kernel_width // 2, kernel_height // 2
-
-    for y in range(height):
-        for x in range(width):
-            old_pixel = img[y, x]
-
-            if old_pixel >= 0.5:
-                new_pixel = 1.0
-            else:
-                new_pixel = 0.0
-
-            output_img[y, x] = new_pixel
-            error = (old_pixel - new_pixel) * str_value
-
-            for ky in range(kernel_height):
-                for kx in range(kernel_width):
-                    if (0 <= y + ky - kernel_center_y < height and
-                        0 <= x + kx - kernel_center_x < width):
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += error * kernel[ky, kx]
-
-    return output_img
-
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def ed(img, kernel, str_value):
     """
@@ -104,39 +73,6 @@ def ed(img, kernel, str_value):
                                 x + kx - kernel_center_x] += error * kernel[ky, kx] # actually diffuse the error maybe the index could be precomputed
 
     return img # return the image in a dithered form
-
-@cc.export('ed_flat', 'f8[:,:](f8[:,:], f8[:,:], f8)')
-def ed_flat(img, kernel, str_value):
-    """
-    A generic error diffusion fuction. Expects the image, the kernel (see src/image_processor for example) and a strength of diffusion as a float between 0 and 1 which controls the amount of error to be diffused.
-    """
-
-    height, width = img.shape
-
-    kernel_height, kernel_width = kernel.shape[0],\
-                                  kernel.shape[1]
-
-    kernel_center_x, kernel_center_y = kernel_width // 2, \
-                                       kernel_height // 2
-
-
-    for idx, pixel in np.ndenumerate(img):
-        y, x = idx
-        old_pixel = pixel
-        new_pixel = np.rint(pixel)
-        error = (pixel - new_pixel) * str_value
-        img[y, x] = new_pixel
-
-        for ky in range(kernel_height):
-            for kx in range(kernel_width):
-                if kernel[ky,kx] != 0:
-                    if (0 <= y + ky - kernel_center_y < height and
-                        0 <= x + kx - kernel_center_x < width):
-
-                        img[y + ky - kernel_center_y,
-                            x + kx - kernel_center_x] += error * kernel[ky, kx]
-
-    return img
 
 @cc.export('eds', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def eds(img, kernel, str_value):
