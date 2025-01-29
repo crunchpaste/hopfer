@@ -30,15 +30,12 @@ def worker_p(queue, image, convert, mode, algorithm, im_settings, settings):
     The main function of the worker to be executed as a subprocess. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
 
-    print('W STARTED')
     if convert:
-        print("CONVERTING")
         image = convert_to_grayscale(image, mode)
     if im_settings["sharpness"] > 0:
         image = sharpen(image, im_settings["sharpness"])
     processed_image = apply_algorithm(image, algorithm, settings)
     queue.put(processed_image)
-    print('W PROCESSED')
     return
 
 def convert_to_grayscale(image, mode):
@@ -238,8 +235,6 @@ class ImageProcessor(QObject):
             pass
 
         convert = not self.storage.original_grayscale
-
-        print('Conver: ', convert)
 
         image = self.storage.get_original_image()
 

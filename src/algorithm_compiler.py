@@ -6,6 +6,8 @@ import numpy as np
 cc = CC('static')
 cc.output_dir = "src/algorithms"
 
+
+# STYLING: Could later be used for outputting in different colors
 @cc.export('style_image', 'u1[:,:,:](f8[:,:], u1[:], u1[:])')
 def style_image(img, black, white):
     h, w = img.shape
@@ -23,6 +25,7 @@ def style_image(img, black, white):
                 output_img[y, x, 2] = white[2]
     return output_img
 
+# THESHOLDING METHODS. Should include local thresholding later.
 @cc.export('thresh', 'f8[:,:](f8[:,:], f8)')
 def thresh(img, threshold_value):
     # Apply thresholding
@@ -36,6 +39,7 @@ def thresh(img, threshold_value):
                 output_img[i, j] = 0.0
     return output_img
 
+# ERROR DIFFUSION FUNCTIONS. At some point EDOFDs should be added
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def ed(img, kernel, str_value):
     """
@@ -74,6 +78,7 @@ def ed(img, kernel, str_value):
 
     return img # return the image in a dithered form
 
+# Same as above SERPENTINE
 @cc.export('eds', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def eds(img, kernel, str_value):
     """
@@ -115,6 +120,7 @@ def eds(img, kernel, str_value):
 
     return img # return the image in a dithered form
 
+# GRAYSCALE CONVERSION functions follow.
 @cc.export('luminance', 'f8[:,:](f8[:,:,:])')
 def luminance(img):
 
@@ -181,10 +187,7 @@ def lightness(img):
 
     return output_img
 
-# Compile the code and create the shared library (.so file)
-if __name__ == "__main__":
-    cc.compile()
-
+# The IMAGE PROCESSING fuctions should go here if i decide to implement them from scratch instead of using pillow
 @cc.export('sharpen', 'f8[:,:](f8[:,:],f8)')
 def sharpen(image, str=1.0):
     str *= 0.1
@@ -211,6 +214,5 @@ def sharpen(image, str=1.0):
 
     return sharpened
 
-# Compile the code and create the shared library (.so file)
 if __name__ == "__main__":
     cc.compile()
