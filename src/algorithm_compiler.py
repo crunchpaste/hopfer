@@ -36,7 +36,7 @@ def thresh(img, threshold_value):
                 output_img[i, j] = 0.0
     return output_img
 
-@cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
+@cc.export('ed_old', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def ed(img, kernel, str_value):
     """
     Applies a dithering algorithm using a kernel to an image.
@@ -52,9 +52,9 @@ def ed(img, kernel, str_value):
             old_pixel = img[y, x]
 
             if old_pixel >= 0.5:
-                new_pixel = 1
+                new_pixel = 1.0
             else:
-                new_pixel = 0
+                new_pixel = 0.0
 
             output_img[y, x] = new_pixel
             error = (old_pixel - new_pixel) * str_value
@@ -67,7 +67,80 @@ def ed(img, kernel, str_value):
 
     return output_img
 
-# Export the second function `eds`
+@cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
+def ed_new(img, kernel, str_value):
+    """
+    A generic error diffusion fuction. Expects the image, the kernel (see src/image_processor for example) and a strength of diffusion as a float between 0 and 1 which controls the amount of error to be diffused.
+    """
+    
+    height, width = img.shape # the padded shape
+
+    # iterating over aranges seems much faster than the python range() for big arrays
+
+    h, w = np.arange(height), \
+           np.arange(width)
+
+    # output_img = np.zeros_like(img) # No need for a copy, justi did it in place
+
+    kernel_height, kernel_width = kernel.shape[0],\
+                                  kernel.shape[1]
+
+    kernel_center_x, kernel_center_y = kernel_width // 2, \
+                                       kernel_height // 2
+
+
+    for y in h:
+        for x in w:
+            old_pixel = img[y, x]
+            # np.rint() is marginally faster that np.round() which itself was much faster than a conditional. as precision was not needed, rint() is used.
+            new_pixel = np.rint(old_pixel)
+
+            img[y, x] = new_pixel # replace the value in place
+            error = (old_pixel - new_pixel) * str_value
+
+            for ky in range(kernel_height):
+                for kx in range(kernel_width):
+                    if kernel[ky,kx] != 0: # check if there is something at the index to diffuse. this led to the biggest improvement in speed.
+                        if (0 <= y + ky - kernel_center_y < height and
+                            0 <= x + kx - kernel_center_x < width): # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
+
+                            img[y + ky - kernel_center_y,
+                                x + kx - kernel_center_x] += error * kernel[ky, kx] # actually diffuse the error maybe the index could be precomputed
+
+    return img # return the image in a dithered form
+
+@cc.export('ed_padded', 'f8[:,:](f8[:,:], f8[:,:], f8)')
+def ed_padded(img, kernel, str_value):
+    """
+    Applies a dithering algorithm using a kernel to an image.
+    """
+    height, width = img.shape # the padded shape
+    h, w = height - 5, width - 5 # Remove the padding. 5px on each side should be enough even for the bigger matrices.
+
+    output_img = np.zeros((h-5,w-5)) # Zeros with fully removed padding
+
+    kernel_height, kernel_width = kernel.shape
+    kernel_center_x, kernel_center_y = kernel_width // 2, kernel_height // 2
+
+    for y in range(5, h):
+        for x in range(5, w):
+            old_pixel = img[y, x]
+
+            if old_pixel >= 0.5:
+                new_pixel = 1
+            else:
+                new_pixel = 0
+
+            output_img[y, x] = new_pixel
+            error = (old_pixel - new_pixel) * str_value
+
+            window = img[y - kernel_center_y:y + kernel_center_y,
+                         x - kernel_center_x:x + kernel_center_x]
+
+            window += kernel * error
+
+    return output_img
+
 @cc.export('eds', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def eds(img, kernel, str_value):
     height, width = img.shape
