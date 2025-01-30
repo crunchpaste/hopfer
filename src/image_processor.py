@@ -1,14 +1,15 @@
 from PySide6.QtCore import QCoreApplication, QObject, Signal
 import numpy as np
 from multiprocessing import Process, Queue
+import time
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 from helpers.debounce import debounce
 
 try:
-    from algorithms.thresholdc import threshold
+    from algorithms.thresholdc import threshold, sauvola_threshold
 except ImportError:
-    from algorithms.threshold import threshold
+    from algorithms.threshold import threshold, sauvola_threshold
 
 try:
     from algorithms.error_diffusionc import error_diffusion
@@ -69,6 +70,12 @@ def apply_algorithm(image, algorithm, settings):
     # Apply the chosen halftoning algorithm using the respective kernel
     if algorithm == "Threshold":
         processed_image = threshold(image, settings)
+
+    elif algorithm == "Sauvola threshold":
+        start = time.perf_counter()
+        processed_image = sauvola_threshold(image, settings)
+        end = time.perf_counter()
+        print(f"Sauvola: {end-start} seconds")
 
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0],
