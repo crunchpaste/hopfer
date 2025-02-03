@@ -17,8 +17,10 @@ class SliderControl(QWidget):
 
         # Labels for the slider
         self.left_label = QLabel(label)
-        self.right_label = QLabel(f"{self.slider.value() / self.div}")  # Initial value
-
+        if self.div:
+            self.right_label = QLabel(f"{self.slider.value() / self.div}")  # Initial value
+        else:
+            self.right_label = QLabel(f"{self.slider.value()}")
         # Connect slider signals
         self.slider.valueChanged.connect(self.update_value)
         self.slider.sliderPressed.connect(self.on_slider_pressed)  # Track when dragging starts
@@ -37,7 +39,10 @@ class SliderControl(QWidget):
 
     def update_value(self, value):
         """Update the right label with the current slider value."""
-        self.right_label.setText(f"{value / self.div}")
+        if self.div:
+            self.right_label.setText(f"{value / self.div}")
+        else:
+            self.right_label.setText(f"{value}")
 
     def on_slider_pressed(self):
         """Called when the slider starts being dragged."""
