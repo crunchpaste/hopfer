@@ -23,6 +23,7 @@ class ImageStorage(QObject):
 
     # Result signal to update PhotoViewer captured by the main window
     result_signal = Signal(bool)
+    # Captured by the ImageTab. It is used to disable the GrayscaleCombo.
     grayscale_signal = Signal(bool)
 
     def __init__(self, main_window):
@@ -38,6 +39,7 @@ class ImageStorage(QObject):
         self.original_image = None
         self.original_grayscale = False
         self.grayscale_image = None
+        self.enhanced_image = None
         self.alpha = None
         self.ignore_alpha = False
         self.edited_image = None
@@ -60,6 +62,8 @@ class ImageStorage(QObject):
             pil_image = Image.open(image_path)
             self.original_image, self.alpha = self.extract_alpha(pil_image)
             self.grayscale_signal.emit(self.original_grayscale)
+            if self.original_grayscale:
+                self.grayscale_image = self.original_image
             self.main_window.processor.reset = True
             self.main_window.processor.start()
             self.main_window.sidebar.toolbox.enable_save()
@@ -187,6 +191,17 @@ class ImageStorage(QObject):
         :return: Grayscale image array.
         """
         return self.grayscale_image
+
+    def get_enhanced_image(self):
+        """
+        Return the grayscale image as a NumPy array (normalized to [0, 1]).
+
+        :return: Grayscale image array.
+        """
+        if self.enhanced_image is not None:
+            return self.enhanced_image
+        else:
+            return self.grayscale_image
 
     def get_original_pixmap(self):
         """

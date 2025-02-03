@@ -104,7 +104,7 @@ class HalftoneTab(QWidget):
         # Update processor settings and algorithm, then start processing
         self.processor.settings = settings
         self.processor.algorithm = self.current_algorithm
-        self.processor.start()
+        self.processor.start(step=2)
 
 
 class ImageTab(QWidget):
@@ -125,12 +125,15 @@ class ImageTab(QWidget):
 
         self.combobox = GrayscaleCombo()
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
+
+        self.blur = SliderControl("Blur", (0, 100), 0, 10)
         self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
         self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
         self.sharpness.slider.sliderReleased.connect(lambda:                    self.on_settings_changed(self.sharpness.slider.value))
 
 
         self.layout.addWidget(self.combobox)
+        self.layout.addWidget(self.blur)
         self.layout.addWidget(self.sharpness)
 
         # Add stretch to the layout
@@ -150,7 +153,7 @@ class ImageTab(QWidget):
 
         self.processor.grayscale_mode = mode_name
         self.processor.convert = True
-        self.processor.start()
+        self.processor.start(step=0)
 
     @debounce(0.5)
     def on_settings_changed(self, value):
@@ -164,7 +167,7 @@ class ImageTab(QWidget):
             }
             self.processor.image_settings = settings
             if storage.original_image is not None:
-                self.processor.start()
+                self.processor.start(step=1)
 
     def on_grayscale_signal(self, is_grayscale):
         if is_grayscale:

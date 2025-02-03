@@ -27,15 +27,30 @@ try:
 except ImportError:
     from algorithms.sharpen import sharpen
 
-def worker_p(queue, image, convert, mode, algorithm, im_settings, settings):
+def worker_g(queue, image, mode):
     """
-    The main function of the worker to be executed as a subprocess. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
+    This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
+    print("CONVERTING")
+    image = convert_to_grayscale(image, mode)
+    queue.put(image)
+    return
 
-    if convert:
-        image = convert_to_grayscale(image, mode)
+def worker_e(queue, image, im_settings):
+    """
+    This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
+    """
+    print("ENHANCING")
     if im_settings["sharpness"] > 0:
         image = sharpen(image, im_settings["sharpness"])
+    queue.put(image)
+    return
+
+def worker_h(queue, image, algorithm, settings):
+    """
+    This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
+    """
+    print("PROCESSING")
     processed_image = apply_algorithm(image, algorithm, settings)
     queue.put(processed_image)
     return
@@ -226,7 +241,7 @@ class ImageProcessor(QObject):
         self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
 
     @debounce(0.5)
-    def start(self):
+    def start(self, step=0):
         """Start the image processing in a separate process."""
         if self.storage.original_image is None:
             return
@@ -234,7 +249,7 @@ class ImageProcessor(QObject):
         # Displays the Processing... label in the viewer
         self.main_window.viewer.labelVisible(True)
 
-        #Checks if there is another process running already. If there is terminates it.
+        # Checks if there is another process running already. If there is terminates it.
         try:
             if self.process.is_alive():
                 self.process.terminate()
@@ -242,41 +257,74 @@ class ImageProcessor(QObject):
         except:
             pass
 
-        convert = not self.storage.original_grayscale
+        # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
+        convert = (not self.storage.original_grayscale and step == 0)
 
-        image = self.storage.get_original_image()
+        if convert:
+            image = self.storage.get_original_image()
+            mode = self.grayscale_mode
+            self.queue = Queue()
+            self.process = Process(target=worker_g, args=(self.queue,
+                                                          image,
+                                                          mode))
 
-        mode = self.grayscale_mode
+            self.process.start()
+            grayscale_img = self.wait_for_process()
+            self.process.join()
 
+            # Set the result as the new grayscale image to avoid reprocessing it again.
+            self.storage.grayscale_image = grayscale_img
+        else:
+            grayscale_img = self.storage.get_grayscale_image()
+
+        enchance = step <= 1
+
+        if enchance:
+            image = self.storage.get_grayscale_image()
+            im_settings = self.image_settings
+            self.queue = Queue()
+            self.process = Process(target=worker_e, args=(self.queue,
+                                                         image,
+                                                         im_settings))
+            self.process.start()
+            enhanced_image = self.wait_for_process()
+            self.process.join()
+
+            # Set the result as the storage enhanced image to avoid furher reprocessing.
+            self.storage.enhanced_image = enhanced_image
+
+
+
+
+        image = self.storage.get_enhanced_image()
         algorithm = self.algorithm
         settings = self.settings
-        im_settings = self.image_settings
         self.queue = Queue()
 
         # Creates the subprocess
-        self.process = Process(target=worker_p, args=(self.queue,
+        self.process = Process(target=worker_h, args=(self.queue,
                                                       image,
-                                                      convert,
-                                                      mode,
                                                       algorithm,
-                                                      im_settings,
                                                       settings))
         # Actually start the process
         self.process.start()
 
         # Tries to get the resulting image in a while. If it is not yet available the GUI is repainted.
-        while self.process.is_alive():
-            try:
-                processed_image = self.queue.get_nowait()
-                break  # Non-blocking
-            except:
-                QCoreApplication.processEvents()
+        processed_image = self.wait_for_process()
 
         try:
             self.send_result(processed_image)
             self.process.join()
         except:
             pass
+
+    def wait_for_process(self):
+        while self.process.is_alive():
+            try:
+                _image = self.queue.get_nowait()
+                return _image
+            except:
+                QCoreApplication.processEvents()
 
     def send_result(self, image):
         self.storage.set_processed_image(image, self.reset)
