@@ -49,7 +49,7 @@ class SauvolaSettings(HalftoneSettings):
         super().__init__()
 
         # The slider that controls the k range of the local threshold
-        self.block_size = SliderControl("Block size", (2, 500), 3, 1)
+        self.block_size = SliderControl("Block size", (2, 500), 25, 1)
         self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
         self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
 
@@ -79,6 +79,58 @@ class SauvolaSettings(HalftoneSettings):
                 "block_size": self.block_size.slider.value(),
                 "dynamic_range": self.dynamic_range.slider.value(),
                 "k_factor": self.k_factor.slider.value(),
+            }
+            self.settingsChanged.emit(settings)
+
+class PhansalkarSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+
+        # The slider that controls the k range of the local threshold
+        self.block_size = SliderControl("Block size", (2, 500), 25, 1)
+        self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
+        self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # The slider that controls the dynamic range of the local threshold
+        self.dynamic_range = SliderControl("Dynamic range", (1, 100), 50, 100)
+        self.dynamic_range.slider.valueChanged.connect(self.emit_settings_changed)
+        self.dynamic_range.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # The slider that controls the k range of the local threshold
+        self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
+        self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
+        self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # The slider that controls the p range of the local threshold
+        self.p_factor = SliderControl("Exponential influence", (1, 500), 30, 100)
+        self.p_factor.slider.valueChanged.connect(self.emit_settings_changed)
+        self.p_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # The slider that controls the q range of the local threshold
+        self.q_factor = SliderControl("Exponential decay", (1, 100), 10, 10)
+        self.q_factor.slider.valueChanged.connect(self.emit_settings_changed)
+        self.q_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+
+
+        # Add it to the layout
+        self.layout.addWidget(self.block_size)
+        self.layout.addWidget(self.dynamic_range)
+        self.layout.addWidget(self.k_factor)
+        self.layout.addWidget(self.p_factor)
+        self.layout.addWidget(self.q_factor)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when the threshold value changes."""
+        if not self.block_size.is_dragging and \
+           not self.dynamic_range.is_dragging and \
+           not self.k_factor.is_dragging:
+            settings = {
+                "block_size": self.block_size.slider.value(),
+                "dynamic_range": self.dynamic_range.slider.value(),
+                "k_factor": self.k_factor.slider.value(),
+                "p_factor": self.p_factor.slider.value(),
+                "q_factor": self.q_factor.slider.value(),
             }
             self.settingsChanged.emit(settings)
 

@@ -5,11 +5,12 @@ import time
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 from helpers.debounce import debounce
- factor
 try:
-    from algorithms.thresholdc import threshold, sauvola_threshold
+    from algorithms.thresholdc import threshold, sauvola_threshold, phansalkar_threshold
 except ImportError:
-    from algorithms.threshold import threshold, sauvola_threshold
+    from algorithms.threshold import threshold, sauvola_threshold, phansalkar_threshold
+
+from algorithms.threshold import phansalkar_threshold
 
 try:
     from algorithms.error_diffusionc import error_diffusion
@@ -73,6 +74,9 @@ def apply_algorithm(image, algorithm, settings):
 
     elif algorithm == "Sauvola threshold":
         processed_image = sauvola_threshold(image, settings)
+
+    elif algorithm == "Phansalkar threshold":
+        processed_image = phansalkar_threshold(image, settings)
 
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0],

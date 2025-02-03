@@ -49,6 +49,8 @@ class HalftoneTab(QWidget):
             return ThresholdSettings()
         elif algorithm_name == "Sauvola threshold":
             return SauvolaSettings()
+        elif algorithm_name == "Phansalkar threshold":
+            return PhansalkarSettings()
         elif algorithm_name in [
             "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki",
             "Stucki Small", "Stucki Large", "Atkinson", "Burkes", "Sierra",
