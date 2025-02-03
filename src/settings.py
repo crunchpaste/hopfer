@@ -49,7 +49,7 @@ class SauvolaSettings(HalftoneSettings):
         super().__init__()
 
         # The slider that controls the k range of the local threshold
-        self.block_size = SliderControl("Block size", (2, 25), 3, 1)
+        self.block_size = SliderControl("Block size", (2, 500), 3, 1)
         self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
         self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
 
@@ -59,7 +59,7 @@ class SauvolaSettings(HalftoneSettings):
         self.dynamic_range.slider.sliderReleased.connect(self.emit_settings_changed)
 
         # The slider that controls the k range of the local threshold
-        self.k_factor = SliderControl("K factor", (0, 100), 10, 100)
+        self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
         self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
         self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
 

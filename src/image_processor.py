@@ -5,7 +5,7 @@ import time
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 from helpers.debounce import debounce
-
+ factor
 try:
     from algorithms.thresholdc import threshold, sauvola_threshold
 except ImportError:
@@ -72,10 +72,7 @@ def apply_algorithm(image, algorithm, settings):
         processed_image = threshold(image, settings)
 
     elif algorithm == "Sauvola threshold":
-        start = time.perf_counter()
         processed_image = sauvola_threshold(image, settings)
-        end = time.perf_counter()
-        print(f"Sauvola: {end-start} seconds")
 
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0],
@@ -250,6 +247,7 @@ class ImageProcessor(QObject):
         algorithm = self.algorithm
         settings = self.settings
         im_settings = self.image_settings
+        self.queue = Queue()
 
         # Creates the subprocess
         self.process = Process(target=worker_p, args=(self.queue,

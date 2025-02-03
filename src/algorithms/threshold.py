@@ -19,41 +19,76 @@ def sauvola_threshold(img, settings):
     k = settings["k_factor"] / 100
     return sauvola(img, block_size, dynamic_range, k)
 
-@njit(parallel=True, cache=True, fastmath=True)
+@njit(cache=True)
 def sauvola(img, n=25, R=0.5, k=0.2):
-    # Integral images should definitely be used at some point to speed this up
     h, w = img.shape
-    w_half = n // 2  # Half size of the window for boundary checks
+    w_half = n // 2  # Half size of the block (window)
 
     output_img = np.zeros((h, w))
 
-    for y in prange(h):
-        # Boundary checks for the row
-        y1 = max(0, y - w_half)  # Start of window
-        y2 = min(h, y + w_half + 1)  # End of window
+    # Compute the integral image and squared integral image
+    integral_img = np.zeros((h + 1, w + 1))
+    squared_integral_img = np.zeros((h + 1, w + 1))
 
+    # Build the integral images. This massively improves the perfomance especially at bigger window sizes. The concept is relatively new to me but seems to work. Wikipedia has it described quite well: https://en.wikipedia.org/wiki/Summed-area_table
+
+    for y in range(h):
         for x in range(w):
-            # marginally faster than the min max way
-            x1 = x - w_half
-            if x1 < 0:
-                x1 = 0
-            x2 = x + w_half
-            if x2 > w:
-                x2 = w
 
-            # The block to check
-            block = img[y1:y2, x1:x2]
+            # The integral image, used for the mean of the block
+            integral_img[y + 1, x + 1] = (
+                integral_img[y + 1, x]  # Left
+                + integral_img[y, x + 1]  # Top
+                - integral_img[y, x]  # Top left
+                + img[y, x]  # Current
+            )
 
-            # Get the mean and the srd of the block
-            mean = np.mean(block)
-            std = np.std(block)
+            # The squared integral image, used for the std of the block
+            squared_integral_img[y + 1, x + 1] = (
+                squared_integral_img[y + 1, x]  # Left
+                + squared_integral_img[y, x + 1]  # Top
+                - squared_integral_img[y, x]  # Top left
+                + img[y, x] ** 2  # Current
+            )
 
-            # Apply the formula for the threshold explained lovely at
-            # https://craftofcoding.wordpress.com/2021/10/06/thresholding-algorithms-sauvola-local/
-            #
+    for y in range(h):
+        # There seems to be no significant improvement in perfomance if doing it in a prange.
+        for x in range(w):
+            # Boundary checks
+            y1, x1 = max(0, y - w_half), max(0, x - w_half)
+            y2, x2 = min(h, y + w_half + 1), min(w, x + w_half + 1)
+
+            # Get the sum of the block to calculate the mean
+            block_sum = (
+                integral_img[y2, x2]      # Bottom right
+                - integral_img[y2, x1]    # Left
+                - integral_img[y1, x2]    # Top
+                + integral_img[y1, x1]    # Top left
+            )
+
+            block_sq_sum = (
+                squared_integral_img[y2, x2]      # Bottom right
+                - squared_integral_img[y2, x1]    # Left
+                - squared_integral_img[y1, x2]    # Top
+                + squared_integral_img[y1, x1]    # Top left
+            )
+
+            block_area = (y2 - y1) * (x2 - x1)
+
+            mean = block_sum / block_area
+            mean_sq = block_sq_sum / block_area
+            variance = mean_sq - mean**2
+
+            # if variance gets to be negative strange glitches start happening
+            if variance <= 0:
+                variance = 0
+
+            std = np.sqrt(variance)
+
+            # Get the threshold for the current pixel using the formula provided by craft of coding: https://craftofcoding.wordpress.com/2021/10/06/thresholding-algorithms-sauvola-local/
             threshold = mean * (1 + k * ((std / R) - 1))
 
-            # Apply the thresholding
+            # Check against the calculated threshold
             if img[y, x] > threshold:
                 output_img[y, x] = 1
             else:
