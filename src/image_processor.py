@@ -145,7 +145,7 @@ def apply_algorithm(image, algorithm, settings):
     elif algorithm == "Phansalkar threshold":
         processed_image = phansalkar_threshold(image, settings)
 
-    elif algorithm == "Mezzo":
+    elif algorithm == "Mezzotint":
         processed_image = mezzo(image, settings)
 
     elif algorithm == "Floyd-Steinberg":
