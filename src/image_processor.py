@@ -2,6 +2,7 @@ from PySide6.QtCore import QCoreApplication, QObject, Signal
 import numpy as np
 from multiprocessing import Process, Queue
 import time
+from PIL import Image, ImageFilter
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 from helpers.debounce import debounce
@@ -41,8 +42,15 @@ def worker_e(queue, image, im_settings):
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
     """
     print("ENHANCING")
-    if im_settings["sharpness"] > 0:
-        image = sharpen(image, im_settings["sharpness"])
+    _blur = im_settings["blur"] / 10
+    _sharpness = im_settings["sharpness"]
+    if _blur > 0:
+        _image = (image * 255).astype(np.uint8)
+        pil_image = Image.fromarray(_image)
+        blurred_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
+        image = np.array(blurred_image) / 255
+    if _sharpness > 0:
+        image = sharpen(image, _sharpness)
     queue.put(image)
     return
 
@@ -234,7 +242,8 @@ class ImageProcessor(QObject):
         self.settings = {}
 
         self.image_settings = {
-        "sharpness": 0.0
+        "sharpness": 0.0,
+        "blur": 0.0
         }
 
         self.convert = True # Does the image need reconversion from RGB to Grayscale

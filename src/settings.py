@@ -124,7 +124,9 @@ class PhansalkarSettings(HalftoneSettings):
         """Emit the current settings when the threshold value changes."""
         if not self.block_size.is_dragging and \
            not self.dynamic_range.is_dragging and \
-           not self.k_factor.is_dragging:
+           not self.k_factor.is_dragging and \
+           not self.p_factor.is_dragging and \
+           not self.q_factor.is_dragging:
             settings = {
                 "block_size": self.block_size.slider.value(),
                 "dynamic_range": self.dynamic_range.slider.value(),

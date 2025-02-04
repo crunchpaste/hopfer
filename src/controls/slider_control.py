@@ -52,4 +52,3 @@ class SliderControl(QWidget):
         """Called when the slider is released after dragging."""
         self.is_dragging = False  # Mark that dragging has finished
         value = self.slider.value()
-        print(f"Slider value updated to: {value / self.div}")

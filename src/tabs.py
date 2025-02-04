@@ -117,6 +117,7 @@ class ImageTab(QWidget):
         super().__init__()
         self.processor = processor
         self.processor.storage.grayscale_signal.connect(self.on_grayscale_signal)
+        self.sliders = []
 
         self._initialize_ui()
 
@@ -127,9 +128,13 @@ class ImageTab(QWidget):
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
 
         self.blur = SliderControl("Blur", (0, 100), 0, 10)
+        self.blur.slider.valueChanged.connect(self.on_settings_changed)
+        self.blur.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.blur)
         self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
         self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
-        self.sharpness.slider.sliderReleased.connect(lambda:                    self.on_settings_changed(self.sharpness.slider.value))
+        self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.sharpness)
 
 
         self.layout.addWidget(self.combobox)
@@ -156,18 +161,21 @@ class ImageTab(QWidget):
         self.processor.start(step=0)
 
     @debounce(0.5)
-    def on_settings_changed(self, value):
+    def on_settings_changed(self, value=None):
         """
         Trigger image processing when settings are changed.
         """
+        for slider in self.sliders:
+            if slider.is_dragging:
+                return
         storage = self.processor.storage
-        if not self.sharpness.is_dragging:
-            settings = {
-                "sharpness": self.sharpness.slider.value()
-            }
-            self.processor.image_settings = settings
-            if storage.original_image is not None:
-                self.processor.start(step=1)
+        settings = {
+            "blur" : self.blur.slider.value(),
+            "sharpness": self.sharpness.slider.value()
+        }
+        self.processor.image_settings = settings
+        if storage.original_image is not None:
+            self.processor.start(step=1)
 
     def on_grayscale_signal(self, is_grayscale):
         if is_grayscale:
