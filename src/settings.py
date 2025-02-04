@@ -97,7 +97,7 @@ class PhansalkarSettings(HalftoneSettings):
         self.dynamic_range.slider.sliderReleased.connect(self.emit_settings_changed)
 
         # The slider that controls the k range of the local threshold
-        self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
+        self.k_factor = SliderControl("Local threshold", (1, 100), 25, 100)
         self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
         self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
 
