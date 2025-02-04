@@ -154,6 +154,34 @@ class MezzoSettings(HalftoneSettings):
             "seed": self.spin.spinbox.value()
         })
 
+class GaussSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+        self.spin = SeedSpinBox("Random number seed")
+        self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
+
+        self.location = SliderControl("Peak location", (0, 100), 50, 100)
+        self.location.slider.valueChanged.connect(self.emit_settings_changed)
+        self.location.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.std = SliderControl("Starndard deviation", (0,100), 50, 100)
+        self.std.slider.valueChanged.connect(self.emit_settings_changed)
+        self.std.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        self.layout.addWidget(self.location)
+        self.layout.addWidget(self.std)
+        self.layout.addWidget(self.spin)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when the threshold value changes."""
+        if not self.location.is_dragging and \
+           not self.std.is_dragging:
+            self.settingsChanged.emit({
+                "seed": self.spin.spinbox.value(),
+                "location": self.location.slider.value(),
+                "std": self.std.slider.value()
+            })
+
 class ErrorDiffusionSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()

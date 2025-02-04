@@ -7,7 +7,6 @@ class SeedSpinBox(QWidget):
         super().__init__()
         layout_outer = QVBoxLayout()
         layout_inner = QHBoxLayout()
-        layout_outer.setContentsMargins(0, 0, 0, 0)
         layout_inner.setContentsMargins(0, 0, 0, 0)
 
 

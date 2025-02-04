@@ -146,7 +146,10 @@ def apply_algorithm(image, algorithm, settings):
         processed_image = phansalkar_threshold(image, settings)
 
     elif algorithm == "Mezzotint":
-        processed_image = mezzo(image, settings)
+        processed_image = mezzo(image, settings, mode="uniform")
+
+    elif algorithm == "Mezzotint Gauss":
+        processed_image = mezzo(image, settings, mode="gauss")
 
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0],

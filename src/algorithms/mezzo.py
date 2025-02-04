@@ -1,11 +1,19 @@
 import numpy as np
 from numba import njit
 
-def mezzo(img, settings):
+def mezzo(img, settings, mode="uniform"):
     seed = settings["seed"]
     h, w = img.shape
     rng = np.random.default_rng(seed)
-    noise = rng.random((h,w))
+    if mode == "uniform":
+        noise = rng.random((h, w))
+    elif mode == "gauss":
+        loc = settings["location"] / 100
+        std = settings["location"] / 200
+        std = np.min(std, np.min(loc, 1 - loc))
+        print(std)
+        noise = rng.normal((h, w), loc, std)
+
     img = compare(img, noise, h, w)
     return img
 
