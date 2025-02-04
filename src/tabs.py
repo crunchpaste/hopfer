@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider
 from PySide6.QtCore import QCoreApplication, Signal
 from controls.halftone_combo import HalftoneCombo
 from controls.grayscale_combo import GrayscaleCombo
@@ -127,10 +127,22 @@ class ImageTab(QWidget):
         self.combobox = GrayscaleCombo()
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
 
-        self.blur = SliderControl("Blur", (0, 100), 0, 10)
+        self.brightness = SliderControl("Brightness", (-100, 100), 0, 100)
+        self.brightness.slider.valueChanged.connect(self.on_settings_changed)
+        self.brightness.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.brightness)
+
+
+        self.contrast = SliderControl("Contrast", (-100, 100), 0, 100)
+        self.contrast.slider.valueChanged.connect(self.on_settings_changed)
+        self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.contrast)
+
+        self.blur = SliderControl("Blur", (0, 150), 0, 10)
         self.blur.slider.valueChanged.connect(self.on_settings_changed)
         self.blur.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.blur)
+
         self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
         self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
         self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
@@ -138,6 +150,8 @@ class ImageTab(QWidget):
 
 
         self.layout.addWidget(self.combobox)
+        self.layout.addWidget(self.brightness)
+        self.layout.addWidget(self.contrast)
         self.layout.addWidget(self.blur)
         self.layout.addWidget(self.sharpness)
 
@@ -170,6 +184,8 @@ class ImageTab(QWidget):
                 return
         storage = self.processor.storage
         settings = {
+            "brightness" : self.brightness.slider.value(),
+            "contrast" : self.contrast.slider.value(),
             "blur" : self.blur.slider.value(),
             "sharpness": self.sharpness.slider.value()
         }

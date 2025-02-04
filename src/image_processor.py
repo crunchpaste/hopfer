@@ -2,7 +2,7 @@ from PySide6.QtCore import QCoreApplication, QObject, Signal
 import numpy as np
 from multiprocessing import Process, Queue
 import time
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageEnhance
 
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 from helpers.debounce import debounce
@@ -42,15 +42,43 @@ def worker_e(queue, image, im_settings):
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
     """
     print("ENHANCING")
+    _brightness = im_settings["brightness"] / 100 + 1
+    _contrast = (im_settings["contrast"] / 100) + 1
     _blur = im_settings["blur"] / 10
     _sharpness = im_settings["sharpness"]
+
+    pil_needed = False
+    converted = False # if the image has already been converted back
+
+    if _contrast != 1.0 or \
+       _brightness != 1.0 or \
+       _blur > 0:
+
+       # if PIL manupulation is needed, convert to a PIL image once
+       pil_needed = True
+       _image = (image * 255).astype(np.uint8)
+       pil_image = Image.fromarray(_image)
+
+    if _brightness != 1.0:
+        enhancer = ImageEnhance.Brightness(pil_image)
+        pil_image = enhancer.enhance(_brightness)
+    if _contrast != 1.0:
+        enhancer = ImageEnhance.Contrast(pil_image)
+        pil_image = enhancer.enhance(_contrast)
     if _blur > 0:
-        _image = (image * 255).astype(np.uint8)
-        pil_image = Image.fromarray(_image)
-        blurred_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
-        image = np.array(blurred_image) / 255
+        pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
     if _sharpness > 0:
-        image = sharpen(image, _sharpness)
+        converted = True
+        if pil_needed:
+            _image = np.array(pil_image) / 255
+        else:
+            _image = image
+        image = sharpen(_image, _sharpness)
+
+    if not converted:
+        # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
+        image = np.array(pil_image) / 255
+
     queue.put(image)
     return
 
