@@ -194,6 +194,20 @@ def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
 
     return output_img
 
+# NOISE RELATED FUNCTIONS
+
+@cc.export('compare', 'f8[:,:](f8[:,:], f8[:,:], u2, u2)')
+def compare(img, noise, h, w):
+
+    # Doing it in this crude nested for loop seems to be a few times faster than using np.where
+    for y in range(h):
+        for x in range(w):
+            if noise[y, x] > img[y, x]:
+                img[y, x] = 0
+            else:
+                img[y, x] = 1
+    return img
+
 # ERROR DIFFUSION FUNCTIONS. At some point EDOFDs should be added
 @cc.export('ed', 'f8[:,:](f8[:,:], f8[:,:], f8)')
 def ed(img, kernel, str_value):

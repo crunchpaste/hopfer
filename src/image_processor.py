@@ -11,7 +11,10 @@ try:
 except ImportError:
     from algorithms.threshold import threshold, sauvola_threshold, phansalkar_threshold
 
-from algorithms.mezzo import mezzo
+try:
+    from algorithms.mezzoc import mezzo
+except ImportError:
+    from algorithms.mezzo import mezzo
 
 try:
     from algorithms.error_diffusionc import error_diffusion

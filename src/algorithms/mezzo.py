@@ -11,6 +11,7 @@ def mezzo(img, settings):
 
 @njit
 def compare(img, noise, h, w):
+    # Doing it in this crude nested for loop seems to be a few times faster than using np.where
     for y in range(h):
         for x in range(w):
             if noise[y, x] > img[y, x]:
