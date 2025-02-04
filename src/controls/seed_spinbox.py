@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QSpinBox, QLabel, QAbstractSpinBox, QPushButton
+from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QSpinBox, QLabel, QPushButton
 from PySide6.QtCore import Qt
 import numpy as np
 
@@ -18,7 +18,7 @@ class SeedSpinBox(QWidget):
         self.spinbox.setRange(0, 9999)
         self.spinbox.setValue(3750)
         self.spinbox.setAlignment(Qt.AlignCenter)
-        self.spinbox.setButtonSymbols(QSpinBox.NoButtons)
+        self.spinbox.setButtonSymbols(QSpinBox.PlusMinus)
 
         self.button = QPushButton("\ueb40")
         self.button.setObjectName("seed")

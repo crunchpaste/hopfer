@@ -93,6 +93,67 @@ QSpinBox {
   border-radius: 2px;
   selection-color: @secondary;
   selection-background-color: @accent;
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+QSpinBox::up-button {
+  background: @secondary;
+  subcontrol-origin: border;
+  subcontrol-position: right;
+  height: 31px;
+  border: 1px solid @primary;
+  border-radius: 2px;
+  width: 25px;
+  padding: 0px;
+}
+QSpinBox::up-button:hover {
+  background: @primary;
+}
+
+QSpinBox::up-arrow {
+    image: url(@res/icons/plus.svg);
+    width: 18px;
+    height: 18px;
+}
+
+QSpinBox::up-arrow:hover {
+    image: url(@res/icons/dark/plus.svg);
+    width: 18px;
+    height: 18px;
+}
+
+QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off {
+   image: url(@res/icons/disabled/plus.svg);
+}
+
+QSpinBox::down-button {
+  background: @secondary;
+  subcontrol-origin: border;
+  subcontrol-position: left;
+  height: 31px;
+  border: 1px solid @primary;
+  border-radius: 2px;
+  width: 25px;
+}
+QSpinBox::down-button:hover {
+  background: @primary;
+}
+
+QSpinBox::down-arrow {
+    image: url(@res/icons/minus.svg);
+    width: 18px;
+    height: 18px;
+}
+
+QSpinBox::down-arrow:hover {
+    image: url(@res/icons/dark/minus.svg);
+    width: 18px;
+    height: 18px;
+}
+
+QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off {
+   image: url(@res/icons/disabled/minus.svg);
 }
 
 #seed {
