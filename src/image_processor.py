@@ -42,8 +42,18 @@ def worker_e(queue, image, im_settings):
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
     """
     print("ENHANCING")
-    _brightness = im_settings["brightness"] / 100 + 1
-    _contrast = (im_settings["contrast"] / 100) + 1
+    _brightness = im_settings["brightness"] / 100
+    if _brightness > 0:
+        # using a log function makes the adjustment feel a bit more natural
+        _brightness = 5 * (np.log(1 + (.01 - 1) * _brightness) / np.log(.01))
+        print('Bright: ', _brightness)
+    _brightness += 1
+    _contrast = (im_settings["contrast"] / 100)
+    if _contrast > 0:
+        # using a log function makes the adjustment feel a bit more natural
+        _contrast = 5 * (np.log(1 + (.01 - 1) * _contrast) / np.log(.01))
+        print('Contrast: ', _contrast)
+    _contrast += 1
     _blur = im_settings["blur"] / 10
     _sharpness = im_settings["sharpness"]
 
@@ -56,10 +66,13 @@ def worker_e(queue, image, im_settings):
 
        # if PIL manupulation is needed, convert to a PIL image once
        pil_needed = True
+
        _image = (image * 255).astype(np.uint8)
        pil_image = Image.fromarray(_image)
 
     if _brightness != 1.0:
+        # if PIL manupulation is needed, convert to a PIL image once
+        pil_needed = True
         enhancer = ImageEnhance.Brightness(pil_image)
         pil_image = enhancer.enhance(_brightness)
     if _contrast != 1.0:
@@ -75,7 +88,7 @@ def worker_e(queue, image, im_settings):
             _image = image
         image = sharpen(_image, _sharpness)
 
-    if not converted:
+    if not converted and pil_needed:
         # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
         image = np.array(pil_image) / 255
 
@@ -270,6 +283,8 @@ class ImageProcessor(QObject):
         self.settings = {}
 
         self.image_settings = {
+        "brightness": 0.0,
+        "contrast": 0.0,
         "sharpness": 0.0,
         "blur": 0.0
         }

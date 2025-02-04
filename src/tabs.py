@@ -154,10 +154,6 @@ class ImageTab(QWidget):
         self.layout.addWidget(self.contrast)
         self.layout.addWidget(self.blur)
         self.layout.addWidget(self.sharpness)
-        # label = QLabel("\ue9fe")
-        # label.setFont("MaterialIcons")
-        # # label.setFontSize(32)
-        # self.layout.addWidget(label)
 
         # Add stretch to the layout
         self.layout.addStretch()
@@ -188,9 +184,9 @@ class ImageTab(QWidget):
                 return
         storage = self.processor.storage
         settings = {
-            "brightness" : self.brightness.slider.value(),
-            "contrast" : self.contrast.slider.value(),
-            "blur" : self.blur.slider.value(),
+            "brightness": self.brightness.slider.value(),
+            "contrast": self.contrast.slider.value(),
+            "blur": self.blur.slider.value(),
             "sharpness": self.sharpness.slider.value()
         }
         self.processor.image_settings = settings
