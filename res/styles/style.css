@@ -82,7 +82,35 @@ QComboBox QAbstractItemView::item:selected {
   padding: 5px;
   background: @primary;
   color: @secondary;
+
 }
+
+QSpinBox {
+  color: @primary;
+  background: @secondary;
+  height: 30px;
+  border: 1px solid @primary;
+  border-radius: 2px;
+  selection-color: @secondary;
+  selection-background-color: @accent;
+}
+
+#seed {
+  font-size: 17px;
+  color: @secondary;
+  background: @primary;
+  padding: 0px;
+  width: 30px;
+  max-width: 30px;
+  height: 29px;
+}
+
+#seed:hover {
+  color: @primary;
+  background: @secondary;
+
+}
+
 QTabWidget {
     background-color: @secondary;
     border: 1px solid @primary;

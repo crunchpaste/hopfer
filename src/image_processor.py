@@ -11,7 +11,7 @@ try:
 except ImportError:
     from algorithms.threshold import threshold, sauvola_threshold, phansalkar_threshold
 
-from algorithms.threshold import phansalkar_threshold
+from algorithms.mezzo import mezzo
 
 try:
     from algorithms.error_diffusionc import error_diffusion
@@ -141,6 +141,9 @@ def apply_algorithm(image, algorithm, settings):
 
     elif algorithm == "Phansalkar threshold":
         processed_image = phansalkar_threshold(image, settings)
+
+    elif algorithm == "Mezzo":
+        processed_image = mezzo(image, settings)
 
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0],

@@ -1,7 +1,10 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout
+from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QSpinBox, QPushButton
 from PySide6.QtCore import Signal
+import numpy as np
 from controls.slider_control import SliderControl
 from controls.toggle import ToggleWithLabel
+from controls.seed_spinbox import SeedSpinBox
+from res_loader import get_path
 
 class HalftoneSettings(QWidget):
     settingsChanged = Signal(dict)
@@ -135,6 +138,21 @@ class PhansalkarSettings(HalftoneSettings):
                 "q_factor": self.q_factor.slider.value(),
             }
             self.settingsChanged.emit(settings)
+
+class MezzoSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+        self.spin = SeedSpinBox("Random number seed")
+        self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
+
+        self.layout.addWidget(self.spin)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when the threshold value changes."""
+        self.settingsChanged.emit({
+            "seed": self.spin.spinbox.value()
+        })
 
 class ErrorDiffusionSettings(HalftoneSettings):
     def __init__(self):
