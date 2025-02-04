@@ -90,13 +90,13 @@ QTabWidget {
 }
 
 #toolbox {
-    max-width: 46px;  /* Set the maximum width */
-    width: 46px;      /* Optional, ensures the width stays fixed */
+    max-width: 54px;  /* Set the maximum width */
+    width: 54px;      /* Optional, ensures the width stays fixed */
 }
 
 #toolbox QHBoxLayout {
-    max-width: 46px;  /* Set the maximum width */
-    width: 46px;      /* Optional, ensures the width stays fixed */
+    max-width: 54px;  /* Set the maximum width */
+    width: 54px;      /* Optional, ensures the width stays fixed */
 }
 
 #toolbox QHBoxLayout {
@@ -105,7 +105,10 @@ QTabWidget {
 }
 
 #toolbox QPushButton {
-  qproperty-iconSize: 18px;
+  font-family: "Material Symbols Rounded Filled";
+  font-size: 20px;
+  width: 22px;
+  height: 22px;
   color: @primary;
   background-color: @secondary;
   border: 2px solid @primary;
@@ -119,14 +122,17 @@ QTabWidget {
 }
 
 #toolbox QPushButton:hover {
+    color: @secondary;
     background-color: @primary;
 }
 
 #toolbox QPushButton:focus {
+  color: @accent;
   border: 2px solid @accent;
 }
 
 #toolbox QPushButton:disabled {
+  color: @disabled;
   border: 2px solid @disabled;
 }
 
@@ -251,12 +257,18 @@ QGraphicsView focus{
 }
 
 #viewer-controls QPushButton {
+  font-family: "Material Symbols Rounded Filled";
+  font-size: 20px;
+  width: 22px;
+  height: 22px;
+  color: @primary;
   background-color: @secondary;
   border: 2px solid @primary;
   margin-left: 5px;
 }
 
 #viewer-controls QPushButton:hover {
+  color: @secondary;
   background-color: @primary;
 }
 

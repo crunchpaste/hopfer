@@ -29,33 +29,21 @@ class Toolbox(QWidget):
 
         # Create the buttons
         self.open = self._create_button(
-            icon_path + f"/open.{_ext}",
-            icon_path + f"/dark/open.{_ext}",
-            icon_path + f"/salmon/open.{_ext}",
-            icon_path + f"/disabled/open.{_ext}",
+            "e43e",
             "Open image", self.open_file_dialog)
 
         self.save = self._create_button(
-            icon_path + f"/save.{_ext}",
-            icon_path + f"/dark/save.{_ext}",
-            icon_path + f"/salmon/save.{_ext}",
-            icon_path + f"/disabled/save.{_ext}",
+            "e161",
             "Save image", self.storage.save_image)
         self.save.setEnabled(False) # Initial state is disabled
 
         self.saveas = self._create_button(
-            icon_path + f"/save_as.{_ext}",
-            icon_path + f"/dark/save_as.{_ext}",
-            icon_path + f"/salmon/save_as.{_ext}",
-            icon_path + f"/disabled/save_as.{_ext}",
+            "eb60",
             "Save as", self.save_file_dialog)
         self.saveas.setEnabled(False) # Initial state is disabled
 
         self.preferences = self._create_button(
-            icon_path + f"/settings.{_ext}",
-            icon_path + f"/dark/settings.{_ext}",
-            icon_path + f"/salmon/settings.{_ext}",
-            icon_path + f"/disabled/settings.{_ext}",
+            "e8b8",
             "Preferences", None)
         self.preferences.setObjectName("last-button")
         # Add buttons to layout
@@ -65,7 +53,7 @@ class Toolbox(QWidget):
         toolbox_layout.addStretch()
         toolbox_layout.addWidget(self.preferences)
 
-    def _create_button(self, icon_default, icon_hover, icon_focus, icon_disabled, tooltip, click_handler):
+    def _create_button(self, unicode, tooltip, click_handler):
         """
         Creates a button with the specified icons, tooltip, and click handler.
 
@@ -79,14 +67,8 @@ class Toolbox(QWidget):
         Returns:
             QPushButton: The configured QPushButton.
         """
-        button = QPushButton("")
-        button.setIcon(QIcon(icon_default))
-        button.setIconSize(QSize(30, 30))  # Icon size
-        button.setStyleSheet(
-            f'QPushButton:hover {{ icon: url({icon_hover}); }}'
-            f'QPushButton:focus {{ icon: url({icon_focus}); }}'
-            f'QPushButton:disabled {{ icon: url({icon_disabled}); }}'
-        )
+        icon_unicode = chr(int(unicode, 16))
+        button = QPushButton(icon_unicode)
         button.setToolTip(tooltip)
 
         if click_handler:

@@ -17,34 +17,22 @@ class ViewerControls(QWidget):
         _ext = "svg"
 
         self.fit = self._create_button(
-            icon_path + f"/fit.{_ext}",
-            icon_path + f"/dark/fit.{_ext}",
-            icon_path + f"/salmon/fit.{_ext}",
-            icon_path + f"/disabled/fit.{_ext}",
+            "e3dc",
             "Fit to viewer")
         self.fit.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.x1 = self._create_button(
-            icon_path + f"/1x.{_ext}",
-            icon_path + f"/dark/1x.{_ext}",
-            icon_path + f"/salmon/1x.{_ext}",
-            icon_path + f"/disabled/1x.{_ext}",
+            "efcd",
             "Original size")
         self.x1.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.x2 = self._create_button(
-            icon_path + f"/2x.{_ext}",
-            icon_path + f"/dark/2x.{_ext}",
-            icon_path + f"/salmon/2x.{_ext}",
-            icon_path + f"/disabled/2x.{_ext}",
+            "f4eb",
             "Double size")
         self.x2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         self.blur = self._create_button(
-            icon_path + f"/blur.{_ext}",
-            icon_path + f"/dark/blur.{_ext}",
-            icon_path + f"/salmon/blur.{_ext}",
-            icon_path + f"/disabled/blur.{_ext}",
+            "eb77",
             "Blur preview")
         self.blur.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
@@ -57,7 +45,7 @@ class ViewerControls(QWidget):
         # Set the layout for the widget
         self.setLayout(layout)
 
-    def _create_button(self, icon_default, icon_hover, icon_focus, icon_disabled, tooltip, click_handler=None):
+    def _create_button(self, unicode, tooltip, click_handler=None):
         """
         Creates a button with the specified icons, tooltip, and click handler.
 
@@ -71,14 +59,15 @@ class ViewerControls(QWidget):
         Returns:
             QPushButton: The configured QPushButton.
         """
-        button = QPushButton("")
-        button.setIcon(QIcon(icon_default))
-        button.setIconSize(QSize(20, 20))  # Icon size
-        button.setStyleSheet(
-            f'QPushButton:hover {{ icon: url({icon_hover}); }}'
-            f'QPushButton:focus {{ icon: url({icon_focus}); }}'
-            f'QPushButton:disabled {{ icon: url({icon_disabled}); }}'
-        )
+        icon_unicode = chr(int(unicode, 16))
+        button = QPushButton(icon_unicode)
+        # button.setIcon(QIcon(icon_default))
+        # button.setIconSize(QSize(20, 20))  # Icon size
+        # button.setStyleSheet(
+        #     f'QPushButton:hover {{ icon: url({icon_hover}); }}'
+        #     f'QPushButton:focus {{ icon: url({icon_focus}); }}'
+        #     f'QPushButton:disabled {{ icon: url({icon_disabled}); }}'
+        # )
         button.setToolTip(tooltip)
 
         if click_handler:

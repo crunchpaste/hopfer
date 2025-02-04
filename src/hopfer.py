@@ -19,18 +19,17 @@ def setup_linux_icon():
     icon_path = get_path("res/hopfer.png")
     return create_desktop_file(binary_path, icon_path)
 
-def load_font(app):
+def load_font(path):
     """
     Load a custom font for the application and set it as the default font.
     """
-    font_path = get_path("res/fonts/JetBrainsMono.ttf")
+    font_path = get_path(path)
     font_id = QFontDatabase.addApplicationFont(font_path)
     if font_id == -1:
         print("Failed to load font!")
     else:
-        font_family = QFontDatabase.applicationFontFamilies(font_id)[0]
-        app.setFont(QFont(font_family, 14))
-
+        font_families = QFontDatabase.applicationFontFamilies(font_id)
+        print("Loaded Font Family:", font_families[0])  # The actual font name
 import subprocess
 
 def get_latest_hash():
@@ -63,7 +62,8 @@ def main():
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(get_path("res/hopfer.png")))
 
-    load_font(app)
+    load_font("res/fonts/JetBrainsMono.ttf")
+    load_font("res/fonts/mat_s/MaterialSymbols.ttf")
     # In ths case a .css file is used insread of .qss as it easier to highlight in an editor.
     load_qss(app, get_path("res/styles/style.css"))
 
