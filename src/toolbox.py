@@ -58,10 +58,7 @@ class Toolbox(QWidget):
         Creates a button with the specified icons, tooltip, and click handler.
 
         Args:
-            icon_default (str): Path to the default icon.
-            icon_hover (str): Path to the icon on hover.
-            icon_focus (str): Path to the icon on focus.
-            tooltip (str): Tooltip text for the button.
+            unicode (str): The unicode provided by google fonts
             click_handler (function or None): Function to connect to the button click event.
 
         Returns:

@@ -50,9 +50,7 @@ class ViewerControls(QWidget):
         Creates a button with the specified icons, tooltip, and click handler.
 
         Args:
-            icon_default (str): Path to the default icon.
-            icon_hover (str): Path to the icon on hover.
-            icon_focus (str): Path to the icon on focus.
+            unicode (str): The unicode provided by google fonts
             tooltip (str): Tooltip text for the button.
             click_handler (function or None): Function to connect to the button click event.
 
@@ -61,13 +59,6 @@ class ViewerControls(QWidget):
         """
         icon_unicode = chr(int(unicode, 16))
         button = QPushButton(icon_unicode)
-        # button.setIcon(QIcon(icon_default))
-        # button.setIconSize(QSize(20, 20))  # Icon size
-        # button.setStyleSheet(
-        #     f'QPushButton:hover {{ icon: url({icon_hover}); }}'
-        #     f'QPushButton:focus {{ icon: url({icon_focus}); }}'
-        #     f'QPushButton:disabled {{ icon: url({icon_disabled}); }}'
-        # )
         button.setToolTip(tooltip)
 
         if click_handler:

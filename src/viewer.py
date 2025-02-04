@@ -71,16 +71,16 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         if self._blur.isEnabled():
             self.controls.blur.setStyleSheet(
                 f'QPushButton {{background-color: #f0f6f0;}}'
-                f'QPushButton {{icon: url({icon_path}/dark/blur.svg);}}'
+                f'QPushButton {{color: #222323;}}'
                 f'QPushButton:hover {{background-color: #222323;}}'
-                f'QPushButton:hover {{icon: url({icon_path}/blur.svg);}}'
+                f'QPushButton:hover {{color:  #f0f6f0;}}'
             )
         else:
             self.controls.blur.setStyleSheet(
                 f'QPushButton {{background-color: #222323;}}'
-                f'QPushButton {{icon: url({icon_path}/blur.svg);}}'
+                f'QPushButton {{color:  #f0f6f0;}}'
                 f'QPushButton:hover {{background-color: #f0f6f0;}}'
-                f'QPushButton:hover {{icon: url({icon_path}/dark/blur.svg);}}'
+                f'QPushButton:hover {{color: #222323;;}}'
             )
 
 
