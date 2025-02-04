@@ -1,5 +1,6 @@
-from PySide6.QtWidgets import QSlider, QLabel, QHBoxLayout, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
+from helpers.debounce import debounce
 
 class SliderControl(QWidget):
     def __init__(self, label, range, value, div):
@@ -7,6 +8,7 @@ class SliderControl(QWidget):
 
         self.div = div
         self.is_dragging = False
+        self.default = value
 
         min_value, max_value = range[0], range[1]
 
@@ -17,6 +19,13 @@ class SliderControl(QWidget):
 
         # Labels for the slider
         self.left_label = QLabel(label)
+
+        self.reset = QPushButton("\ue5d5")
+        self.reset.setObjectName("reset")
+        self.reset.setFocusPolicy(Qt.FocusPolicy.NoFocus)
+        self.reset.clicked.connect(self.reset_to_default)
+        self.reset.setVisible(False)
+
         if self.div:
             self.right_label = QLabel(f"{self.slider.value() / self.div}")  # Initial value
         else:
@@ -30,6 +39,7 @@ class SliderControl(QWidget):
         self.slider_layout = QVBoxLayout()
         self.slider_labels = QHBoxLayout()
         self.slider_labels.addWidget(self.left_label)
+        self.slider_labels.addWidget(self.reset)
         self.slider_labels.addStretch(1)
         self.slider_labels.addWidget(self.right_label)
         self.slider_layout.addLayout(self.slider_labels)
@@ -43,6 +53,20 @@ class SliderControl(QWidget):
             self.right_label.setText(f"{value / self.div}")
         else:
             self.right_label.setText(f"{value}")
+
+        self.show_reset(value)
+
+    @debounce(0.5)
+    def show_reset(self, value):
+        if value != self.default:
+            self.reset.setVisible(True)
+        else:
+            self.reset.setVisible(False)
+
+
+
+    def reset_to_default(self):
+        self.slider.setValue(self.default)
 
     def on_slider_pressed(self):
         """Called when the slider starts being dragged."""

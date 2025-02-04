@@ -282,6 +282,22 @@ QGraphicsView focus{
   border: 2px solid @primary;
   padding: 5px;
 }
+
+#reset {
+  font-family: "Material Symbols Rounded Filled";
+  color: @primary;
+  background-color: @secondary;
+  margin: 0px;
+  padding: 0px;
+  border: 0px solid transparent;
+  margin-bottom: -1px;
+}
+#reset:hover {
+  font-family: "Material Symbols Rounded Filled";
+  color: @accent;
+  background-color: @secondary;
+}
+
 p{
   line-height: 10pt;
 }
