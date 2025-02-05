@@ -55,6 +55,8 @@ class HalftoneTab(QWidget):
             return MezzoSettings()
         elif algorithm_name == "Mezzotint Gauss":
             return GaussSettings()
+        elif algorithm_name == "Mezzotint beta":
+            return BetaSettings()
         elif algorithm_name in [
             "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki",
             "Stucki Small", "Stucki Large", "Atkinson", "Burkes", "Sierra",

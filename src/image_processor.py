@@ -151,6 +151,9 @@ def apply_algorithm(image, algorithm, settings):
     elif algorithm == "Mezzotint Gauss":
         processed_image = mezzo(image, settings, mode="gauss")
 
+    elif algorithm == "Mezzotint beta":
+        processed_image = mezzo(image, settings, mode="beta")
+
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0],
                            [0, 0, 7],
@@ -181,7 +184,7 @@ def apply_algorithm(image, algorithm, settings):
                            [1, 2, 4, 2, 1]], dtype=float) / 42.0
         processed_image = error_diffusion(image, kernel, settings)
 
-    elif algorithm == "Stucki Small":
+    elif algorithm == "Stucki small":
         kernel = np.array([[0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0],
                            [0, 0, 0, 8, 2],
@@ -189,7 +192,7 @@ def apply_algorithm(image, algorithm, settings):
                            [0, 0, 2, 0, 0]], dtype=float) / 24.0
         processed_image = error_diffusion(image, kernel, settings)
 
-    elif algorithm == "Stucki Large":
+    elif algorithm == "Stucki large":
         kernel = np.array([[0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0],
                            [0, 0, 0, 0, 0, 0, 0],

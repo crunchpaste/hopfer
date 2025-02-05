@@ -37,7 +37,7 @@ class HalftoneCombo(QWidget):
         """
         combobox = QComboBox()
         algorithms = [
-            "None", "Threshold", "Sauvola threshold", "Phansalkar threshold", "Mezzotint", "Mezzotint Gauss", "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki", "Stucki Small", "Stucki Large", "Atkinson", "Burkes", "Sierra", "Sierra2", "Sierra2 4A", "Nakano"
+            "None", "Threshold", "Sauvola threshold", "Phansalkar threshold", "Mezzotint", "Mezzotint Gauss", "Mezzotint beta", "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki", "Stucki small", "Stucki large", "Atkinson", "Burkes", "Sierra", "Sierra2", "Sierra2 4A", "Nakano"
         ]
         combobox.addItems(algorithms)
         combobox.setView(QListView())  # Ensure dropdown uses a list view for better presentation

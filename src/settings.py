@@ -182,6 +182,45 @@ class GaussSettings(HalftoneSettings):
                 "std": self.std.slider.value()
             })
 
+class BetaSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+        self.spin = SeedSpinBox("Random number seed")
+        self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
+
+        self.lock_toggle = ToggleWithLabel(label="Lock alpha/beta")
+
+        self.alpha = SliderControl("Alpha", (1, 100), 5, 10)
+        self.alpha.slider.valueChanged.connect(self.emit_settings_changed)
+        self.alpha.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        self.beta = SliderControl("Beta", (1,100), 5, 10)
+        self.beta.slider.valueChanged.connect(self.emit_settings_changed)
+        self.beta.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        self.layout.addWidget(self.lock_toggle)
+        self.layout.addWidget(self.alpha)
+        self.layout.addWidget(self.beta)
+        self.layout.addWidget(self.spin)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when the threshold value changes."""
+        sender = self.sender()
+        if self.lock_toggle.is_toggle_checked():
+            if sender == self.alpha.slider:
+                self.beta.slider.setValue(self.alpha.slider.value())
+            elif sender == self.beta.slider:
+                self.alpha.slider.setValue(self.beta.slider.value())
+
+        if not self.alpha.is_dragging and \
+           not self.beta.is_dragging:
+            self.settingsChanged.emit({
+                "seed": self.spin.spinbox.value(),
+                "alpha": self.alpha.slider.value(),
+                "beta": self.beta.slider.value()
+            })
+
 class ErrorDiffusionSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()

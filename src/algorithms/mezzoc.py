@@ -11,9 +11,11 @@ def mezzo(img, settings, mode="uniform"):
     elif mode == "gauss":
         loc = settings["location"] / 100
         std = settings["std"] / 200
-        print(loc)
-        print(std)
         noise = rng.normal(loc, std, (h, w))
+    elif mode == "beta":
+        alpha = settings["alpha"] / 10
+        beta = settings["beta"] / 10
+        noise = rng.beta(alpha, beta, (h, w))
 
     img = compare(img, noise, h, w)
     return img
