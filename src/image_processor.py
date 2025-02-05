@@ -136,7 +136,7 @@ def apply_algorithm(image, algorithm, settings):
     print(f"Applying {algorithm} to the image with settings: {settings}")
 
     # Apply the chosen halftoning algorithm using the respective kernel
-    if algorithm == "Threshold":
+    if algorithm == "Fixed threshold":
         processed_image = threshold(image, settings)
 
     elif algorithm == "Sauvola threshold":
