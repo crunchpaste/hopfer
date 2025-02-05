@@ -1,9 +1,11 @@
 import os
+import io
+import requests
 from PIL import Image, UnidentifiedImageError
 import numpy as np
-from PIL.ImageQt import ImageQt
-from PySide6.QtCore import QObject, Signal
-from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QApplication # used for clipboard management
+from PySide6.QtCore import QObject, Signal, QBuffer
+from PySide6.QtGui import QPixmap, QImage
 from helpers.image_conversion import numpy_to_pixmap
 
 try:
@@ -33,6 +35,7 @@ class ImageStorage(QObject):
         :param main_window: The main window of the application, used for showing notifications.
         """
         super().__init__()
+        self.app = QApplication.instance()
         self.main_window = main_window
         self.image_path = None
         self.save_path = None
@@ -45,6 +48,17 @@ class ImageStorage(QObject):
         self.edited_image = None
         self.processed_image = None
         self.save_path_edited = False  # Track if the save path has been altered
+
+    def _load(self, image):
+        # the final procedure of loading an image. expecs a pillow image.
+
+        self.original_image, self.alpha = self.extract_alpha(image)
+        self.grayscale_signal.emit(self.original_grayscale)
+        if self.original_grayscale:
+            self.grayscale_image = self.original_image
+        self.main_window.processor.reset = True
+        self.main_window.processor.start()
+        self.main_window.sidebar.toolbox.enable_save()
 
     def load_image(self, image_path):
         """
@@ -60,17 +74,47 @@ class ImageStorage(QObject):
             self.save_path = save_path
 
             pil_image = Image.open(image_path)
-            self.original_image, self.alpha = self.extract_alpha(pil_image)
-            self.grayscale_signal.emit(self.original_grayscale)
-            if self.original_grayscale:
-                self.grayscale_image = self.original_image
-            self.main_window.processor.reset = True
-            self.main_window.processor.start()
-            self.main_window.sidebar.toolbox.enable_save()
+
+            self._load(pil_image)
+
         except (FileNotFoundError, UnidentifiedImageError) as e:
             self.show_notification(f"Error: Unable to open image.\n{str(e)}", duration=10000)
         except Exception as e:
             self.show_notification(f"An unexpected error occurred: {str(e)}", duration=10000)
+
+    def load_from_clipboard(self):
+
+        clipboard = self.app.clipboard()
+        _image = clipboard.image()
+        _url = clipboard.text()
+
+        if not _image.isNull():
+            # if there is any image data convert it to a pil image.
+            # solution is mostly copied from: https://stackoverflow.com/questions/47289884/how-to-convert-qimageqpixmap-to-pil-image-in-python-3
+            # seems to work perfectly well
+            buffer = QBuffer()
+            buffer.open(QBuffer.ReadWrite)
+            _image.save(buffer, "PNG")
+            pil_image = Image.open(io.BytesIO(buffer.data()))
+            self._load(pil_image)
+
+        elif _url != "":
+            try:
+                response = requests.get(_url)
+                if response.status_code == 200:
+                    image_data = io.BytesIO(response.content)
+                    pil_image = Image.open(image_data)
+                    self._load(pil_image)
+                else:
+                    self.show_notification(f"Failed to retrieve image. Status code: {response.status_code}", duration=10000)
+                    return None
+            except:
+                # if this fails it is captured by the load_image method
+                self.load_image(_url)
+        else:
+            self.show_notification(f"Error: No image data in clipboard.", duration=10000)
+
+
 
     def extract_alpha(self, image):
         if image.mode == "LA":

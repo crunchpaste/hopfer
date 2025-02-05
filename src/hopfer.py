@@ -55,6 +55,7 @@ def main():
 
     if not hasattr(get_latest_hash(), '__compiled__'):
         # only get the hash if this is not a nuitka compiled binary
+        print("not_compiled")
         get_latest_hash()
 
     # Setup Linux environment if applicable
