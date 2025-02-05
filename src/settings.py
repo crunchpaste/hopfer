@@ -47,6 +47,35 @@ class ThresholdSettings(HalftoneSettings):
             }
             self.settingsChanged.emit(settings)
 
+class NiblackSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+
+        # The slider that controls the k range of the local threshold
+        self.block_size = SliderControl("Block size", (2, 500), 25, False)
+        self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
+        self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # The slider that controls the k range of the local threshold
+        self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
+        self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
+        self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # Add it to the layout
+        self.layout.addWidget(self.block_size)
+        self.layout.addWidget(self.k_factor)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when the threshold value changes."""
+        if not self.block_size.is_dragging and \
+           not self.k_factor.is_dragging:
+            settings = {
+                "block_size": self.block_size.slider.value(),
+                "k_factor": self.k_factor.slider.value(),
+            }
+            self.settingsChanged.emit(settings)
+
 class SauvolaSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()

@@ -47,6 +47,8 @@ class HalftoneTab(QWidget):
         """
         if algorithm_name == "Fixed threshold":
             return ThresholdSettings()
+        elif algorithm_name == "Niblack threshold":
+            return NiblackSettings()
         elif algorithm_name == "Sauvola threshold":
             return SauvolaSettings()
         elif algorithm_name == "Phansalkar threshold":

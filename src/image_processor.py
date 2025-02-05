@@ -7,9 +7,9 @@ from PIL import Image, ImageFilter, ImageEnhance
 from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
 from helpers.debounce import debounce
 try:
-    from algorithms.thresholdc import threshold, sauvola_threshold, phansalkar_threshold
+    from algorithms.thresholdc import threshold, niblack_threshold, sauvola_threshold, phansalkar_threshold
 except ImportError:
-    from algorithms.threshold import threshold, sauvola_threshold, phansalkar_threshold
+    from algorithms.threshold import threshold, niblack_threshold, sauvola_threshold, phansalkar_threshold
 
 try:
     from algorithms.mezzoc import mezzo
@@ -138,6 +138,9 @@ def apply_algorithm(image, algorithm, settings):
     # Apply the chosen halftoning algorithm using the respective kernel
     if algorithm == "Fixed threshold":
         processed_image = threshold(image, settings)
+
+    elif algorithm == "Niblack threshold":
+        processed_image = niblack_threshold(image, settings)
 
     elif algorithm == "Sauvola threshold":
         processed_image = sauvola_threshold(image, settings)
