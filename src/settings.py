@@ -205,7 +205,6 @@ class BetaSettings(HalftoneSettings):
         self.layout.addStretch()
 
     def emit_settings_changed(self):
-        """Emit the current settings when the threshold value changes."""
         sender = self.sender()
         if self.lock_toggle.is_toggle_checked():
             if sender == self.alpha.slider:
