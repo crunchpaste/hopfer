@@ -62,11 +62,13 @@ class HalftoneCombo(QWidget):
         combobox = QComboBox()
         combobox.setView(QListView())  # Enable custom delegate support
         combobox.setItemDelegate(StyledSeparatorDelegate(combobox))
+        combobox.setMaxVisibleItems(25)
         algorithms = [
             "None", "Fixed threshold", "Niblack threshold", "Sauvola threshold", "Phansalkar threshold", "Mezzotint uniform", "Mezzotint normal", "Mezzotint beta", "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki", "Stucki small", "Stucki large", "Atkinson", "Burkes", "Sierra", "Sierra2", "Sierra2 4A", "Nakano"
         ]
         combobox.addItems(algorithms)
 
+        # Probably the separators could be done in a for loop
         # separator after None
         combobox.insertItem(1, "")
         combobox.setItemData(1, "separator", Qt.UserRole)

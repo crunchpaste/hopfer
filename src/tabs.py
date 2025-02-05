@@ -61,7 +61,7 @@ class HalftoneTab(QWidget):
             return BetaSettings()
         elif algorithm_name in [
             "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki",
-            "Stucki Small", "Stucki Large", "Atkinson", "Burkes", "Sierra",
+            "Stucki small", "Stucki large", "Atkinson", "Burkes", "Sierra",
             "Sierra2", "Sierra2 4A", "Nakano"
         ]:
             return ErrorDiffusionSettings()

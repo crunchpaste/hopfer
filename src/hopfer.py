@@ -9,6 +9,7 @@ from PySide6.QtCore import Qt, QCoreApplication
 from main_window import MainWindow
 from shortcuts import Shortcuts
 from helpers.load_stylesheet import load_qss
+from helpers.no_outline import NoFocusProxyStyle
 from res_loader import get_path, create_desktop_file
 
 def setup_linux_icon():
@@ -65,6 +66,8 @@ def main():
     load_font("res/fonts/JetBrainsMono.ttf")
     load_font("res/fonts/mat_s/MaterialSymbols.ttf")
     # In ths case a .css file is used insread of .qss as it easier to highlight in an editor.
+    # app.setStyle("Windows") # leads to minor differences
+    app.setStyle(NoFocusProxyStyle())
     load_qss(app, get_path("res/styles/style.css"))
 
     window = MainWindow()

@@ -67,7 +67,6 @@ QComboBox QAbstractItemView {
     border: 1px solid @primary;
     border-radius: 2px;
     padding: 5px;
-    outline: 0;
 }
 QComboBox QAbstractItemView::item {
   padding: 5px;
@@ -102,8 +101,8 @@ QSpinBox {
   height: 30px;
   border: 1px solid @primary;
   border-radius: 2px;
-  selection-color: @secondary;
-  selection-background-color: @accent;
+  selection-color: @accent;
+  selection-background-color: @secondary;
   padding-right: 15px;
   padding-left: 15px;
 }
@@ -332,6 +331,13 @@ QSlider::handle:horizontal {
     margin: -6px 0;
     border-radius: 0px;
 }
+
+QScrollBar {
+    height:0px;
+    width: 0px;
+    margin: 0px;
+}
+
 #toggleSlider {
     /* margin: 5px 10px; */
     max-width: 25px;
@@ -349,7 +355,7 @@ QSlider::handle:horizontal {
 
 QGraphicsView {
   margin: 10px;
-  min-width: 225px;
+  min-width: 250px;
   background: url('@res/background.@ext') no-repeat center center;
 }
 QGraphicsView focus{
