@@ -165,16 +165,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         viewer_width = self.width()
         viewer_height = self.height()
 
-        # Get the dimensions of the controls widget
         controls_width = 300#self.controls.width()
         controls_height = 64 #self.controls.height()
 
         label_width = self.label.width()
         label_height = self.label.height()
 
-        # Position the controls widget in the top-right corner
-        x = viewer_width - controls_width - 5 # 10px padding from the right
-        y = viewer_height - controls_height # 10px padding from the top
+        # Position the controls widget in the bottom right corner
+        x = viewer_width - controls_width -1 # Don't really know how the padding works, it's kinda weird
+        y = viewer_height - controls_height + 4 # Vertically yoo
         self.controls.setGeometry(x, y, controls_width, controls_height)
 
         x = viewer_width // 2 - label_width  // 2

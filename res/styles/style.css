@@ -82,8 +82,19 @@ QComboBox QAbstractItemView::item:selected {
   padding: 5px;
   background: @primary;
   color: @secondary;
-
 }
+
+QSplitter::handle {
+    image: url("@res/icons/handle.svg");
+    height: 6px;
+}
+QSplitter::handle:hover {
+    image: url("@res/icons/handle_hover.svg");
+}
+/*
+QSplitter::handle:vertical {
+    min-width: 12px;
+} */
 
 QSpinBox {
   color: @primary;
