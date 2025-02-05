@@ -189,6 +189,7 @@ class BetaSettings(HalftoneSettings):
         self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
 
         self.lock_toggle = ToggleWithLabel(label="Lock alpha/beta")
+        self.lock_toggle.set_toggle_checked(True)
 
         self.alpha = SliderControl("Alpha", (1, 100), 5, 10)
         self.alpha.slider.valueChanged.connect(self.emit_settings_changed)
