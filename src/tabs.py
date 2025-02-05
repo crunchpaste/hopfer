@@ -53,9 +53,9 @@ class HalftoneTab(QWidget):
             return SauvolaSettings()
         elif algorithm_name == "Phansalkar threshold":
             return PhansalkarSettings()
-        elif algorithm_name == "Mezzotint":
+        elif algorithm_name == "Mezzotint uniform":
             return MezzoSettings()
-        elif algorithm_name == "Mezzotint Gauss":
+        elif algorithm_name == "Mezzotint normal":
             return GaussSettings()
         elif algorithm_name == "Mezzotint beta":
             return BetaSettings()

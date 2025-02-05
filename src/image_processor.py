@@ -148,10 +148,10 @@ def apply_algorithm(image, algorithm, settings):
     elif algorithm == "Phansalkar threshold":
         processed_image = phansalkar_threshold(image, settings)
 
-    elif algorithm == "Mezzotint":
+    elif algorithm == "Mezzotint uniform":
         processed_image = mezzo(image, settings, mode="uniform")
 
-    elif algorithm == "Mezzotint Gauss":
+    elif algorithm == "Mezzotint normal":
         processed_image = mezzo(image, settings, mode="gauss")
 
     elif algorithm == "Mezzotint beta":
