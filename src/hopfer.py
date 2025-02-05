@@ -52,7 +52,10 @@ def main():
     TODO: Create a splash screen.
     """
     desktop_file_path = None
-    get_latest_hash()
+
+    if not hasattr(get_latest_hash(), '__compiled__'):
+        # only get the hash if this is not a nuitka compiled binary
+        get_latest_hash()
 
     # Setup Linux environment if applicable
     if sys.platform.startswith('linux') or platform.system() == "Linux":

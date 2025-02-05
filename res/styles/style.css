@@ -108,7 +108,7 @@ QSpinBox {
 }
 
 QSpinBox::up-button {
-  background: @secondary;
+  background: transparent;
   subcontrol-origin: border;
   subcontrol-position: right;
   height: 31px;
@@ -138,7 +138,7 @@ QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off {
 }
 
 QSpinBox::down-button {
-  background: @secondary;
+  background: transparent;
   subcontrol-origin: border;
   subcontrol-position: left;
   height: 31px;
