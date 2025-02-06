@@ -42,10 +42,9 @@ def get_latest_hash():
         ).strip()
         with open(get_path("res/hash.txt"), "w") as file:
             file.write(hash)
+        print(f"{hash}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
-
-    print(f"{hash}")
 
 
 def main():
@@ -54,9 +53,8 @@ def main():
     """
     desktop_file_path = None
 
-    if not hasattr(get_latest_hash(), "__compiled__"):
+    if not hasattr(sys.modules["__main__"], "__compiled__"):
         # only get the hash if this is not a nuitka compiled binary
-        print("not_compiled")
         get_latest_hash()
 
     # Setup Linux environment if applicable
