@@ -1,6 +1,6 @@
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtWidgets import QWidget, QLabel, QVBoxLayout, QApplication
-import sys
+from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
+
 
 class ProcessingIndicator(QWidget):
     def __init__(self, parent=None):
@@ -23,5 +23,5 @@ class ProcessingIndicator(QWidget):
     def update_label(self):
         # Animate the dots
         self.dot_count = (self.dot_count + 1) % 4
-        dots = '.' * self.dot_count
+        dots = "." * self.dot_count
         self.label.setText(f"Processing{dots}")

@@ -1,30 +1,40 @@
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget, QComboBox, QStyledItemDelegate, QListView
-from PySide6.QtGui import QPainter, QColor
-from PySide6.QtCore import Qt, QSize, Signal, QPoint
-from res_loader import get_path
+from PySide6.QtCore import QPoint, QSize, Qt, Signal
+from PySide6.QtGui import QColor
+from PySide6.QtWidgets import (
+    QComboBox,
+    QLabel,
+    QListView,
+    QStyledItemDelegate,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 class StyledSeparatorDelegate(QStyledItemDelegate):
     def paint(self, painter, option, index):
-        """ Paint method to style separators. """
-        text = index.data(Qt.DisplayRole)
-
+        """Paint method to style separators."""
         if index.data(Qt.UserRole) == "separator":  # Check if separator
             painter.save()
             pen = painter.pen()
             pen.setColor(QColor("#282929"))
             pen.setWidth(3)
             painter.setPen(pen)
-            painter.drawLine(option.rect.left() + 3, option.rect.center().y(),
-                             option.rect.right() - 3, option.rect.center().y())
+            painter.drawLine(
+                option.rect.left() + 3,
+                option.rect.center().y(),
+                option.rect.right() - 3,
+                option.rect.center().y(),
+            )
             painter.restore()
         else:
             super().paint(painter, option, index)
 
     def sizeHint(self, option, index):
-        """ Size method to make separators shorter. """
+        """Size method to make separators shorter."""
         if index.data(Qt.UserRole) == "separator":
             return QSize(option.rect.width(), 10)  # Set separator height to 8px
         return super().sizeHint(option, index)  # Default height for other items
+
 
 class HalftoneCombo(QWidget):
     algorithmChanged = Signal(str)  # Signal emitted when the algorithm changes
@@ -64,7 +74,26 @@ class HalftoneCombo(QWidget):
         combobox.setItemDelegate(StyledSeparatorDelegate(combobox))
         combobox.setMaxVisibleItems(25)
         algorithms = [
-            "None", "Fixed threshold", "Niblack threshold", "Sauvola threshold", "Phansalkar threshold", "Mezzotint uniform", "Mezzotint normal", "Mezzotint beta", "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki", "Stucki small", "Stucki large", "Atkinson", "Burkes", "Sierra", "Sierra2", "Sierra2 4A", "Nakano"
+            "None",
+            "Fixed threshold",
+            "Niblack threshold",
+            "Sauvola threshold",
+            "Phansalkar threshold",
+            "Mezzotint uniform",
+            "Mezzotint normal",
+            "Mezzotint beta",
+            "Floyd-Steinberg",
+            "False Floyd-Steinberg",
+            "Jarvis",
+            "Stucki",
+            "Stucki small",
+            "Stucki large",
+            "Atkinson",
+            "Burkes",
+            "Sierra",
+            "Sierra2",
+            "Sierra2 4A",
+            "Nakano",
         ]
         combobox.addItems(algorithms)
 

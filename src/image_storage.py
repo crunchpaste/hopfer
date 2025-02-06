@@ -1,17 +1,20 @@
-import os
 import io
+import os
+
+import numpy as np
 import requests
 from PIL import Image, UnidentifiedImageError
-import numpy as np
-from PySide6.QtWidgets import QApplication # used for clipboard management
-from PySide6.QtCore import QObject, Signal, QBuffer
-from PySide6.QtGui import QPixmap, QImage
+from PySide6.QtCore import QBuffer, QObject, Signal
+from PySide6.QtGui import QPixmap
+from PySide6.QtWidgets import QApplication  # used for clipboard management
+
 from helpers.image_conversion import numpy_to_pixmap
 
 try:
     from algorithms.static import style_image
 except ImportError:
     from algorithms.style_preview import style_image
+
 
 class ImageStorage(QObject):
     """
@@ -69,7 +72,7 @@ class ImageStorage(QObject):
         try:
             self.image_path = image_path
 
-            path_without_ext = image_path.rsplit('.', 1)[0]
+            path_without_ext = image_path.rsplit(".", 1)[0]
             save_path = path_without_ext + ".png"
             self.save_path = save_path
 
@@ -78,12 +81,15 @@ class ImageStorage(QObject):
             self._load(pil_image)
 
         except (FileNotFoundError, UnidentifiedImageError) as e:
-            self.show_notification(f"Error: Unable to open image.\n{str(e)}", duration=10000)
+            self.show_notification(
+                f"Error: Unable to open image.\n{e!s}", duration=10000
+            )
         except Exception as e:
-            self.show_notification(f"An unexpected error occurred: {str(e)}", duration=10000)
+            self.show_notification(
+                f"An unexpected error occurred: {e!s}", duration=10000
+            )
 
     def load_from_clipboard(self):
-
         clipboard = self.app.clipboard()
         _image = clipboard.image()
         _url = clipboard.text()
@@ -106,21 +112,23 @@ class ImageStorage(QObject):
                     pil_image = Image.open(image_data)
                     self._load(pil_image)
                 else:
-                    self.show_notification(f"Failed to retrieve image. Status code: {response.status_code}", duration=10000)
+                    self.show_notification(
+                        f"Failed to retrieve image. Status code: {response.status_code}",
+                        duration=10000,
+                    )
                     return None
-            except:
+            except Exception as e:
                 # if this fails it is captured by the load_image method
+                print(e)
                 self.load_image(_url)
         else:
-            self.show_notification(f"Error: No image data in clipboard.", duration=10000)
-
-
+            self.show_notification("Error: No image data in clipboard.", duration=10000)
 
     def extract_alpha(self, image):
         if image.mode == "LA":
             np_image = np.array(image) / self.NORMALIZED_MAX
-            L = np_image[:,:,0]
-            A = np_image[:,:,1]
+            L = np_image[:, :, 0]
+            A = np_image[:, :, 1]
             self.original_grayscale = True
             return L, A
         elif image.mode == "L":
@@ -131,8 +139,8 @@ class ImageStorage(QObject):
             return L, A
         elif image.mode == "RGBA":
             np_image = np.array(image) / self.NORMALIZED_MAX
-            RGB = np_image[:,:,:3]
-            A = np_image[:,:,3]
+            RGB = np_image[:, :, :3]
+            A = np_image[:, :, 3]
             RGB, is_gray = self.check_grayscale(RGB)
             self.original_grayscale = is_gray
             return RGB, A
@@ -155,14 +163,13 @@ class ImageStorage(QObject):
     def check_grayscale(self, rgb):
         """This is just a small function to check if an RGB image is actually grayscale. It saves time and resources on converting it to grayscale later on. Turns out using numpy's array_equal is much faster."""
 
-        if np.array_equal(rgb[:,:,0], rgb[:,:,1]) and \
-           np.array_equal(rgb[:,:,0], rgb[:,:,2]):
-
-            r = np.copy(rgb[:,:,0])
+        if np.array_equal(rgb[:, :, 0], rgb[:, :, 1]) and np.array_equal(
+            rgb[:, :, 0], rgb[:, :, 2]
+        ):
+            r = np.copy(rgb[:, :, 0])
             return r, True
         else:
             return rgb, False
-
 
     def save_image(self):
         """
@@ -173,7 +180,10 @@ class ImageStorage(QObject):
         """
         if self.processed_image is None:
             print("No processed image to save!")
-            self.show_notification("Oops! It seems like you haven't opened an image yet. Open an image and then you can save it.", duration=3000)
+            self.show_notification(
+                "Oops! It seems like you haven't opened an image yet. Open an image and then you can save it.",
+                duration=3000,
+            )
             return
 
         # Ensure the base name and directory are properly set
@@ -208,14 +218,16 @@ class ImageStorage(QObject):
         :return: A unique file path for saving.
         """
         # Extract the file extension (format) from the base_name
-        base_name_without_ext = base_name.rsplit('.', 1)[0]
-        file_format = '.' + base_name.rsplit('.', 1)[1] if '.' in base_name else '.png'
+        base_name_without_ext = base_name.rsplit(".", 1)[0]
+        file_format = "." + base_name.rsplit(".", 1)[1] if "." in base_name else ".png"
 
         counter = 1
         save_path = os.path.join(base_dir, f"{base_name_without_ext}{file_format}")
 
         while os.path.exists(save_path) and counter < self.MAX_SAVE_ATTEMPTS:
-            save_path = os.path.join(base_dir, f"{base_name_without_ext}_{counter:03d}{file_format}")
+            save_path = os.path.join(
+                base_dir, f"{base_name_without_ext}_{counter:03d}{file_format}"
+            )
             counter += 1
 
         return save_path
@@ -281,14 +293,15 @@ class ImageStorage(QObject):
         :return: QPixmap of the processed image (or original if not processed).
         """
         if self.main_window.processor.algorithm == "None":
-            return self._get_image_pixmap(self.processed_image) or self.get_original_pixmap()
+            return (
+                self._get_image_pixmap(self.processed_image)
+                or self.get_original_pixmap()
+            )
         else:
             color_dark = np.array((34, 35, 35)).astype(np.uint8)
             color_light = np.array((240, 246, 246)).astype(np.uint8)
 
-            themed_image = style_image(self.processed_image,
-                                       color_dark,
-                                       color_light)
+            themed_image = style_image(self.processed_image, color_dark, color_light)
 
             if self.alpha is not None:
                 alpha = np.copy(self.alpha) * 255

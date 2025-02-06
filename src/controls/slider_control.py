@@ -1,6 +1,15 @@
-from PySide6.QtWidgets import QSlider, QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QWidget
 from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
+)
+
 from helpers.debounce import debounce
+
 
 class SliderControl(QWidget):
     def __init__(self, label, range, value, div):
@@ -27,12 +36,16 @@ class SliderControl(QWidget):
         self.reset.setVisible(False)
 
         if self.div:
-            self.right_label = QLabel(f"{self.slider.value() / self.div}")  # Initial value
+            self.right_label = QLabel(
+                f"{self.slider.value() / self.div}"
+            )  # Initial value
         else:
             self.right_label = QLabel(f"{self.slider.value()}")
         # Connect slider signals
         self.slider.valueChanged.connect(self.update_value)
-        self.slider.sliderPressed.connect(self.on_slider_pressed)  # Track when dragging starts
+        self.slider.sliderPressed.connect(
+            self.on_slider_pressed
+        )  # Track when dragging starts
         self.slider.sliderReleased.connect(self.on_slider_released)
 
         # Layout for slider and labels
@@ -63,8 +76,6 @@ class SliderControl(QWidget):
         else:
             self.reset.setVisible(False)
 
-
-
     def reset_to_default(self):
         self.slider.setValue(self.default)
 
@@ -75,4 +86,3 @@ class SliderControl(QWidget):
     def on_slider_released(self):
         """Called when the slider is released after dragging."""
         self.is_dragging = False  # Mark that dragging has finished
-        value = self.slider.value()

@@ -1,5 +1,7 @@
-from .static import compare
 import numpy as np
+
+from .static import compare
+
 
 def mezzo(img, settings, mode="uniform"):
     seed = settings["seed"]

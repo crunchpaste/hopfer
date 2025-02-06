@@ -1,18 +1,32 @@
-from PySide6.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QTabWidget, QWidget, QLabel, QPushButton, QSpacerItem, QSizePolicy, QTextEdit
 from PySide6.QtCore import Qt, QUrl
-from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtGui import QDesktopServices
+from PySide6.QtSvgWidgets import QSvgWidget
+from PySide6.QtWidgets import (
+    QDialog,
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSizePolicy,
+    QSpacerItem,
+    QTabWidget,
+    QVBoxLayout,
+    QWidget,
+)
+
 from res_loader import get_path
 
 # Quite messy should fix at some point
 
+
 def open_url(url):
     QDesktopServices.openUrl(QUrl(url))
+
 
 class ShortcutLabel(QLabel):
     def __init__(self, text="", parent=None):
         super().__init__(text)
         self.setObjectName("shortcut")
+
 
 class ShortcutLayout(QWidget):
     def __init__(self, label, sc_list):
@@ -36,20 +50,21 @@ class ShortcutsTab(QWidget):
         layout = QVBoxLayout()
 
         shortcuts = [
-            ShortcutLayout("Quit",["Ctrl","Q"]),
-            ShortcutLayout("Open image",["Ctrl","O"]),
-            ShortcutLayout("Save image",["Ctrl","S"]),
-            ShortcutLayout("Save image as",["Ctrl","Shift","S"]),
-            ShortcutLayout("Image tab",["Ctrl","I"]),
-            ShortcutLayout("Haltone tab",["Ctrl","H"]),
-            ShortcutLayout("Blur preview",["Ctrl","B"]),
-            ShortcutLayout("Zoom level",["Ctrl","0-9"])
+            ShortcutLayout("Quit", ["Ctrl", "Q"]),
+            ShortcutLayout("Open image", ["Ctrl", "O"]),
+            ShortcutLayout("Save image", ["Ctrl", "S"]),
+            ShortcutLayout("Save image as", ["Ctrl", "Shift", "S"]),
+            ShortcutLayout("Image tab", ["Ctrl", "I"]),
+            ShortcutLayout("Haltone tab", ["Ctrl", "H"]),
+            ShortcutLayout("Blur preview", ["Ctrl", "B"]),
+            ShortcutLayout("Zoom level", ["Ctrl", "0-9"]),
         ]
 
         for sc in shortcuts:
             layout.addWidget(sc)
 
         self.setLayout(layout)
+
 
 class AboutTab(QWidget):
     def __init__(self):
@@ -80,13 +95,14 @@ class AboutTab(QWidget):
         links_layout = QHBoxLayout()
         github_link = QPushButton("GitHub")
         links_layout.addWidget(github_link)
-        github_link.clicked.connect(lambda: open_url(
-                "https://github.com/crunchpaste/hopfer"))
+        github_link.clicked.connect(
+            lambda: open_url("https://github.com/crunchpaste/hopfer")
+        )
 
         layout.addLayout(links_layout)
 
-
         self.setLayout(layout)
+
 
 class PreferencesDialog(QDialog):
     def __init__(self, parent=None):
@@ -94,7 +110,7 @@ class PreferencesDialog(QDialog):
         self.setWindowTitle("Preferences")
         self.setModal(True)
         # self.setWindowFlag(Qt.FramelessWindowHint)
-        self.setFixedSize(445,720)
+        self.setFixedSize(445, 720)
         layout = QVBoxLayout()
 
         self.logotype = QSvgWidget(get_path("res/type.svg"))

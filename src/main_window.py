@@ -1,11 +1,17 @@
-from PySide6.QtWidgets import QMainWindow, QSplitter, QHBoxLayout, QVBoxLayout, QWidget, QStackedWidget, QPushButton
 from PySide6.QtCore import Qt
-from sidebar import SideBar
-from viewer import PhotoViewer
-from viewer_controls import ViewerControls
-from preferences import PreferencesDialog
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QMainWindow,
+    QSplitter,
+    QWidget,
+)
+
 from image_processor import ImageProcessor
 from image_storage import ImageStorage
+from preferences import PreferencesDialog
+from sidebar import SideBar
+from viewer import PhotoViewer
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -15,8 +21,6 @@ class MainWindow(QMainWindow):
 
     def _initialize_components(self):
         """Initialize the storage and processor module."""
-        current_algorithm = "None"
-        current_settings = {}
         self.storage = ImageStorage(self)
         self.processor = ImageProcessor(self, self.storage)
 
@@ -35,8 +39,7 @@ class MainWindow(QMainWindow):
         self.sidebar = SideBar(self.processor, self.storage)
 
         self.viewer = PhotoViewer()
-        self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus
-        )
+        self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         # self.viewer_controls = ViewerControls(self.viewer)
 
         self.splitter.addWidget(self.sidebar)

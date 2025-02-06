@@ -1,6 +1,6 @@
-from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget, QComboBox, QListView
-from PySide6.QtCore import Qt, Signal, QPoint
-from res_loader import get_path
+from PySide6.QtCore import QPoint, Signal
+from PySide6.QtWidgets import QComboBox, QLabel, QListView, QVBoxLayout, QWidget
+
 
 class GrayscaleCombo(QWidget):
     modeChanged = Signal(str)  # Signal emitted when the algorithm changes
@@ -36,11 +36,11 @@ class GrayscaleCombo(QWidget):
             QComboBox: The combo box with the available grayscale modes.
         """
         combobox = QComboBox()
-        modes = [
-            "Luminance", "Luma", "Lightness", "Average", "Value"
-        ]
+        modes = ["Luminance", "Luma", "Lightness", "Average", "Value"]
         combobox.addItems(modes)
-        combobox.setView(QListView())  # Ensure dropdown uses a list view for better presentation
+        combobox.setView(
+            QListView()
+        )  # Ensure dropdown uses a list view for better presentation
         return combobox
 
     def emit_mode_changed(self, text):

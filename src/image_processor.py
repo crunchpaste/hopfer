@@ -1,15 +1,26 @@
-from PySide6.QtCore import QCoreApplication, QObject, Signal
-import numpy as np
 from multiprocessing import Process, Queue
-import time
-from PIL import Image, ImageFilter, ImageEnhance
+from queue import Empty
 
-from helpers.image_conversion import numpy_to_pixmap, pixmap_to_numpy
+import numpy as np
+from PIL import Image, ImageEnhance, ImageFilter
+from PySide6.QtCore import QCoreApplication, QObject, Signal
+
 from helpers.debounce import debounce
+
 try:
-    from algorithms.thresholdc import threshold, niblack_threshold, sauvola_threshold, phansalkar_threshold
+    from algorithms.thresholdc import (
+        niblack_threshold,
+        phansalkar_threshold,
+        sauvola_threshold,
+        threshold,
+    )
 except ImportError:
-    from algorithms.threshold import threshold, niblack_threshold, sauvola_threshold, phansalkar_threshold
+    from algorithms.threshold import (
+        niblack_threshold,
+        phansalkar_threshold,
+        sauvola_threshold,
+        threshold,
+    )
 
 try:
     from algorithms.mezzoc import mezzo
@@ -22,14 +33,15 @@ except ImportError:
     from algorithms.error_diffusion import error_diffusion
 
 try:
-    from algorithms.static import luminance, luma, average, value, lightness
+    from algorithms.static import average, lightness, luma, luminance, value
 except ImportError:
-    from algorithms.grayscale import luminance, luma, average, value, lightness
+    from algorithms.grayscale import average, lightness, luma, luminance, value
 
 try:
     from algorithms.static import sharpen
 except ImportError:
     from algorithms.sharpen import sharpen
+
 
 def worker_g(queue, image, mode):
     """
@@ -40,6 +52,7 @@ def worker_g(queue, image, mode):
     queue.put(image)
     return
 
+
 def worker_e(queue, image, im_settings):
     """
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
@@ -48,30 +61,27 @@ def worker_e(queue, image, im_settings):
     _brightness = im_settings["brightness"] / 100
     if _brightness > 0:
         # using a log function makes the adjustment feel a bit more natural
-        _brightness = 5 * (np.log(1 + (.01 - 1) * _brightness) / np.log(.01))
-        print('Bright: ', _brightness)
+        _brightness = 5 * (np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01))
+        print("Bright: ", _brightness)
     _brightness += 1
-    _contrast = (im_settings["contrast"] / 100)
+    _contrast = im_settings["contrast"] / 100
     if _contrast > 0:
         # using a log function makes the adjustment feel a bit more natural
-        _contrast = 5 * (np.log(1 + (.01 - 1) * _contrast) / np.log(.01))
-        print('Contrast: ', _contrast)
+        _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
+        print("Contrast: ", _contrast)
     _contrast += 1
     _blur = im_settings["blur"] / 10
     _sharpness = im_settings["sharpness"]
 
     pil_needed = False
-    converted = False # if the image has already been converted back
+    converted = False  # if the image has already been converted back
 
-    if _contrast != 1.0 or \
-       _brightness != 1.0 or \
-       _blur > 0:
+    if _contrast != 1.0 or _brightness != 1.0 or _blur > 0:
+        # if PIL manupulation is needed, convert to a PIL image once
+        pil_needed = True
 
-       # if PIL manupulation is needed, convert to a PIL image once
-       pil_needed = True
-
-       _image = (image * 255).astype(np.uint8)
-       pil_image = Image.fromarray(_image)
+        _image = (image * 255).astype(np.uint8)
+        pil_image = Image.fromarray(_image)
 
     if _brightness != 1.0:
         # if PIL manupulation is needed, convert to a PIL image once
@@ -98,6 +108,7 @@ def worker_e(queue, image, im_settings):
     queue.put(image)
     return
 
+
 def worker_h(queue, image, algorithm, settings):
     """
     This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
@@ -106,6 +117,7 @@ def worker_h(queue, image, algorithm, settings):
     processed_image = apply_algorithm(image, algorithm, settings)
     queue.put(processed_image)
     return
+
 
 def convert_to_grayscale(image, mode):
     """
@@ -124,6 +136,7 @@ def convert_to_grayscale(image, mode):
         return lightness(image)
     else:
         return luminance(image)
+
 
 def apply_algorithm(image, algorithm, settings):
     """
@@ -158,99 +171,162 @@ def apply_algorithm(image, algorithm, settings):
         processed_image = mezzo(image, settings, mode="beta")
 
     elif algorithm == "Floyd-Steinberg":
-        kernel = np.array([[0, 0, 0],
-                           [0, 0, 7],
-                           [3, 5, 1]], dtype=float) / 16.0
-        processed_image = error_diffusion(image,
-                                          kernel,
-                                          settings)
+        kernel = np.array([[0, 0, 0], [0, 0, 7], [3, 5, 1]], dtype=np.float64) / 16.0
+
+        processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "False Floyd-Steinberg":
-        kernel = np.array([[0, 0, 0],
-                           [0, 0, 3],
-                           [0, 3, 2]], dtype=float) / 8.0
+        kernel = np.array([[0, 0, 0], [0, 0, 3], [0, 3, 2]], dtype=np.float64) / 8.0
+
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Jarvis":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 7, 5],
-                           [3, 5, 7, 5, 3],
-                           [1, 3, 5, 3, 1]], dtype=float) / 48.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 7, 5],
+                    [3, 5, 7, 5, 3],
+                    [1, 3, 5, 3, 1],
+                ],
+                dtype=np.float64,
+            )
+            / 48.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Stucki":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 8, 4],
-                           [2, 4, 8, 4, 2],
-                           [1, 2, 4, 2, 1]], dtype=float) / 42.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 8, 4],
+                    [2, 4, 8, 4, 2],
+                    [1, 2, 4, 2, 1],
+                ],
+                dtype=np.float64,
+            )
+            / 42.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Stucki small":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 8, 2],
-                           [0, 2, 8, 2, 0],
-                           [0, 0, 2, 0, 0]], dtype=float) / 24.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 8, 2],
+                    [0, 2, 8, 2, 0],
+                    [0, 0, 2, 0, 0],
+                ],
+                dtype=np.float64,
+            )
+            / 24.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Stucki large":
-        kernel = np.array([[0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 8, 4, 2],
-                           [2, 4, 8, 8, 8, 4, 2],
-                           [2, 4, 4, 4, 4, 4, 2],
-                           [2, 2, 2, 2, 2, 2, 2]], dtype=float) / 88.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 8, 4, 2],
+                    [2, 4, 8, 8, 8, 4, 2],
+                    [2, 4, 4, 4, 4, 4, 2],
+                    [2, 2, 2, 2, 2, 2, 2],
+                ],
+                dtype=np.float64,
+            )
+            / 88.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Atkinson":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 1, 1],
-                           [0, 1, 1, 1, 0],
-                           [0, 0, 1, 0, 0]], dtype=float) / 8
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1],
+                    [0, 1, 1, 1, 0],
+                    [0, 0, 1, 0, 0],
+                ],
+                dtype=np.float64,
+            )
+            / 8
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Burkes":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 8, 4],
-                           [2, 4, 8, 4, 2],
-                           [0, 0, 0, 0, 0]], dtype=float) / 32.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 8, 4],
+                    [2, 4, 8, 4, 2],
+                    [0, 0, 0, 0, 0],
+                ],
+                dtype=np.float64,
+            )
+            / 32.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Sierra":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 5, 3],
-                           [2, 4, 5, 4, 2],
-                           [0, 2, 3, 2, 0]], dtype=float) / 32.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 5, 3],
+                    [2, 4, 5, 4, 2],
+                    [0, 2, 3, 2, 0],
+                ],
+                dtype=np.float64,
+            )
+            / 32.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Sierra2":
-        kernel = np.array([[0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0],
-                           [0, 0, 0, 4, 3],
-                           [1, 2, 3, 2, 1],
-                           [0, 0, 0, 0, 0]], dtype=float) / 16.0
+        kernel = (
+            np.array(
+                [
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0],
+                    [0, 0, 0, 4, 3],
+                    [1, 2, 3, 2, 1],
+                    [0, 0, 0, 0, 0],
+                ],
+                dtype=np.float64,
+            )
+            / 16.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Sierra2 4A":
-        kernel = np.array([[0, 0, 0],
-                           [0, 0, 2],
-                           [1, 1, 0]], dtype=float) / 4.0
+        kernel = np.array([[0, 0, 0], [0, 0, 2], [1, 1, 0]], dtype=np.float64) / 4.0
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Nakano":
-        kernel = np.array([[0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 0, 0],
-                           [0, 0, 0, 0, 0, 6, 4],
-                           [0, 1, 6, 0, 0, 5, 3],
-                           [0, 0, 4, 7, 3, 5, 3],
-                           [0, 0, 3, 5, 3, 4, 2]], dtype=float)
+        kernel = np.array(
+            [
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 6, 4],
+                [0, 1, 6, 0, 0, 5, 3],
+                [0, 0, 4, 7, 3, 5, 3],
+                [0, 0, 3, 5, 3, 4, 2],
+            ],
+            dtype=np.float64,
+        )
         kernel /= float(np.sum(kernel))  # Normalize the kernel
         processed_image = error_diffusion(image, kernel, settings)
 
@@ -264,6 +340,7 @@ def apply_algorithm(image, algorithm, settings):
         processed_image = image
 
     return processed_image
+
 
 class ImageProcessor(QObject):
     """
@@ -294,18 +371,18 @@ class ImageProcessor(QObject):
         self.storage = storage
         self.main_window = main_window
         self.algorithm = "None"
-        self.grayscale_mode = "Luminance" # Initialize the processor with Luminance as the grayscale mode as it is the best.
+        self.grayscale_mode = "Luminance"  # Initialize the processor with Luminance as the grayscale mode as it is the best.
         self.settings = {}
 
         self.image_settings = {
-        "brightness": 0.0,
-        "contrast": 0.0,
-        "sharpness": 0.0,
-        "blur": 0.0
+            "brightness": 0.0,
+            "contrast": 0.0,
+            "sharpness": 0.0,
+            "blur": 0.0,
         }
 
-        self.convert = True # Does the image need reconversion from RGB to Grayscale
-        self.reset = True # Does the viewer need to be reset. Set to True when a new image is loaded.
+        self.convert = True  # Does the image need reconversion from RGB to Grayscale
+        self.reset = True  # Does the viewer need to be reset. Set to True when a new image is loaded.
 
     @debounce(0.5)
     def start(self, step=0):
@@ -321,19 +398,17 @@ class ImageProcessor(QObject):
             if self.process.is_alive():
                 self.process.terminate()
                 self.pocess.join()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
-        convert = (not self.storage.original_grayscale and step == 0)
+        convert = not self.storage.original_grayscale and step == 0
 
         if convert:
             image = self.storage.get_original_image()
             mode = self.grayscale_mode
             self.queue = Queue()
-            self.process = Process(target=worker_g, args=(self.queue,
-                                                          image,
-                                                          mode))
+            self.process = Process(target=worker_g, args=(self.queue, image, mode))
 
             self.process.start()
             grayscale_img = self.wait_for_process()
@@ -350,9 +425,9 @@ class ImageProcessor(QObject):
             image = self.storage.get_grayscale_image()
             im_settings = self.image_settings
             self.queue = Queue()
-            self.process = Process(target=worker_e, args=(self.queue,
-                                                         image,
-                                                         im_settings))
+            self.process = Process(
+                target=worker_e, args=(self.queue, image, im_settings)
+            )
             self.process.start()
             enhanced_image = self.wait_for_process()
             self.process.join()
@@ -360,19 +435,15 @@ class ImageProcessor(QObject):
             # Set the result as the storage enhanced image to avoid furher reprocessing.
             self.storage.enhanced_image = enhanced_image
 
-
-
-
         image = self.storage.get_enhanced_image()
         algorithm = self.algorithm
         settings = self.settings
         self.queue = Queue()
 
         # Creates the subprocess
-        self.process = Process(target=worker_h, args=(self.queue,
-                                                      image,
-                                                      algorithm,
-                                                      settings))
+        self.process = Process(
+            target=worker_h, args=(self.queue, image, algorithm, settings)
+        )
         # Actually start the process
         self.process.start()
 
@@ -382,15 +453,17 @@ class ImageProcessor(QObject):
         try:
             self.send_result(processed_image)
             self.process.join()
-        except:
-            pass
+        except Exception as e:
+            print(e)
 
     def wait_for_process(self):
         while self.process.is_alive():
             try:
                 _image = self.queue.get_nowait()
                 return _image
-            except:
+            except Empty as e:
+                print(f"Exception type: {type(e).__name__}")
+                print(f"Exception message: {e}")
                 QCoreApplication.processEvents()
 
     def send_result(self, image):

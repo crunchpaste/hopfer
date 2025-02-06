@@ -1,6 +1,14 @@
-from PySide6.QtWidgets import QVBoxLayout, QHBoxLayout, QWidget, QSpinBox, QLabel, QPushButton
-from PySide6.QtCore import Qt
 import numpy as np
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QPushButton,
+    QSpinBox,
+    QVBoxLayout,
+    QWidget,
+)
+
 
 class SeedSpinBox(QWidget):
     def __init__(self, label):
@@ -8,7 +16,6 @@ class SeedSpinBox(QWidget):
         layout_outer = QVBoxLayout()
         layout_inner = QHBoxLayout()
         layout_inner.setContentsMargins(0, 0, 0, 0)
-
 
         self.label = QLabel(label)
 
@@ -33,5 +40,5 @@ class SeedSpinBox(QWidget):
         self.setLayout(layout_outer)
 
     def new_seed(self):
-        seed = np.random.randint(0,9999)
+        seed = np.random.randint(0, 9999)
         self.spinbox.setValue(seed)

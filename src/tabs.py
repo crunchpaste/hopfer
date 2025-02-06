@@ -1,12 +1,21 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QLabel, QSlider
 from PySide6.QtCore import QCoreApplication, Signal
-from controls.halftone_combo import HalftoneCombo
-from controls.grayscale_combo import GrayscaleCombo
-from controls.slider_control import SliderControl
-from settings import *
-from image_processor import ImageProcessor
-from helpers.debounce import debounce
+from PySide6.QtWidgets import QVBoxLayout, QWidget
 
+from controls.grayscale_combo import GrayscaleCombo
+from controls.halftone_combo import HalftoneCombo
+from controls.slider_control import SliderControl
+from helpers.debounce import debounce
+from settings import (
+    BetaSettings,
+    ErrorDiffusionSettings,
+    GaussSettings,
+    MezzoSettings,
+    NiblackSettings,
+    NoneSettings,
+    PhansalkarSettings,
+    SauvolaSettings,
+    ThresholdSettings,
+)
 
 
 class HalftoneTab(QWidget):
@@ -60,9 +69,18 @@ class HalftoneTab(QWidget):
         elif algorithm_name == "Mezzotint beta":
             return BetaSettings()
         elif algorithm_name in [
-            "Floyd-Steinberg", "False Floyd-Steinberg", "Jarvis", "Stucki",
-            "Stucki small", "Stucki large", "Atkinson", "Burkes", "Sierra",
-            "Sierra2", "Sierra2 4A", "Nakano"
+            "Floyd-Steinberg",
+            "False Floyd-Steinberg",
+            "Jarvis",
+            "Stucki",
+            "Stucki small",
+            "Stucki large",
+            "Atkinson",
+            "Burkes",
+            "Sierra",
+            "Sierra2",
+            "Sierra2 4A",
+            "Nakano",
         ]:
             return ErrorDiffusionSettings()
         return NoneSettings()
@@ -140,7 +158,6 @@ class ImageTab(QWidget):
         self.brightness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.brightness)
 
-
         self.contrast = SliderControl("Contrast", (-100, 100), 0, 100)
         self.contrast.slider.valueChanged.connect(self.on_settings_changed)
         self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
@@ -155,7 +172,6 @@ class ImageTab(QWidget):
         self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
         self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.sharpness)
-
 
         self.layout.addWidget(self.combobox)
         self.layout.addWidget(self.brightness)
@@ -195,7 +211,7 @@ class ImageTab(QWidget):
             "brightness": self.brightness.slider.value(),
             "contrast": self.contrast.slider.value(),
             "blur": self.blur.slider.value(),
-            "sharpness": self.sharpness.slider.value()
+            "sharpness": self.sharpness.slider.value(),
         }
         self.processor.image_settings = settings
         if storage.original_image is not None:

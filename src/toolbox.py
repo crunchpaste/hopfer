@@ -1,9 +1,5 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QPushButton, QFileDialog
-from PySide6.QtGui import QIcon
-from PySide6.QtCore import QSize, Signal
-from res_loader import get_path
-
-import os
+from PySide6.QtCore import Signal
+from PySide6.QtWidgets import QFileDialog, QPushButton, QVBoxLayout, QWidget
 
 
 class Toolbox(QWidget):
@@ -23,28 +19,18 @@ class Toolbox(QWidget):
         toolbox_layout = QVBoxLayout(self)
         toolbox_layout.setContentsMargins(0, 0, 10, 0)  # Adjust margins
 
-        icon_path = get_path("res/icons")
-
         _ext = "svg"
 
         # Create the buttons
-        self.open = self._create_button(
-            "e43e",
-            "Open image", self.open_file_dialog)
+        self.open = self._create_button("e43e", "Open image", self.open_file_dialog)
 
-        self.save = self._create_button(
-            "e161",
-            "Save image", self.storage.save_image)
-        self.save.setEnabled(False) # Initial state is disabled
+        self.save = self._create_button("e161", "Save image", self.storage.save_image)
+        self.save.setEnabled(False)  # Initial state is disabled
 
-        self.saveas = self._create_button(
-            "eb60",
-            "Save as", self.save_file_dialog)
-        self.saveas.setEnabled(False) # Initial state is disabled
+        self.saveas = self._create_button("eb60", "Save as", self.save_file_dialog)
+        self.saveas.setEnabled(False)  # Initial state is disabled
 
-        self.preferences = self._create_button(
-            "e8b8",
-            "Preferences", None)
+        self.preferences = self._create_button("e8b8", "Preferences", None)
         self.preferences.setObjectName("last-button")
         # Add buttons to layout
         toolbox_layout.addWidget(self.open)
@@ -81,12 +67,14 @@ class Toolbox(QWidget):
             "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
         )
 
-        if self.storage.image_path == None:
+        if self.storage.image_path is None:
             origin = ""
         else:
             origin = self.storage.image_path
 
-        file_path, _ = file_dialog.getOpenFileName(None, "Open File", origin, file_filter)
+        file_path, _ = file_dialog.getOpenFileName(
+            None, "Open File", origin, file_filter
+        )
 
         if file_path:
             self.storage.load_image(file_path)
@@ -101,7 +89,9 @@ class Toolbox(QWidget):
                 "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
                 "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
             )
-            file_path, _ = file_dialog.getSaveFileName(None, "Save File", self.storage.save_path, file_filter)
+            file_path, _ = file_dialog.getSaveFileName(
+                None, "Save File", self.storage.save_path, file_filter
+            )
 
             if file_path:
                 self.storage.save_path = file_path

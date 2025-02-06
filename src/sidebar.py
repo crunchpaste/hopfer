@@ -1,9 +1,9 @@
-from PySide6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QTabWidget, QPushButton
-from PySide6.QtGui import QShortcut, QKeySequence, QIcon
-from PySide6.QtCore import QSize
-from tabs import ImageTab, HalftoneTab
+from PySide6.QtWidgets import QHBoxLayout, QTabWidget, QVBoxLayout, QWidget
+
 from status import NotificationPane
+from tabs import HalftoneTab, ImageTab
 from toolbox import Toolbox
+
 
 class SideBar(QWidget):
     def __init__(self, processor, storage):

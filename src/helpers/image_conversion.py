@@ -1,9 +1,7 @@
-from PIL import Image
 import numpy as np
-from PIL.ImageQt import ImageQt
-from PySide6.QtGui import QPixmap, QImage
+from PIL import Image
+from PySide6.QtGui import QImage, QPixmap
 
-import time
 
 def pixmap_to_numpy(pixmap):
     image = pixmap.toImage()
@@ -13,8 +11,8 @@ def pixmap_to_numpy(pixmap):
 
     return image_array
 
-def numpy_to_pixmap(img_array):
 
+def numpy_to_pixmap(img_array):
     image_array = np.copy(img_array)
     if image_array.dtype != np.uint8:
         # This one is quite slow for large images and definitely needs improvement
@@ -29,12 +27,14 @@ def numpy_to_pixmap(img_array):
         if c == 2:
             # This is grayscale with alpha
             # For some reason QImage does not support LA so this is needed
-            image_array = np.dstack((
-                image_array,
-                image_array,
-                image_array,
-                np.full((h, w), 255, dtype=np.uint8)
-            ))
+            image_array = np.dstack(
+                (
+                    image_array,
+                    image_array,
+                    image_array,
+                    np.full((h, w), 255, dtype=np.uint8),
+                )
+            )
             format = QImage.Format_RGBA8888
             c = 4
         elif c == 3:

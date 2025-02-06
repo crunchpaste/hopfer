@@ -1,11 +1,12 @@
 from PySide6 import QtCore, QtGui, QtWidgets
-from viewer_controls import ViewerControls
+
 from processing_label import ProcessingIndicator
-from res_loader import get_path
+from viewer_controls import ViewerControls
+
 
 class PhotoViewer(QtWidgets.QGraphicsView):
-    """Quite literally taken from ekhumoro's answer at https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview. It's not perfect and glitches every once in a while, but it gets the job done for now.
-    """
+    """Quite literally taken from ekhumoro's answer at https://stackoverflow.com/questions/35508711/how-to-enable-pan-and-zoom-in-a-qgraphicsview. It's not perfect and glitches every once in a while, but it gets the job done for now."""
+
     coordinatesChanged = QtCore.Signal(QtCore.QPoint)
 
     SCALE_FACTOR = 1.25  # Class-level constant for scaling factor
@@ -18,8 +19,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._photo = QtWidgets.QGraphicsPixmapItem()
 
-        self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
-        self._photo.setShapeMode(QtWidgets.QGraphicsPixmapItem.ShapeMode.BoundingRectShape)
+        self._photo.setTransformationMode(
+            QtCore.Qt.TransformationMode.FastTransformation
+        )
+        self._photo.setShapeMode(
+            QtWidgets.QGraphicsPixmapItem.ShapeMode.BoundingRectShape
+        )
         self._blur = QtWidgets.QGraphicsBlurEffect()
         self._blur.setBlurHints(QtWidgets.QGraphicsBlurEffect.PerformanceHint)
         self._blur.setBlurRadius(1.05)
@@ -28,7 +33,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene.addItem(self._photo)
         self.setScene(self._scene)
 
-        self.setTransformationAnchor(QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
+        self.setTransformationAnchor(
+            QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
+        )
         self.setResizeAnchor(QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
         self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
         self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
@@ -67,22 +74,20 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def toggleBlur(self):
         # Toggle the blur effect and apply a style to the button
         self._blur.setEnabled(not self._blur.isEnabled())
-        icon_path = get_path("res/icons")
         if self._blur.isEnabled():
             self.controls.blur.setStyleSheet(
-                f'QPushButton {{background-color: #f0f6f0;}}'
-                f'QPushButton {{color: #222323;}}'
-                f'QPushButton:hover {{background-color: #222323;}}'
-                f'QPushButton:hover {{color:  #f0f6f0;}}'
+                "QPushButton {background-color: #f0f6f0;}"
+                "QPushButton {color: #222323;}"
+                "QPushButton:hover {background-color: #222323;}"
+                "QPushButton:hover {color:  #f0f6f0;}"
             )
         else:
             self.controls.blur.setStyleSheet(
-                f'QPushButton {{background-color: #222323;}}'
-                f'QPushButton {{color:  #f0f6f0;}}'
-                f'QPushButton:hover {{background-color: #f0f6f0;}}'
-                f'QPushButton:hover {{color: #222323;;}}'
+                "QPushButton {background-color: #222323;}"
+                "QPushButton {color:  #f0f6f0;}"
+                "QPushButton:hover {background-color: #f0f6f0;}"
+                "QPushButton:hover {color: #222323;;}"
             )
-
 
     def resetView(self, scale=1):
         """Reset the view to fit the photo within the viewport."""
@@ -115,12 +120,16 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             scale = max(1, scale)  # Ensure scale is at least 1
             if self.hasValidPhoto():
                 # Apply the custom scale factor
-                self.setTransform(QtGui.QTransform())  # Reset any previous transformations
+                self.setTransform(
+                    QtGui.QTransform()
+                )  # Reset any previous transformations
                 self.scale(scale, scale)  # Apply custom scale factor
                 self.centerOn(self._photo)
 
                 self.updateCoordinates()
-                self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
+                self._photo.setTransformationMode(
+                    QtCore.Qt.TransformationMode.FastTransformation
+                )
 
     def _scaleToFit(self, rect, scale):
         """Helper method to scale the photo to fit the viewport."""
@@ -128,8 +137,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.scale(1 / unity.width(), 1 / unity.height())
         viewrect = self.viewport().rect()
         scenerect = self.transform().mapRect(rect)
-        factor = min(viewrect.width() / scenerect.width(),
-                     viewrect.height() / scenerect.height()) * scale
+        factor = (
+            min(
+                viewrect.width() / scenerect.width(),
+                viewrect.height() / scenerect.height(),
+            )
+            * scale
+        )
         self.scale(factor, factor)
 
     def zoom(self, step):
@@ -137,7 +151,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         zoom = max(0, self._zoom + int(step))
         if zoom != self._zoom:
             self._zoom = zoom
-            factor = self.SCALE_FACTOR ** abs(step) if step > 0 else 1 / (self.SCALE_FACTOR ** abs(step))
+            factor = (
+                self.SCALE_FACTOR ** abs(step)
+                if step > 0
+                else 1 / (self.SCALE_FACTOR ** abs(step))
+            )
             self.scale(factor, factor) if self._zoom > 0 else self.resetView()
 
         # Get the bounding rectangle of the photo
@@ -148,9 +166,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         # print(rect, "\n", transformed_rect)
 
         if rect.width() > transformed_rect.width() / 2:
-            self._photo.setTransformationMode(QtCore.Qt.TransformationMode.SmoothTransformation)
+            self._photo.setTransformationMode(
+                QtCore.Qt.TransformationMode.SmoothTransformation
+            )
         else:
-            self._photo.setTransformationMode(QtCore.Qt.TransformationMode.FastTransformation)
+            self._photo.setTransformationMode(
+                QtCore.Qt.TransformationMode.FastTransformation
+            )
 
     def wheelEvent(self, event):
         """Handle zooming via mouse wheel."""
@@ -165,18 +187,20 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         viewer_width = self.width()
         viewer_height = self.height()
 
-        controls_width = 300#self.controls.width()
-        controls_height = 64 #self.controls.height()
+        controls_width = 300  # self.controls.width()
+        controls_height = 64  # self.controls.height()
 
         label_width = self.label.width()
         label_height = self.label.height()
 
         # Position the controls widget in the bottom right corner
-        x = viewer_width - controls_width -1 # Don't really know how the padding works, it's kinda weird
-        y = viewer_height - controls_height + 4 # Vertically yoo
+        x = (
+            viewer_width - controls_width - 1
+        )  # Don't really know how the padding works, it's kinda weird
+        y = viewer_height - controls_height + 4  # Vertically yoo
         self.controls.setGeometry(x, y, controls_width, controls_height)
 
-        x = viewer_width // 2 - label_width  // 2
+        x = viewer_width // 2 - label_width // 2
         y = viewer_height // 2 - label_height // 2
         self.label.setGeometry(x, y, label_width, label_height)
 

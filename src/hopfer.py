@@ -1,16 +1,17 @@
 import os
-import sys
 import platform
+import subprocess
+import sys
 
+from PySide6.QtGui import QFontDatabase, QIcon
 from PySide6.QtWidgets import QApplication
-from PySide6.QtGui import QFont, QFontDatabase, QIcon
-from PySide6.QtCore import Qt, QCoreApplication
 
-from main_window import MainWindow
-from shortcuts import Shortcuts
 from helpers.load_stylesheet import load_qss
 from helpers.no_outline import NoFocusProxyStyle
-from res_loader import get_path, create_desktop_file
+from main_window import MainWindow
+from res_loader import create_desktop_file, get_path
+from shortcuts import Shortcuts
+
 
 def setup_linux_icon():
     """
@@ -19,6 +20,7 @@ def setup_linux_icon():
     binary_path = get_path(".")
     icon_path = get_path("res/hopfer.png")
     return create_desktop_file(binary_path, icon_path)
+
 
 def load_font(path):
     """
@@ -31,21 +33,20 @@ def load_font(path):
     else:
         font_families = QFontDatabase.applicationFontFamilies(font_id)
         print("Loaded Font Family:", font_families[0])  # The actual font name
-import subprocess
+
 
 def get_latest_hash():
     try:
         hash = subprocess.check_output(
-            ['git', 'rev-parse', '--short', 'HEAD'],
-            cwd='.',
-            text=True
+            ["git", "rev-parse", "--short", "HEAD"], cwd=".", text=True
         ).strip()
         with open(get_path("res/hash.txt"), "w") as file:
             file.write(hash)
-    except:
-        print('Not in a git folder.')
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
 
     print(f"{hash}")
+
 
 def main():
     """
@@ -53,13 +54,13 @@ def main():
     """
     desktop_file_path = None
 
-    if not hasattr(get_latest_hash(), '__compiled__'):
+    if not hasattr(get_latest_hash(), "__compiled__"):
         # only get the hash if this is not a nuitka compiled binary
         print("not_compiled")
         get_latest_hash()
 
     # Setup Linux environment if applicable
-    if sys.platform.startswith('linux') or platform.system() == "Linux":
+    if sys.platform.startswith("linux") or platform.system() == "Linux":
         desktop_file_path = setup_linux_icon()
 
     # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet stiled.
@@ -76,8 +77,9 @@ def main():
 
     window = MainWindow()
     window.setWindowIcon(QIcon(get_path("res/hopfer.png")))
-    shortcuts = Shortcuts(app, window)
     window.show()
+
+    Shortcuts(app, window)
 
     try:
         sys.exit(app.exec())
@@ -86,6 +88,7 @@ def main():
         if desktop_file_path and os.path.exists(desktop_file_path):
             os.remove(desktop_file_path)
             print(f".desktop file removed: {desktop_file_path}")
+
 
 if __name__ == "__main__":
     main()

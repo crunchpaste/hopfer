@@ -1,8 +1,6 @@
-import os
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton, QApplication
-from PySide6.QtCore import Qt, QSize
-from PySide6.QtGui import QIcon
-from res_loader import get_path
+from PySide6.QtCore import Qt
+from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
+
 
 class ViewerControls(QWidget):
     def __init__(self, parent=None):
@@ -12,28 +10,18 @@ class ViewerControls(QWidget):
         # Create the layout
         layout = QHBoxLayout()
 
-        icon_path = get_path("res/icons")
-
         _ext = "svg"
 
-        self.fit = self._create_button(
-            "e3dc",
-            "Fit to viewer")
+        self.fit = self._create_button("e3dc", "Fit to viewer")
         self.fit.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.x1 = self._create_button(
-            "efcd",
-            "Original size")
+        self.x1 = self._create_button("efcd", "Original size")
         self.x1.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.x2 = self._create_button(
-            "f4eb",
-            "Double size")
+        self.x2 = self._create_button("f4eb", "Double size")
         self.x2.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
-        self.blur = self._create_button(
-            "eb77",
-            "Blur preview")
+        self.blur = self._create_button("eb77", "Blur preview")
         self.blur.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         layout.addStretch()

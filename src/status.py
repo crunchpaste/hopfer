@@ -1,10 +1,10 @@
-from PySide6.QtWidgets import QFrame, QLabel, QHBoxLayout, QPushButton, QSizePolicy
-from PySide6.QtCore import QTimer, Qt, QPropertyAnimation, Property
-from PySide6.QtGui import QFont
+from PySide6.QtCore import Qt, QTimer
+from PySide6.QtWidgets import QFrame, QHBoxLayout, QLabel, QPushButton
+
 
 class NotificationPane(QFrame):
     """This one is meant to display all sorts of errors, warnings and other notifications. Currently it is mainly used to display an "Image saved" message."""
-    
+
     def __init__(self, parent):
         super().__init__(parent)
 
@@ -21,7 +21,8 @@ class NotificationPane(QFrame):
         # Close button setup with an "X" icon
         self.close_button = QPushButton("✕", self)
         self.close_button.setFixedSize(20, 20)
-        self.close_button.setStyleSheet("""
+        self.close_button.setStyleSheet(
+            """
             QPushButton {
                 border: none;
                 color: white;
@@ -31,7 +32,8 @@ class NotificationPane(QFrame):
             QPushButton:hover {
                 color: salmon;
             }
-        """)
+        """
+        )
         self.close_button.clicked.connect(self.fade_out)
         self.layout.addWidget(self.close_button, alignment=Qt.AlignmentFlag.AlignTop)
 

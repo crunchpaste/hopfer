@@ -1,9 +1,11 @@
 import numpy as np
-from numba import njit, prange
+from numba import njit
+
 
 def threshold(img, settings):
     value = settings["threshold_value"] / 100
     return thresh(img, value)
+
 
 @njit(cache=True)
 def thresh(img, threshold_value):
@@ -13,10 +15,12 @@ def thresh(img, threshold_value):
     img = np.rint(img + t)
     return img
 
+
 def niblack_threshold(img, settings):
     block_size = int(settings["block_size"])
     k = settings["k_factor"] / 100
     return niblack(img, block_size, k)
+
 
 @njit(cache=True)
 def niblack(img, n=25, k=0.2):
@@ -34,7 +38,6 @@ def niblack(img, n=25, k=0.2):
 
     for y in range(h):
         for x in range(w):
-
             # The integral image, used for the mean of the block
             integral_img[y + 1, x + 1] = (
                 integral_img[y + 1, x]  # Left
@@ -60,17 +63,17 @@ def niblack(img, n=25, k=0.2):
 
             # Get the sum of the block to calculate the mean
             block_sum = (
-                integral_img[y2, x2]      # Bottom right
-                - integral_img[y2, x1]    # Left
-                - integral_img[y1, x2]    # Top
-                + integral_img[y1, x1]    # Top left
+                integral_img[y2, x2]  # Bottom right
+                - integral_img[y2, x1]  # Left
+                - integral_img[y1, x2]  # Top
+                + integral_img[y1, x1]  # Top left
             )
 
             block_sq_sum = (
-                squared_integral_img[y2, x2]      # Bottom right
-                - squared_integral_img[y2, x1]    # Left
-                - squared_integral_img[y1, x2]    # Top
-                + squared_integral_img[y1, x1]    # Top left
+                squared_integral_img[y2, x2]  # Bottom right
+                - squared_integral_img[y2, x1]  # Left
+                - squared_integral_img[y1, x2]  # Top
+                + squared_integral_img[y1, x1]  # Top left
             )
 
             block_area = (y2 - y1) * (x2 - x1)
@@ -86,7 +89,7 @@ def niblack(img, n=25, k=0.2):
             std = np.sqrt(variance)
 
             # Get the threshold for the current pixel using the formula provided by craft of coding: https://craftofcoding.wordpress.com/2021/09/30/thresholding-algorithms-niblack-local/
-            threshold = (mean - k * std)
+            threshold = mean - k * std
 
             # Check against the calculated threshold
             if img[y, x] > threshold:
@@ -103,6 +106,7 @@ def sauvola_threshold(img, settings):
     k = settings["k_factor"] / 100
     return sauvola(img, block_size, dynamic_range, k)
 
+
 @njit(cache=True)
 def sauvola(img, n=25, R=0.5, k=0.2):
     h, w = img.shape
@@ -118,7 +122,6 @@ def sauvola(img, n=25, R=0.5, k=0.2):
 
     for y in range(h):
         for x in range(w):
-
             # The integral image, used for the mean of the block
             integral_img[y + 1, x + 1] = (
                 integral_img[y + 1, x]  # Left
@@ -144,17 +147,17 @@ def sauvola(img, n=25, R=0.5, k=0.2):
 
             # Get the sum of the block to calculate the mean
             block_sum = (
-                integral_img[y2, x2]      # Bottom right
-                - integral_img[y2, x1]    # Left
-                - integral_img[y1, x2]    # Top
-                + integral_img[y1, x1]    # Top left
+                integral_img[y2, x2]  # Bottom right
+                - integral_img[y2, x1]  # Left
+                - integral_img[y1, x2]  # Top
+                + integral_img[y1, x1]  # Top left
             )
 
             block_sq_sum = (
-                squared_integral_img[y2, x2]      # Bottom right
-                - squared_integral_img[y2, x1]    # Left
-                - squared_integral_img[y1, x2]    # Top
-                + squared_integral_img[y1, x1]    # Top left
+                squared_integral_img[y2, x2]  # Bottom right
+                - squared_integral_img[y2, x1]  # Left
+                - squared_integral_img[y1, x2]  # Top
+                + squared_integral_img[y1, x1]  # Top left
             )
 
             block_area = (y2 - y1) * (x2 - x1)
@@ -180,6 +183,7 @@ def sauvola(img, n=25, R=0.5, k=0.2):
 
     return output_img
 
+
 def phansalkar_threshold(img, settings):
     block_size = int(settings["block_size"])
     dynamic_range = settings["dynamic_range"] / 100
@@ -188,6 +192,7 @@ def phansalkar_threshold(img, settings):
     q = settings["q_factor"] / 10
 
     return phansalkar(img, block_size, dynamic_range, k, p, q)
+
 
 @njit(cache=True)
 def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
@@ -205,7 +210,6 @@ def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
 
     for y in range(h):
         for x in range(w):
-
             # The integral image, used for the mean of the block
             integral_img[y + 1, x + 1] = (
                 integral_img[y + 1, x]  # Left
@@ -231,17 +235,17 @@ def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
 
             # Get the sum of the block to calculate the mean
             block_sum = (
-                integral_img[y2, x2]      # Bottom right
-                - integral_img[y2, x1]    # Left
-                - integral_img[y1, x2]    # Top
-                + integral_img[y1, x1]    # Top left
+                integral_img[y2, x2]  # Bottom right
+                - integral_img[y2, x1]  # Left
+                - integral_img[y1, x2]  # Top
+                + integral_img[y1, x1]  # Top left
             )
 
             block_sq_sum = (
-                squared_integral_img[y2, x2]      # Bottom right
-                - squared_integral_img[y2, x1]    # Left
-                - squared_integral_img[y1, x2]    # Top
-                + squared_integral_img[y1, x1]    # Top left
+                squared_integral_img[y2, x2]  # Bottom right
+                - squared_integral_img[y2, x1]  # Left
+                - squared_integral_img[y1, x2]  # Top
+                + squared_integral_img[y1, x1]  # Top left
             )
 
             block_area = (y2 - y1) * (x2 - x1)

@@ -1,6 +1,7 @@
 import numpy as np
 from numba import njit
 
+
 def mezzo(img, settings, mode="uniform"):
     seed = settings["seed"]
     h, w = img.shape
@@ -19,6 +20,8 @@ def mezzo(img, settings, mode="uniform"):
 
     img = compare(img, noise, h, w)
     return img
+
+
 @njit
 def compare(img, noise, h, w):
     # Doing it in this crude nested for loop seems to be a few times faster than using np.where

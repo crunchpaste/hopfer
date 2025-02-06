@@ -1,5 +1,11 @@
-from PySide6.QtWidgets import QApplication, QWidget, QSlider, QVBoxLayout, QLabel, QHBoxLayout
 from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import (
+    QHBoxLayout,
+    QLabel,
+    QSlider,
+    QWidget,
+)
+
 
 class ToggleButton(QSlider):
     def __init__(self):
@@ -18,7 +24,10 @@ class ToggleButton(QSlider):
             self.setValue(new_value)  # Set the new value to 0 or 1
             event.accept()  # Accept the event to stop it from propagating (normal slider behavior)
         else:
-            super().mousePressEvent(event)  # Call the base class method for other buttons
+            super().mousePressEvent(
+                event
+            )  # Call the base class method for other buttons
+
 
 class ToggleWithLabel(QWidget):
     toggleChanged = Signal(bool)
