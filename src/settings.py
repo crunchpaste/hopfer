@@ -1,5 +1,7 @@
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtGui import QBrush, QColor
+
 
 from controls.seed_spinbox import SeedSpinBox
 from controls.slider_control import SliderControl
@@ -178,6 +180,7 @@ class PhansalkarSettings(HalftoneSettings):
 class MezzoSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()
+
         self.spin = SeedSpinBox("Random number seed")
         self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
 

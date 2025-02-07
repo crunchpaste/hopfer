@@ -1,6 +1,9 @@
-from PySide6.QtCore import QCoreApplication, Signal
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtCore import QCoreApplication, Qt, Signal
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QFrame
 
+from superqt import QRangeSlider
+
+from controls.custom_range import RangeSlider
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
@@ -173,11 +176,16 @@ class ImageTab(QWidget):
         self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.sharpness)
 
+        self.range_slider = RangeSlider(Qt.Orientation.Horizontal)
+        self.range_slider.setValue((0, 100))
+
         self.layout.addWidget(self.combobox)
         self.layout.addWidget(self.brightness)
         self.layout.addWidget(self.contrast)
         self.layout.addWidget(self.blur)
         self.layout.addWidget(self.sharpness)
+
+        self.layout.addWidget(self.range_slider)
 
         # Add stretch to the layout
         self.layout.addStretch()

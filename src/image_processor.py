@@ -47,7 +47,6 @@ def worker_g(queue, image, mode):
     """
     This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
-    print("CONVERTING")
     image = convert_to_grayscale(image, mode)
     queue.put(image)
     return
@@ -57,7 +56,6 @@ def worker_e(queue, image, im_settings):
     """
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
     """
-    print("ENHANCING")
     _brightness = im_settings["brightness"] / 100
     if _brightness > 0:
         # using a log function makes the adjustment feel a bit more natural
@@ -113,7 +111,7 @@ def worker_h(queue, image, algorithm, settings):
     """
     This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
     """
-    print("PROCESSING")
+
     processed_image = apply_algorithm(image, algorithm, settings)
     queue.put(processed_image)
     return
@@ -146,7 +144,7 @@ def apply_algorithm(image, algorithm, settings):
     :param settings: Settings for the algorithm (like threshold, dither levels).
     :return: The processed image as a NumPy array.
     """
-    print(f"Applying {algorithm} to the image with settings: {settings}")
+    # print(f"Applying {algorithm} to the image with settings: {settings}")
 
     # Apply the chosen halftoning algorithm using the respective kernel
     if algorithm == "Fixed threshold":
@@ -348,14 +346,12 @@ class ImageProcessor(QObject):
     It emits progress updates and processed images back to the main thread.
 
     Attributes:
-        progress_signal: Signal to update progress in the main thread.
         result_signal: Signal to send the processed image to the main thread.
         algorithm: The halftoning algorithm to apply.
         settings: Settings for the algorithm, such as error diffusion parameters.
         storage: The ImageStorage instance to access the image data.
     """
 
-    progress_signal = Signal(int)
     result_signal = Signal(bool)
 
     def __init__(self, main_window, storage, parent=None):

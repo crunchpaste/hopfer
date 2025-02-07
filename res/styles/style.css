@@ -2,7 +2,6 @@
     font-family: "JetBrains Mono";
     font-weight: bold;
     font-size: 14px;
-
 }
 
 QWidget {
@@ -31,35 +30,35 @@ QPushButton:focus {
     color: @accent;
     background-color: @secondary;
     border-color: @accent;
-    outline: none;                   /* No outline */
+    outline: none; /* No outline */
     /* text-selection-color: transparent;
     text-selection-background-color: transparent;
     text-selection-border: none; */
 }
 QComboBox {
-    background-color: @secondary;        /* Solid background color */
-    border: 1px solid @primary;        /* Flat border */
-    border-radius: 0px;            /* Optional: slightly rounded corners */
-    padding: 4px;                  /* Some padding for inner spacing */
-    color: @primary;                  /* Text color */
+    background-color: @secondary; /* Solid background color */
+    border: 1px solid @primary; /* Flat border */
+    border-radius: 0px; /* Optional: slightly rounded corners */
+    padding: 4px; /* Some padding for inner spacing */
+    color: @primary; /* Text color */
 }
 QComboBox:disabled {
-    border: 1px solid @disabled;        /* Flat border */
-    border-radius: 0px;            /* Optional: slightly rounded corners */
-    padding: 4px;                  /* Some padding for inner spacing */
-    color: @disabled;                  /* Text color */
+    border: 1px solid @disabled; /* Flat border */
+    border-radius: 0px; /* Optional: slightly rounded corners */
+    padding: 4px; /* Some padding for inner spacing */
+    color: @disabled; /* Text color */
 }
 QComboBox:focus {
-    border: 1px solid @accent;        /* Flat border */
-    color: @accent;                  /* Text color */
+    border: 1px solid @accent; /* Flat border */
+    color: @accent; /* Text color */
 }
 QComboBox::drop-down {
     border: none;
     background-color: transparent; /* Make the background transparent */
-    width: 20px;                   /* Optional: Adjust width of the dropdown button */
+    width: 20px; /* Optional: Adjust width of the dropdown button */
 }
 QComboBox::down-arrow {
-    image: url('@res/icons/menu-down.@ext');
+    image: url("@res/icons/menu-down.@ext");
 }
 /* Dropdown List */
 QComboBox QAbstractItemView {
@@ -69,18 +68,18 @@ QComboBox QAbstractItemView {
     padding: 5px;
 }
 QComboBox QAbstractItemView::item {
-  padding: 5px;
+    padding: 5px;
 }
 
 QComboBox QAbstractItemView::item:hover {
-  padding: 5px;
-  background: @primary;
-  color: @secondary;
+    padding: 5px;
+    background: @primary;
+    color: @secondary;
 }
 QComboBox QAbstractItemView::item:selected {
-  padding: 5px;
-  background: @primary;
-  color: @secondary;
+    padding: 5px;
+    background: @primary;
+    color: @secondary;
 }
 
 QSplitter::handle {
@@ -96,29 +95,29 @@ QSplitter::handle:vertical {
 } */
 
 QSpinBox {
-  color: @primary;
-  background: @secondary;
-  height: 30px;
-  border: 1px solid @primary;
-  border-radius: 2px;
-  selection-color: @accent;
-  selection-background-color: @secondary;
-  padding-right: 15px;
-  padding-left: 15px;
+    color: @primary;
+    background: @secondary;
+    height: 30px;
+    border: 1px solid @primary;
+    border-radius: 2px;
+    selection-color: @accent;
+    selection-background-color: @secondary;
+    padding-right: 15px;
+    padding-left: 15px;
 }
 
 QSpinBox::up-button {
-  background: transparent;
-  subcontrol-origin: border;
-  subcontrol-position: right;
-  height: 31px;
-  border: 1px solid @primary;
-  border-radius: 2px;
-  width: 25px;
-  padding: 0px;
+    background: transparent;
+    subcontrol-origin: border;
+    subcontrol-position: right;
+    height: 31px;
+    border: 1px solid @primary;
+    border-radius: 2px;
+    width: 25px;
+    padding: 0px;
 }
 QSpinBox::up-button:hover {
-  background: @primary;
+    background: @primary;
 }
 
 QSpinBox::up-arrow {
@@ -133,21 +132,22 @@ QSpinBox::up-arrow:hover {
     height: 18px;
 }
 
-QSpinBox::up-arrow:disabled, QSpinBox::up-arrow:off {
-   image: url(@res/icons/disabled/plus.svg);
+QSpinBox::up-arrow:disabled,
+QSpinBox::up-arrow:off {
+    image: url(@res/icons/disabled/plus.svg);
 }
 
 QSpinBox::down-button {
-  background: transparent;
-  subcontrol-origin: border;
-  subcontrol-position: left;
-  height: 31px;
-  border: 1px solid @primary;
-  border-radius: 2px;
-  width: 25px;
+    background: transparent;
+    subcontrol-origin: border;
+    subcontrol-position: left;
+    height: 31px;
+    border: 1px solid @primary;
+    border-radius: 2px;
+    width: 25px;
 }
 QSpinBox::down-button:hover {
-  background: @primary;
+    background: @primary;
 }
 
 QSpinBox::down-arrow {
@@ -162,24 +162,24 @@ QSpinBox::down-arrow:hover {
     height: 18px;
 }
 
-QSpinBox::down-arrow:disabled, QSpinBox::down-arrow:off {
-   image: url(@res/icons/disabled/minus.svg);
+QSpinBox::down-arrow:disabled,
+QSpinBox::down-arrow:off {
+    image: url(@res/icons/disabled/minus.svg);
 }
 
 #seed {
-  font-size: 17px;
-  color: @secondary;
-  background: @primary;
-  padding: 0px;
-  width: 30px;
-  max-width: 30px;
-  height: 29px;
+    font-size: 17px;
+    color: @secondary;
+    background: @primary;
+    padding: 0px;
+    width: 30px;
+    max-width: 30px;
+    height: 29px;
 }
 
 #seed:hover {
-  color: @primary;
-  background: @secondary;
-
+    color: @primary;
+    background: @secondary;
 }
 
 QTabWidget {
@@ -189,35 +189,35 @@ QTabWidget {
 }
 
 #toolbox {
-    max-width: 54px;  /* Set the maximum width */
-    width: 54px;      /* Optional, ensures the width stays fixed */
+    max-width: 54px; /* Set the maximum width */
+    width: 54px; /* Optional, ensures the width stays fixed */
 }
 
 #toolbox QHBoxLayout {
-    max-width: 54px;  /* Set the maximum width */
-    width: 54px;      /* Optional, ensures the width stays fixed */
+    max-width: 54px; /* Set the maximum width */
+    width: 54px; /* Optional, ensures the width stays fixed */
 }
 
 #toolbox QHBoxLayout {
-  padding: 0px;
-  margin: 0px;
+    padding: 0px;
+    margin: 0px;
 }
 
 #toolbox QPushButton {
-  font-family: "Material Symbols Rounded Filled";
-  font-size: 20px;
-  width: 22px;
-  height: 22px;
-  color: @primary;
-  background-color: @secondary;
-  border: 2px solid @primary;
-  border-radius: 2px;
-  margin-top: 1px;
-  margin-bottom: 5px;
+    font-family: "Material Symbols Rounded Filled";
+    font-size: 20px;
+    width: 22px;
+    height: 22px;
+    color: @primary;
+    background-color: @secondary;
+    border: 2px solid @primary;
+    border-radius: 2px;
+    margin-top: 1px;
+    margin-bottom: 5px;
 }
 
 #toolbox #last-button {
-  margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 #toolbox QPushButton:hover {
@@ -226,13 +226,13 @@ QTabWidget {
 }
 
 #toolbox QPushButton:focus {
-  color: @accent;
-  border: 2px solid @accent;
+    color: @accent;
+    border: 2px solid @accent;
 }
 
 #toolbox QPushButton:disabled {
-  color: @disabled;
-  border: 2px solid @disabled;
+    color: @disabled;
+    border: 2px solid @disabled;
 }
 
 QPushButton#settings {
@@ -240,12 +240,12 @@ QPushButton#settings {
 }
 
 QToolTip {
-    color: @primary;                   /* Text color */
-    background-color: @secondary;        /* Background color */
-    border: 2px solid @primary;        /* Border style */
-    border-radius: 2px;               /* Rounded corners */
+    color: @primary; /* Text color */
+    background-color: @secondary; /* Background color */
+    border: 2px solid @primary; /* Border style */
+    border-radius: 2px; /* Rounded corners */
     padding: 2px 5px 2px 5px;
-    font-size: 14px;                  /* Text size */
+    font-size: 14px; /* Text size */
     /* opacity: 200; */
 }
 
@@ -267,9 +267,9 @@ QTabBar::tab:selected {
 
 QTabBar::tab:focus {
     background: @accent;
-    outline: none;  /* Remove the focus outline */
-    selection-color: transparent;  /* Disable text selection color */
-    selection-background-color: transparent;  /* Disable text selection background */
+    outline: none; /* Remove the focus outline */
+    selection-color: transparent; /* Disable text selection color */
+    selection-background-color: transparent; /* Disable text selection background */
 }
 
 QTabBar::tab:hover {
@@ -281,48 +281,52 @@ QTabWidget::pane {
     background-color: transparent;
 }
 
+QSlider {
+    background: none;
+}
+
 QSlider::groove:horizontal {
     border: 2px solid @primary;
     height: 4px;
     border-radius: 2px;
-    background: none;  /* No background for the groove itself */
+    background: transparent; /* No background for the groove itself */
     margin: 6px 0;
 }
 QSlider::groove:horizontal:focus {
     border: 2px solid @accent;
     height: 4px;
     border-radius: 2px;
-    background: none;  /* No background for the groove itself */
+    background: none; /* No background for the groove itself */
     margin: 6px 0;
 }
 /* Left of the handle: White fill inside the groove only */
 QSlider::sub-page:horizontal {
     background: @primary;
     /* border-radius: 2px; */
-    height: 6px;                 /* Same height as the groove */
-    margin: 6px 0;               /* Align with the groove */
+    height: 6px; /* Same height as the groove */
+    margin: 6px 0; /* Align with the groove */
 }
 /* Left of the handle: White fill inside the groove only */
 QSlider::sub-page:horizontal:focus {
     background: @accent;
     /* border-radius: 2px; */
-    height: 6px;                 /* Same height as the groove */
-    margin: 6px 0;               /* Align with the groove */
+    height: 6px; /* Same height as the groove */
+    margin: 6px 0; /* Align with the groove */
 }
 /* Right of the handle: Transparent, matching the groove size */
 QSlider::add-page:horizontal {
     background: none;
     /* border-radius: 2px; */
-    height: 6px;                 /* Same height as the groove */
-    margin: 6px 0;               /* Align with the groove */
+    height: 6px; /* Same height as the groove */
+    margin: 6px 0; /* Align with the groove */
 }
 
 /* Right of the handle: Transparent, matching the groove size */
 QSlider::add-page:horizontal {
     background: none;
     /* border-radius: 2px; */
-    height: 6px;                 /* Same height as the groove */
-    margin: 6px 0;               /* Align with the groove */
+    height: 6px; /* Same height as the groove */
+    margin: 6px 0; /* Align with the groove */
 }
 QSlider::handle:horizontal {
     background: @primary;
@@ -333,9 +337,17 @@ QSlider::handle:horizontal {
 }
 
 QScrollBar {
-    height:0px;
+    height: 0px;
     width: 0px;
     margin: 0px;
+}
+
+QRangeSlider {
+	qproperty-barColor: @primary;
+}
+
+QRangeSlider:active {
+	qproperty-barColor: @accent;
 }
 
 #toggleSlider {
@@ -344,66 +356,66 @@ QScrollBar {
 }
 
 #notificationPane {
-  border: 1px solid @accent;
+    border: 1px solid @accent;
 }
 
 #notificationPane QPushButton {
-  border: none;
-  background: transparent;
-  margin: 0;
+    border: none;
+    background: transparent;
+    margin: 0;
 }
 
 QGraphicsView {
-  margin: 10px;
-  min-width: 250px;
-  background: url('@res/background.@ext') no-repeat center center;
+    margin: 10px;
+    min-width: 250px;
+    background: url("@res/background.@ext") no-repeat center center;
 }
-QGraphicsView focus{
-  border: 1px solid @accent;
+QGraphicsView focus {
+    border: 1px solid @accent;
 }
 
 #viewer-controls QPushButton {
-  font-family: "Material Symbols Rounded Filled";
-  font-size: 20px;
-  width: 22px;
-  height: 22px;
-  color: @primary;
-  background-color: @secondary;
-  border: 2px solid @primary;
-  margin-left: 5px;
+    font-family: "Material Symbols Rounded Filled";
+    font-size: 20px;
+    width: 22px;
+    height: 22px;
+    color: @primary;
+    background-color: @secondary;
+    border: 2px solid @primary;
+    margin-left: 5px;
 }
 
 #viewer-controls QPushButton:hover {
-  color: @secondary;
-  background-color: @primary;
+    color: @secondary;
+    background-color: @primary;
 }
 
 #processing-indicator QLabel {
-  color: @accent;
-  padding: 15px;
-  padding-left: 25px;
-  border: 2px solid @accent;
+    color: @accent;
+    padding: 15px;
+    padding-left: 25px;
+    border: 2px solid @accent;
 }
 #shortcut {
-  border: 2px solid @primary;
-  padding: 5px;
+    border: 2px solid @primary;
+    padding: 5px;
 }
 
 #reset {
-  font-family: "Material Symbols Rounded Filled";
-  color: @primary;
-  background-color: @secondary;
-  margin: 0px;
-  padding: 0px;
-  border: 0px solid transparent;
-  margin-bottom: -1px;
+    font-family: "Material Symbols Rounded Filled";
+    color: @primary;
+    background-color: @secondary;
+    margin: 0px;
+    padding: 0px;
+    border: 0px solid transparent;
+    margin-bottom: -1px;
 }
 #reset:hover {
-  font-family: "Material Symbols Rounded Filled";
-  color: @accent;
-  background-color: @secondary;
+    font-family: "Material Symbols Rounded Filled";
+    color: @accent;
+    background-color: @secondary;
 }
 
-p{
-  line-height: 10pt;
+p {
+    line-height: 10pt;
 }
