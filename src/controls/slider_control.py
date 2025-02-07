@@ -8,21 +8,26 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from controls.custom_range import RangeSlider
 from helpers.debounce import debounce
 
 
 class SliderControl(QWidget):
-    def __init__(self, label, range, value, div):
+    def __init__(self, label, range, value, div, double=False):
         super().__init__()
 
         self.div = div
         self.is_dragging = False
         self.default = value
+        self.double = double
 
         min_value, max_value = range[0], range[1]
 
         # Initialize slider and labels
-        self.slider = QSlider(Qt.Orientation.Horizontal)
+        if self.double:
+            self.slider = RangeSlider(Qt.Orientation.Horizontal)
+        else:
+            self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(min_value, max_value)
         self.slider.setValue(value)
 
@@ -36,11 +41,22 @@ class SliderControl(QWidget):
         self.reset.setVisible(False)
 
         if self.div:
-            self.right_label = QLabel(
-                f"{self.slider.value() / self.div}"
-            )  # Initial value
+            if self.double:
+                self.right_label = QLabel(
+                    f"{self.slider.value()[0] / self.div:.2f} → {self.slider.value()[1] / self.div:.2f}"
+                )
+            else:
+                self.right_label = QLabel(
+                    f"{self.slider.value() / self.div}"
+                )  # Initial value
         else:
-            self.right_label = QLabel(f"{self.slider.value()}")
+            if self.double:
+                self.right_label = QLabel(
+                    f"{self.slider.value()[0]} → {self.slider.value()[1]}"
+                )
+            else:
+                self.right_label = QLabel(f"{self.slider.value()}")
+
         # Connect slider signals
         self.slider.valueChanged.connect(self.update_value)
         self.slider.sliderPressed.connect(
@@ -63,8 +79,17 @@ class SliderControl(QWidget):
     def update_value(self, value):
         """Update the right label with the current slider value."""
         if self.div:
-            self.right_label.setText(f"{value / self.div}")
+            if self.double:
+                self.right_label.setText(
+                    f"{self.slider.value()[0] / self.div:.2f} → {self.slider.value()[1] / self.div:.2f}"
+                )
+            else:
+                self.right_label.setText(f"{value / self.div}")
         else:
+            if self.double:
+                self.right_label.setText(
+                    f"{self.slider.value()[0]} → {self.slider.value()[1]}"
+                )
             self.right_label.setText(f"{value}")
 
         self.show_reset(value)

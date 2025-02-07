@@ -1,7 +1,5 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QVBoxLayout, QWidget
-from PySide6.QtGui import QBrush, QColor
-
 
 from controls.seed_spinbox import SeedSpinBox
 from controls.slider_control import SliderControl
@@ -181,15 +179,27 @@ class MezzoSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()
 
+        self.range_slider = SliderControl(
+            "Uniform range", (0, 100), (0, 100), 100, True
+        )
+        self.range_slider.slider.valueChanged.connect(self.emit_settings_changed)
+        self.range_slider.slider.sliderReleased.connect(self.emit_settings_changed)
+
         self.spin = SeedSpinBox("Random number seed")
         self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
 
+        self.layout.addWidget(self.range_slider)
         self.layout.addWidget(self.spin)
         self.layout.addStretch()
 
     def emit_settings_changed(self):
         """Emit the current settings when the threshold value changes."""
-        self.settingsChanged.emit({"seed": self.spin.spinbox.value()})
+        self.settingsChanged.emit(
+            {
+                "range": self.range_slider.slider.value(),
+                "seed": self.spin.spinbox.value(),
+            }
+        )
 
 
 class GaussSettings(HalftoneSettings):

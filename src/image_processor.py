@@ -60,13 +60,11 @@ def worker_e(queue, image, im_settings):
     if _brightness > 0:
         # using a log function makes the adjustment feel a bit more natural
         _brightness = 5 * (np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01))
-        print("Bright: ", _brightness)
     _brightness += 1
     _contrast = im_settings["contrast"] / 100
     if _contrast > 0:
         # using a log function makes the adjustment feel a bit more natural
         _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
-        print("Contrast: ", _contrast)
     _contrast += 1
     _blur = im_settings["blur"] / 10
     _sharpness = im_settings["sharpness"]
@@ -457,9 +455,7 @@ class ImageProcessor(QObject):
             try:
                 _image = self.queue.get_nowait()
                 return _image
-            except Empty as e:
-                print(f"Exception type: {type(e).__name__}")
-                print(f"Exception message: {e}")
+            except Empty:
                 QCoreApplication.processEvents()
 
     def send_result(self, image):

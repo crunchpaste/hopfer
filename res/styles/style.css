@@ -346,8 +346,11 @@ QRangeSlider {
 	qproperty-barColor: @primary;
 }
 
-QRangeSlider:active {
-	qproperty-barColor: @accent;
+QRangeSlider::sub-page:horizontal {
+    background: @secondary;
+    /* border-radius: 2px; */
+    height: 6px; /* Same height as the groove */
+    margin: 6px 0; /* Align with the groove */
 }
 
 #toggleSlider {

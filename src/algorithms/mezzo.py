@@ -8,7 +8,11 @@ def mezzo(img, settings, mode="uniform"):
     rng = np.random.default_rng(seed)
 
     if mode == "uniform":
-        noise = rng.random((h, w))
+        r_min, r_max = settings["range"]
+        r_min /= 100
+        r_max /= 100
+        print(r_min, r_max)
+        noise = rng.uniform(r_min, r_max, (h, w))
     elif mode == "gauss":
         loc = settings["location"] / 100
         std = settings["std"] / 200
