@@ -289,6 +289,23 @@ def compare(img, noise, h, w):
     return img
 
 
+@cc.export("bayer_dither", "f8[:,:](f8[:,:], f8[:,:])")
+def bayer_dither(img, matrix):
+    n = matrix.shape[0]
+    for y in range(img.shape[0]):
+        for x in range(img.shape[1]):
+            pixel = img[y, x]
+            j = y % n
+            if not (pixel == 0 or pixel == 1):
+                i = x % n
+                if matrix[j, i] > img[y, x]:
+                    img[y, x] = 0
+                else:
+                    img[y, x] = 1
+
+    return img
+
+
 # ERROR DIFFUSION FUNCTIONS. At some point EDOFDs should be added
 @cc.export("ed", "f8[:,:](f8[:,:], f8[:,:], f8)")
 def ed(img, kernel, str_value):

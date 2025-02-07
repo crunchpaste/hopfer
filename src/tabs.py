@@ -6,6 +6,7 @@ from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
 from helpers.debounce import debounce
 from settings import (
+    BayerSettings,
     BetaSettings,
     ErrorDiffusionSettings,
     GaussSettings,
@@ -68,6 +69,8 @@ class HalftoneTab(QWidget):
             return GaussSettings()
         elif algorithm_name == "Mezzotint beta":
             return BetaSettings()
+        elif algorithm_name == "Bayer":
+            return BayerSettings()
         elif algorithm_name in [
             "Floyd-Steinberg",
             "False Floyd-Steinberg",

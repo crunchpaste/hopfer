@@ -28,6 +28,11 @@ except ImportError:
     from algorithms.mezzo import mezzo
 
 try:
+    from algorithms.bayerc import bayer
+except ImportError:
+    from algorithms.bayer import bayer
+
+try:
     from algorithms.error_diffusionc import error_diffusion
 except ImportError:
     from algorithms.error_diffusion import error_diffusion
@@ -165,6 +170,9 @@ def apply_algorithm(image, algorithm, settings):
 
     elif algorithm == "Mezzotint beta":
         processed_image = mezzo(image, settings, mode="beta")
+
+    elif algorithm == "Bayer":
+        processed_image = bayer(image, settings)
 
     elif algorithm == "Floyd-Steinberg":
         kernel = np.array([[0, 0, 0], [0, 0, 7], [3, 5, 1]], dtype=np.float64) / 16.0

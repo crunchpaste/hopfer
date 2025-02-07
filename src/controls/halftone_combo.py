@@ -75,13 +75,18 @@ class HalftoneCombo(QWidget):
         combobox.setMaxVisibleItems(25)
         algorithms = [
             "None",
+            # Thresholds
             "Fixed threshold",
             "Niblack threshold",
             "Sauvola threshold",
             "Phansalkar threshold",
+            # Random dithers
             "Mezzotint uniform",
             "Mezzotint normal",
             "Mezzotint beta",
+            # Ordered dithers
+            "Bayer",
+            # Error diffusions
             "Floyd-Steinberg",
             "False Floyd-Steinberg",
             "Jarvis",
@@ -112,6 +117,11 @@ class HalftoneCombo(QWidget):
         combobox.insertItem(10, "")
         combobox.setItemData(10, "separator", Qt.UserRole)
         combobox.setItemData(10, 0, Qt.UserRole - 1)  # non-selectable
+
+        # separator after the ordered dithers
+        combobox.insertItem(12, "")
+        combobox.setItemData(12, "separator", Qt.UserRole)
+        combobox.setItemData(12, 0, Qt.UserRole - 1)  # non-selectable
 
         return combobox
 

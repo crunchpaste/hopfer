@@ -273,6 +273,35 @@ class BetaSettings(HalftoneSettings):
             )
 
 
+class BayerSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+
+        # The size of the Bayer matrix. Converted to the proper power of 2 in bayer.py and bayerc.py
+        self.size = SliderControl("Matrix size", (1, 10), 1, False)
+        self.size.slider.valueChanged.connect(self.emit_settings_changed)
+        self.size.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        #
+        self.offset = SliderControl("Matrix offset", (-100, 100), 0, 100)
+        self.offset.slider.valueChanged.connect(self.emit_settings_changed)
+        self.offset.slider.sliderReleased.connect(self.emit_settings_changed)
+
+        # Add widgets to layout
+        self.layout.addWidget(self.size)
+        self.layout.addWidget(self.offset)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when any control changes."""
+        if not self.size.is_dragging:
+            settings = {
+                "size": self.size.slider.value(),
+                "offset": self.offset.slider.value(),
+            }
+            self.settingsChanged.emit(settings)
+
+
 class ErrorDiffusionSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()
