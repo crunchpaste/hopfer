@@ -1,5 +1,6 @@
 import io
 import os
+from urllib.parse import unquote, urlparse
 
 import numpy as np
 import requests
@@ -105,6 +106,7 @@ class ImageStorage(QObject):
             self._load(pil_image)
 
         elif _url != "":
+            print(_url)
             try:
                 response = requests.get(_url)
                 if response.status_code == 200:
@@ -120,6 +122,12 @@ class ImageStorage(QObject):
             except Exception as e:
                 # if this fails it is captured by the load_image method
                 print(e)
+                if _url.startswith("file:///"):
+                    parsed_url = urlparse(_url)
+                    local_path = unquote(parsed_url.path)
+                    if os.name == "nt":
+                        local_path = local_path.lstrip("/")
+                    _url = local_path
                 self.load_image(_url)
         else:
             self.show_notification("Error: No image data in clipboard.", duration=10000)
