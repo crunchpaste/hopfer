@@ -3,7 +3,7 @@ import platform
 import subprocess
 import sys
 
-from PySide6.QtGui import QFontDatabase, QIcon
+from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtWidgets import QApplication
 
 from helpers.load_stylesheet import load_qss
@@ -32,6 +32,15 @@ def load_font(path):
         print("Failed to load font!")
     else:
         font_families = QFontDatabase.applicationFontFamilies(font_id)
+
+        font = QFont(font_families[0])
+
+        # It seems that this does nothing to help awful font rendering on Windows
+        # The only solution I've found so far is to just use MacType, available at
+        # https://mactype.net
+        font.setHintingPreference(QFont.HintingPreference.PreferFullHinting)
+        font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
+
         print("Loaded Font Family:", font_families[0])  # The actual font name
 
 
@@ -63,14 +72,16 @@ def main():
 
     # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet stiled.
     # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
+
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(get_path("res/hopfer.png")))
 
     load_font("res/fonts/JetBrainsMono.ttf")
     load_font("res/fonts/mat_s/MaterialSymbols.ttf")
-    # In ths case a .css file is used insread of .qss as it easier to highlight in an editor.
     # app.setStyle("Windows") # leads to minor differences
+    #
     app.setStyle(NoFocusProxyStyle())
+    # In ths case a .css file is used insread of .qss as it easier to highlight in an editor.
     load_qss(app, get_path("res/styles/style.css"))
 
     window = MainWindow()
