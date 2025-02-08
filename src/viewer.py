@@ -19,6 +19,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self._scene = QtWidgets.QGraphicsScene(self)
         self._photo = QtWidgets.QGraphicsPixmapItem()
 
+        screen = QtWidgets.QApplication.primaryScreen()
+        self.dpi_scaling = screen.devicePixelRatio()
+
         self._photo.setTransformationMode(
             QtCore.Qt.TransformationMode.FastTransformation
         )
@@ -108,6 +111,13 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setSceneRect(rect)
             self.resetTransform()
             self.setTransform(QtGui.QTransform())
+
+            # in case the display is set at custom scaling
+            # this should negate it. Mostly done as Windows defaults
+            # to 125% scale and images look horrible.
+            sf = 1 / self.dpi_scaling
+            self.scale(sf, sf)
+
             self.centerOn(self._photo)
 
             self.updateCoordinates()
@@ -119,11 +129,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setSceneRect(rect)
             scale = max(1, scale)  # Ensure scale is at least 1
             if self.hasValidPhoto():
-                # Apply the custom scale factor
-                self.setTransform(
-                    QtGui.QTransform()
-                )  # Reset any previous transformations
-                self.scale(scale, scale)  # Apply custom scale factor
+                self.setTransform(QtGui.QTransform())
+                # in case the display is set at custom scaling
+                # this should negate it. Mostly done as Windows defaults
+                # to 125% scale and images look horrible.
+                sf = 1 / self.dpi_scaling
+                self.scale(scale * sf, scale * sf)  # Apply custom scale factor
                 self.centerOn(self._photo)
 
                 self.updateCoordinates()
