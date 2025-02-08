@@ -370,6 +370,7 @@ class ImageProcessor(QObject):
         """
         super().__init__(parent)
         self.queue = Queue()
+        self.process = None
         self.storage = storage
         self.main_window = main_window
         self.algorithm = "None"
@@ -396,12 +397,13 @@ class ImageProcessor(QObject):
         self.main_window.viewer.labelVisible(True)
 
         # Checks if there is another process running already. If there is terminates it.
-        try:
-            if self.process.is_alive():
-                self.process.terminate()
-                self.pocess.join()
-        except Exception as e:
-            print(e)
+        if self.process is not None:
+            try:
+                if self.process.is_alive():
+                    self.process.terminate()
+                    self.pocess.join()
+            except Exception as e:
+                print(e)
 
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
         convert = not self.storage.original_grayscale and step == 0
