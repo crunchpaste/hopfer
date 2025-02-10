@@ -216,6 +216,19 @@ class ImageStorage(QObject):
         self.show_notification(f"Image saved to {save_path}", duration=3000)
         print(f"Image saved to {save_path}")
 
+    def save_to_clipboard(self):
+        if self.processed_image is not None:
+            clipboard = self.app.clipboard()
+            img = numpy_to_pixmap(self.processed_image)
+
+            # TODO: I have to check how to create pixmaps directly from an array
+            clipboard.setPixmap(img)
+            self.show_notification("Image stored in clipboard.")
+        else:
+            self.show_notification(
+                "Image? What image? You haven't opened one yet.", duration=5000
+            )
+
     def generate_unique_save_path(self, base_dir, base_name):
         """
         Generate a unique save path for the image. If the file exists,
