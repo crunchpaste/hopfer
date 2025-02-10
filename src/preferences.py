@@ -55,7 +55,7 @@ class ShortcutsTab(QWidget):
             ShortcutLayout("Save image", ["Ctrl", "S"]),
             ShortcutLayout("Save image as", ["Ctrl", "Shift", "S"]),
             ShortcutLayout("Image tab", ["Ctrl", "I"]),
-            ShortcutLayout("Haltone tab", ["Ctrl", "H"]),
+            ShortcutLayout("Halftone tab", ["Ctrl", "H"]),
             ShortcutLayout("Blur preview", ["Ctrl", "B"]),
             ShortcutLayout("Zoom level", ["Ctrl", "0-9"]),
         ]
