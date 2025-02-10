@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
+    QScrollArea,
     QSizePolicy,
     QSpacerItem,
     QTabWidget,
@@ -47,11 +48,17 @@ class ShortcutsTab(QWidget):
     def __init__(self, dialog):
         super().__init__()
         self.dialog = dialog
-        layout = QVBoxLayout()
+
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+
+        container = QWidget()
+        layout = QVBoxLayout(container)
 
         shortcuts = [
             ShortcutLayout("Quit", ["Ctrl", "Q"]),
             ShortcutLayout("Open image", ["Ctrl", "O"]),
+            ShortcutLayout("Image from clipboard", ["Ctrl", "Shift", "V"]),
             ShortcutLayout("Save image", ["Ctrl", "S"]),
             ShortcutLayout("Save image as", ["Ctrl", "Shift", "S"]),
             ShortcutLayout("Image tab", ["Ctrl", "I"]),
@@ -63,7 +70,12 @@ class ShortcutsTab(QWidget):
         for sc in shortcuts:
             layout.addWidget(sc)
 
-        self.setLayout(layout)
+        container.setLayout(layout)
+
+        scroll.setWidget(container)
+
+        main_layout = QVBoxLayout(self)
+        main_layout.addWidget(scroll)
 
 
 class AboutTab(QWidget):
