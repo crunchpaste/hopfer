@@ -343,7 +343,7 @@ QScrollBar {
 }
 
 QRangeSlider {
-	qproperty-barColor: @primary;
+    qproperty-barcolor: @primary;
 }
 
 QRangeSlider::sub-page:horizontal {
@@ -369,9 +369,10 @@ QRangeSlider::sub-page:horizontal {
 }
 
 QGraphicsView {
-    margin: 10px;
+    border: 2px solid transparent;
+    margin: 8px; /* should have been 10, but this is compensating for te border */
     min-width: 250px;
-    background: url("@res/background.@ext") no-repeat center center;
+    background: url("@res/background.svg") no-repeat center center;
 }
 QGraphicsView focus {
     border: 1px solid @accent;

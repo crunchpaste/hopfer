@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 
         self.sidebar = SideBar(self.processor, self.storage)
 
-        self.viewer = PhotoViewer()
+        self.viewer = PhotoViewer(self.storage)
         self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         # self.viewer_controls = ViewerControls(self.viewer)
 

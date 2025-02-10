@@ -11,8 +11,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     SCALE_FACTOR = 1.25  # Class-level constant for scaling factor
 
-    def __init__(self, parent=None):
+    def __init__(self, storage, parent=None):
         super().__init__(parent)
+
+        self.storage = storage
+        self.setAcceptDrops(True)
+
         self._zoom = 0
         self._pinned = False
         self._empty = True
@@ -236,10 +240,46 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.updateCoordinates(event.position().toPoint())
         super().mouseMoveEvent(event)
 
-    def leaveEvent(self, event):
-        """Handle mouse leave event."""
-        self.coordinatesChanged.emit(QtCore.QPoint())
-        super().leaveEvent(event)
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls() or event.mimeData().hasText():
+            event.acceptProposedAction()
+            self.toggle_drop_border(True)
+
+        else:
+            print("Ignoring drag event (unknown format)")
+
+    def dragMoveEvent(self, event):
+        # Drops are not accepted if dragMoveEvent is not accepted for
+        # some reason
+        event.acceptProposedAction()
+
+    def dropEvent(self, event):
+        # remove the border as soon as possible
+        self.toggle_drop_border(False)
+
+        urls = event.mimeData().urls()
+        if urls:
+            file_path = urls[0].toLocalFile()
+            self.storage.load_image(file_path)
+            return
+
+        text = event.mimeData().text().strip()
+        if text.startswith("file://"):
+            file_path = text[7:]  # Strip file://
+            self.storage.load_image(file_path)
+
+    def dragLeaveEvent(self, event):
+        self.toggle_drop_border(False)
 
     def labelVisible(self, state):
         self.label.setVisible(state)
+
+    def toggle_drop_border(self, show):
+        # A border that indicates if a file could be dropped
+        if show:
+            self.setStyleSheet("QGraphicsView {border: 2px solid salmon}")
+        else:
+            # a transparent 2px border is being used so that the resize
+            # event is not triggered as it is quite jarring. The border is
+            # compensated with the margin in style.css
+            self.setStyleSheet("QGraphicsView {border: 2px solid transparent}")
