@@ -12,18 +12,33 @@ def pixmap_to_numpy(pixmap):
     return image_array
 
 
-def numpy_to_pixmap(img_array):
+def numpy_to_pixmap(img_array, alpha=None):
+    # A bit of a spaghetti monster, but alpha is only passed when the image
+    # is stored into the clipboard, if that makes sense.
+
+    h, w = img_array.shape[:2]
+    c = 1 if img_array.ndim == 2 else img_array.shape[2]
     image_array = np.copy(img_array)
+
+    if alpha is not None:
+        alpha_array = np.copy(alpha)
+        c += 1
+        if alpha_array.dtype != np.uint8:
+            alpha_array = (alpha_array * 255).clip(0, 255).astype(np.uint8)
+    else:
+        alpha_array = np.full((h, w), 255, dtype=np.uint8)
+
     if image_array.dtype != np.uint8:
         # This one is quite slow for large images and definitely needs improvement
         image_array = (image_array * 255).clip(0, 255).astype(np.uint8)
-    if image_array.ndim == 2:
+
+    if image_array.ndim == 2 and alpha is None:
         # This is the case only when the halftoning mode is None
         format = QImage.Format_Grayscale8
         h, w = image_array.shape
         c = 1
-    elif image_array.ndim == 3:
-        h, w, c = image_array.shape
+
+    elif image_array.ndim == 3 or alpha is not None:
         if c == 2:
             # This is grayscale with alpha
             # For some reason QImage does not support LA so this is needed
@@ -32,7 +47,7 @@ def numpy_to_pixmap(img_array):
                     image_array,
                     image_array,
                     image_array,
-                    np.full((h, w), 255, dtype=np.uint8),
+                    alpha_array,
                 )
             )
             format = QImage.Format_RGBA8888

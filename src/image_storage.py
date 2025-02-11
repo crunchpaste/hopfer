@@ -219,7 +219,8 @@ class ImageStorage(QObject):
     def save_to_clipboard(self):
         if self.processed_image is not None:
             clipboard = self.app.clipboard()
-            img = numpy_to_pixmap(self.processed_image)
+            print(self.alpha)
+            img = numpy_to_pixmap(self.processed_image, alpha=self.alpha)
 
             # TODO: I have to check how to create pixmaps directly from an array
             clipboard.setPixmap(img)
