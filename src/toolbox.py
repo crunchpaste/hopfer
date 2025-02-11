@@ -53,6 +53,9 @@ class Toolbox(QWidget):
         self.flip = self._create_button("e3e8", "Flip", self._flip)
         self.flip.setEnabled(False)
 
+        self.invert = self._create_button("e891", "Invert colors", self._invert)
+        self.invert.setEnabled(False)
+
         # App buttons
 
         self.preferences = self._create_button("e8b8", "Preferences", None)
@@ -65,6 +68,7 @@ class Toolbox(QWidget):
 
         toolbox_layout.addItem(spacer)
 
+        toolbox_layout.addWidget(self.invert)
         toolbox_layout.addWidget(self.rot_cw)
         toolbox_layout.addWidget(self.rot_ccw)
         toolbox_layout.addWidget(self.flip)
@@ -140,6 +144,9 @@ class Toolbox(QWidget):
     def _flip(self):
         self.storage.flip_image()
 
+    def _invert(self):
+        self.storage.invert_image()
+
     def enable_buttons(self):
         """Enables the buttons when an image is available"""
         self.save.setEnabled(True)
@@ -147,3 +154,4 @@ class Toolbox(QWidget):
         self.rot_cw.setEnabled(True)
         self.rot_ccw.setEnabled(True)
         self.flip.setEnabled(True)
+        self.invert.setEnabled(True)

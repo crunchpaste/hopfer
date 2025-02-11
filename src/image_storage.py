@@ -392,6 +392,16 @@ class ImageStorage(QObject):
         # the halftoning would be accurate again on the next reprocess.
         self.result_signal.emit(True)
 
+    def invert_image(self):
+        self.original_image = 1 - self.original_image
+        self.grayscale_image = 1 - self.grayscale_image
+        self.enhanced_image = 1 - self.enhanced_image
+        self.processed_image = 1 - self.processed_image
+
+        # It may be a bit of a personal preference, but i don't believe
+        # the view should be reset after inverting the colors.
+        self.result_signal.emit(False)
+
     def show_notification(self, message, duration=3000):
         """
         Show a notification in the main window's sidebar.
