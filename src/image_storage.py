@@ -41,8 +41,11 @@ class ImageStorage(QObject):
         super().__init__()
         self.app = QApplication.instance()
         self.main_window = main_window
+
         self.image_path = None
         self.save_path = None
+        self.save_path_edited = False  # Track if the save path has been altered
+
         self.original_image = None
         self.original_grayscale = False
         self.grayscale_image = None
@@ -51,7 +54,6 @@ class ImageStorage(QObject):
         self.ignore_alpha = False
         self.edited_image = None
         self.processed_image = None
-        self.save_path_edited = False  # Track if the save path has been altered
 
     def _load(self, image):
         # the final procedure of loading an image. expecs a pillow image.
@@ -356,6 +358,19 @@ class ImageStorage(QObject):
 
         # Sending the signal to main_window
         self.result_signal.emit(reset)
+
+    def rotate_image(self, cw=True):
+        if cw:
+            self.original_image = np.rot90(self.original_image, k=-1)
+            self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
+            self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
+        else:
+            self.original_image = np.rot90(self.original_image, k=1)
+            self.grayscale_image = np.rot90(self.grayscale_image, k=1)
+            self.enhanced_image = np.rot90(self.enhanced_image, k=1)
+
+        self.main_window.processor.reset = True
+        self.main_window.processor.start(step=2)
 
     def show_notification(self, message, duration=3000):
         """

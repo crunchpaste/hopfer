@@ -1,5 +1,11 @@
 from PySide6.QtCore import Signal
-from PySide6.QtWidgets import QFileDialog, QPushButton, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QFileDialog,
+    QPushButton,
+    QSpacerItem,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class Toolbox(QWidget):
@@ -22,6 +28,10 @@ class Toolbox(QWidget):
         _ext = "svg"
 
         # Create the buttons
+        # Spacer
+        spacer = QSpacerItem(20, 15)
+
+        # File buttons
         self.open = self._create_button("e43e", "Open image", self.open_file_dialog)
 
         self.save = self._create_button("e161", "Save image", self.storage.save_image)
@@ -30,12 +40,35 @@ class Toolbox(QWidget):
         self.saveas = self._create_button("eb60", "Save as", self.save_file_dialog)
         self.saveas.setEnabled(False)  # Initial state is disabled
 
+        # Image buttons
+
+        self.rot_cw = self._create_button("e41a", "Rotate CW", None)
+        self.rot_cw.setEnabled(False)
+        self.rot_cw.clicked.connect(lambda: self._rotate(True))
+
+        self.rot_ccw = self._create_button("e419", "Rotate CCW", None)
+        self.rot_ccw.setEnabled(False)
+        self.rot_ccw.clicked.connect(lambda: self._rotate(False))
+
+        self.flip = self._create_button("e3e8", "Flip", None)
+        self.flip.setEnabled(False)
+
+        # App buttons
+
         self.preferences = self._create_button("e8b8", "Preferences", None)
         self.preferences.setObjectName("last-button")
+
         # Add buttons to layout
         toolbox_layout.addWidget(self.open)
         toolbox_layout.addWidget(self.save)
         toolbox_layout.addWidget(self.saveas)
+
+        toolbox_layout.addItem(spacer)
+
+        toolbox_layout.addWidget(self.rot_cw)
+        toolbox_layout.addWidget(self.rot_ccw)
+        toolbox_layout.addWidget(self.flip)
+
         toolbox_layout.addStretch()
         toolbox_layout.addWidget(self.preferences)
 
@@ -101,7 +134,12 @@ class Toolbox(QWidget):
             # This is just so that an error pops in the notification pane.
             self.storage.save_image()
 
+    def _rotate(self, cw):
+        self.storage.rotate_image(cw)
+
     def enable_save(self):
         """Enables the save buttons when an image is available"""
         self.save.setEnabled(True)
         self.saveas.setEnabled(True)
+        self.rot_cw.setEnabled(True)
+        self.rot_ccw.setEnabled(True)
