@@ -36,26 +36,25 @@ QPushButton:focus {
     text-selection-border: none; */
 }
 QComboBox {
-    background-color: @secondary; /* Solid background color */
-    border: 1px solid @primary; /* Flat border */
-    border-radius: 0px; /* Optional: slightly rounded corners */
-    padding: 4px; /* Some padding for inner spacing */
-    color: @primary; /* Text color */
+    background-color: @secondary;
+    border: 1px solid @primary;
+    padding: 4px;
+    color: @primary;
 }
 QComboBox:disabled {
-    border: 1px solid @disabled; /* Flat border */
-    border-radius: 0px; /* Optional: slightly rounded corners */
-    padding: 4px; /* Some padding for inner spacing */
-    color: @disabled; /* Text color */
+    border: 1px solid @disabled;
+    border-radius: 1px;
+    padding: 4px;
+    color: @disabled;
 }
 QComboBox:focus {
-    border: 1px solid @accent; /* Flat border */
-    color: @accent; /* Text color */
+    border: 1px solid @accent;
+    color: @accent;
 }
 QComboBox::drop-down {
     border: none;
-    background-color: transparent; /* Make the background transparent */
-    width: 20px; /* Optional: Adjust width of the dropdown button */
+    background-color: transparent;
+    width: 20px;
 }
 QComboBox::down-arrow {
     image: url("@res/icons/menu-down.@ext");
@@ -72,12 +71,14 @@ QComboBox QAbstractItemView::item {
 }
 
 QComboBox QAbstractItemView::item:hover {
-    padding: 5px;
+    /* No clue where a margin is set on hover, but this negates it */
+    margin-left: -5px;
     background: @primary;
     color: @secondary;
 }
 QComboBox QAbstractItemView::item:selected {
-    padding: 5px;
+    /* No clue where a margin is set on hover, but this negates it */
+    margin-left: -5px;
     background: @primary;
     color: @secondary;
 }
@@ -89,10 +90,6 @@ QSplitter::handle {
 QSplitter::handle:hover {
     image: url("@res/icons/handle_hover.svg");
 }
-/*
-QSplitter::handle:vertical {
-    min-width: 12px;
-} */
 
 QSpinBox {
     color: @primary;
@@ -189,13 +186,13 @@ QTabWidget {
 }
 
 #toolbox {
-    max-width: 54px; /* Set the maximum width */
-    width: 54px; /* Optional, ensures the width stays fixed */
+    max-width: 54px;
+    width: 54px;
 }
 
 #toolbox QHBoxLayout {
-    max-width: 54px; /* Set the maximum width */
-    width: 54px; /* Optional, ensures the width stays fixed */
+    max-width: 54px;
+    width: 54px;
 }
 
 #toolbox QHBoxLayout {
@@ -240,13 +237,12 @@ QPushButton#settings {
 }
 
 QToolTip {
-    color: @primary; /* Text color */
-    background-color: @secondary; /* Background color */
-    border: 2px solid @primary; /* Border style */
-    border-radius: 2px; /* Rounded corners */
+    color: @primary;
+    background-color: @secondary;
+    border: 2px solid @primary;
+    border-radius: 2px;
     padding: 2px 5px 2px 5px;
-    font-size: 14px; /* Text size */
-    /* opacity: 200; */
+    font-size: 14px;
 }
 
 QTabWidget::tab-bar {
@@ -257,7 +253,6 @@ QTabBar::tab {
     background-color: @secondary;
     border: 1px solid @primary;
     padding: 5px 10px;
-    /* margin-right: 1px; */
 }
 
 QTabBar::tab:selected {
@@ -267,9 +262,6 @@ QTabBar::tab:selected {
 
 QTabBar::tab:focus {
     background: @accent;
-    outline: none; /* Remove the focus outline */
-    selection-color: transparent; /* Disable text selection color */
-    selection-background-color: transparent; /* Disable text selection background */
 }
 
 QTabBar::tab:hover {
@@ -348,13 +340,11 @@ QRangeSlider {
 
 QRangeSlider::sub-page:horizontal {
     background: @secondary;
-    /* border-radius: 2px; */
-    height: 6px; /* Same height as the groove */
-    margin: 6px 0; /* Align with the groove */
+    height: 6px;
+    margin: 6px 0;
 }
 
 #toggleSlider {
-    /* margin: 5px 10px; */
     max-width: 25px;
 }
 
