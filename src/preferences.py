@@ -85,6 +85,7 @@ class AboutTab(QWidget):
 
         with open(get_path("res/desc.html"), "r") as file:
             text = file.read()
+
         description_label = QLabel()
         description_label.setObjectName("about")
         description_label.setAlignment(Qt.AlignmentFlag.AlignLeft)

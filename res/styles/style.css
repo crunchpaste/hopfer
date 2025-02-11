@@ -410,6 +410,10 @@ QGraphicsView focus {
     background-color: @secondary;
 }
 
+#about {
+    padding: 10px;
+}
+
 p {
     line-height: 10pt;
 }
