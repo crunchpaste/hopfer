@@ -317,10 +317,9 @@ class ImageStorage(QObject):
         :return: QPixmap of the processed image (or original if not processed).
         """
         if self.main_window.processor.algorithm == "None":
-            return (
-                self._get_image_pixmap(self.processed_image)
-                or self.get_original_pixmap()
-            )
+            # needed to avoid not C contiguous error
+            _img = np.ascontiguousarray(self.processed_image)
+            return self._get_image_pixmap(_img) or self.get_original_pixmap()
         else:
             color_dark = np.array((34, 35, 35)).astype(np.uint8)
             color_light = np.array((240, 246, 246)).astype(np.uint8)
@@ -364,21 +363,34 @@ class ImageStorage(QObject):
             self.original_image = np.rot90(self.original_image, k=-1)
             self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
+            self.processed_image = np.rot90(self.processed_image, k=-1)
+            if self.alpha is not None:
+                self.alpha = np.rot90(self.alpha, k=-1)
         else:
             self.original_image = np.rot90(self.original_image, k=1)
             self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
+            self.processed_image = np.rot90(self.processed_image, k=1)
+            if self.alpha is not None:
+                self.alpha = np.rot90(self.alpha, k=1)
 
-        self.main_window.processor.reset = True
-        self.main_window.processor.start(step=2)
+        # while this does not produce accurate results for the dithering
+        # it is much faster than reprocessing the image on each transform.
+        # the halftoning would be accurate again on the next reprocess.
+        self.result_signal.emit(True)
 
     def flip_image(self):
         self.original_image = np.fliplr(self.original_image)
         self.grayscale_image = np.fliplr(self.grayscale_image)
         self.enhanced_image = np.fliplr(self.enhanced_image)
+        self.processed_image = np.fliplr(self.processed_image)
+        if self.alpha is not None:
+            self.alpha = np.fliplr(self.alpha)
 
-        self.main_window.processor.reset = True
-        self.main_window.processor.start(step=2)
+        # while this does not produce accurate results for the dithering
+        # it is much faster than reprocessing the image on each transform.
+        # the halftoning would be accurate again on the next reprocess.
+        self.result_signal.emit(True)
 
     def show_notification(self, message, duration=3000):
         """
