@@ -64,7 +64,7 @@ class ImageStorage(QObject):
             self.grayscale_image = self.original_image
         self.main_window.processor.reset = True
         self.main_window.processor.start()
-        self.main_window.sidebar.toolbox.enable_save()
+        self.main_window.sidebar.toolbox.enable_buttons()
 
     def load_image(self, image_path):
         """
@@ -368,6 +368,14 @@ class ImageStorage(QObject):
             self.original_image = np.rot90(self.original_image, k=1)
             self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
+
+        self.main_window.processor.reset = True
+        self.main_window.processor.start(step=2)
+
+    def flip_image(self):
+        self.original_image = np.fliplr(self.original_image)
+        self.grayscale_image = np.fliplr(self.grayscale_image)
+        self.enhanced_image = np.fliplr(self.enhanced_image)
 
         self.main_window.processor.reset = True
         self.main_window.processor.start(step=2)

@@ -50,7 +50,7 @@ class Toolbox(QWidget):
         self.rot_ccw.setEnabled(False)
         self.rot_ccw.clicked.connect(lambda: self._rotate(False))
 
-        self.flip = self._create_button("e3e8", "Flip", None)
+        self.flip = self._create_button("e3e8", "Flip", self._flip)
         self.flip.setEnabled(False)
 
         # App buttons
@@ -137,9 +137,13 @@ class Toolbox(QWidget):
     def _rotate(self, cw):
         self.storage.rotate_image(cw)
 
-    def enable_save(self):
-        """Enables the save buttons when an image is available"""
+    def _flip(self):
+        self.storage.flip_image()
+
+    def enable_buttons(self):
+        """Enables the buttons when an image is available"""
         self.save.setEnabled(True)
         self.saveas.setEnabled(True)
         self.rot_cw.setEnabled(True)
         self.rot_ccw.setEnabled(True)
+        self.flip.setEnabled(True)
