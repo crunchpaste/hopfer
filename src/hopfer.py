@@ -1,5 +1,3 @@
-import os
-import platform
 import subprocess
 import sys
 
@@ -60,15 +58,15 @@ def main():
     """
     TODO: Create a splash screen.
     """
-    desktop_file_path = None
+    # desktop_file_path = None
 
     if not hasattr(sys.modules["__main__"], "__compiled__"):
         # only get the hash if this is not a nuitka compiled binary
         get_latest_hash()
 
     # Setup Linux environment if applicable
-    if sys.platform.startswith("linux") or platform.system() == "Linux":
-        desktop_file_path = setup_linux_icon()
+    # if sys.platform.startswith("linux") or platform.system() == "Linux":
+    #     desktop_file_path = setup_linux_icon()
 
     # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet stiled.
     # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
@@ -90,13 +88,12 @@ def main():
 
     Shortcuts(app, window)
 
-    try:
-        sys.exit(app.exec())
-    finally:
-        # Delete the .desktop file. Suitable only for portable versions and should be improved.
-        if desktop_file_path and os.path.exists(desktop_file_path):
-            os.remove(desktop_file_path)
-            print(f".desktop file removed: {desktop_file_path}")
+    sys.exit(app.exec())
+    # pass
+    #     # Delete the .desktop file. Suitable only for portable versions and should be improved.
+    #     if desktop_file_path and os.path.exists(desktop_file_path):
+    #         os.remove(desktop_file_path)
+    #         print(f".desktop file removed: {desktop_file_path}")
 
 
 if __name__ == "__main__":

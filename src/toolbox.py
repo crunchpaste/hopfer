@@ -29,7 +29,8 @@ class Toolbox(QWidget):
 
         # Create the buttons
         # Spacer
-        spacer = QSpacerItem(20, 15)
+        spacer0 = QSpacerItem(20, 15)
+        spacer1 = QSpacerItem(20, 15)
 
         # File buttons
         self.open = self._create_button("e43e", "Open image", self.open_file_dialog)
@@ -66,12 +67,14 @@ class Toolbox(QWidget):
         toolbox_layout.addWidget(self.save)
         toolbox_layout.addWidget(self.saveas)
 
-        toolbox_layout.addItem(spacer)
+        toolbox_layout.addItem(spacer0)
 
         toolbox_layout.addWidget(self.invert)
         toolbox_layout.addWidget(self.rot_cw)
         toolbox_layout.addWidget(self.rot_ccw)
         toolbox_layout.addWidget(self.flip)
+
+        toolbox_layout.addItem(spacer1)
 
         toolbox_layout.addStretch()
         toolbox_layout.addWidget(self.preferences)
