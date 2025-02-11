@@ -38,7 +38,7 @@ class MainWindow(QMainWindow):
 
         self.sidebar = SideBar(self.processor, self.storage)
 
-        self.viewer = PhotoViewer(self.storage)
+        self.viewer = PhotoViewer(self, self.storage)
         self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         # self.viewer_controls = ViewerControls(self.viewer)
 
@@ -74,3 +74,7 @@ class MainWindow(QMainWindow):
             if reset:
                 self.viewer.resetView()
                 self.viewer._zoom = 0
+
+    def get_focus(self):
+        self.activateWindow()
+        self.raise_()

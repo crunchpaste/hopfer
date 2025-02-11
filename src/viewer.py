@@ -11,10 +11,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
 
     SCALE_FACTOR = 1.25  # Class-level constant for scaling factor
 
-    def __init__(self, storage, parent=None):
+    def __init__(self, window, storage, parent=None):
         super().__init__(parent)
 
-        self.storage = storage
+        self.window = window  # needed to regain focus after a drop
+        self.storage = storage  # needed to load image after a drop
         self.setAcceptDrops(True)
 
         self._zoom = 0
@@ -261,12 +262,14 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         if urls:
             file_path = urls[0].toLocalFile()
             self.storage.load_image(file_path)
+            self.window.get_focus()
             return
 
         text = event.mimeData().text().strip()
         if text.startswith("file://"):
             file_path = text[7:]  # Strip file://
             self.storage.load_image(file_path)
+            self.window.get_focus()
 
     def dragLeaveEvent(self, event):
         self.toggle_drop_border(False)
