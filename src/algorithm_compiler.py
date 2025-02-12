@@ -8,7 +8,7 @@ cc.output_dir = "src/algorithms"
 
 
 # STYLING: Could later be used for outputting in different colors
-@cc.export("style_image", "u1[:,:,:](f8[:,:], u1[:], u1[:])")
+@cc.export("style_image", "u1[:,:,:](f4[:,:], u1[:], u1[:])")
 def style_image(img, black, white):
     h, w = img.shape
     output_img = np.zeros((h, w, 3), dtype=np.uint8)
@@ -27,11 +27,11 @@ def style_image(img, black, white):
 
 
 # THESHOLDING METHODS. Should include local thresholding later.
-@cc.export("thresh", "f8[:,:](f8[:,:], f8)")
+@cc.export("thresh", "f4[:,:](f4[:,:], f4)")
 def thresh(img, threshold_value):
     # Apply thresholding
     h, w = img.shape
-    output_img = np.zeros((h, w), dtype=np.float64)
+    output_img = np.zeros((h, w), dtype=np.float32)
     for i in range(h):
         for j in range(w):
             if img[i, j] > threshold_value:
@@ -41,13 +41,13 @@ def thresh(img, threshold_value):
     return output_img
 
 
-@cc.export("niblack", "f8[:,:](f8[:,:], u2, f8)")
+@cc.export("niblack", "f4[:,:](f4[:,:], u2, f4)")
 def niblack(img, n=25, k=0.2):
     # exaclty the same as sauvola() and phansalkar() apart for the formula for the threshold
     h, w = img.shape
     w_half = n // 2  # Half size of the block (window)
 
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     # Compute the integral image and squared integral image
     integral_img = np.zeros((h + 1, w + 1))
@@ -119,12 +119,12 @@ def niblack(img, n=25, k=0.2):
     return output_img
 
 
-@cc.export("sauvola", "f8[:,:](f8[:,:], u2, f8, f8)")
+@cc.export("sauvola", "f4[:,:](f4[:,:], u2, f8, f8)")
 def sauvola(img, n=25, R=0.5, k=0.2):
     h, w = img.shape
     w_half = n // 2  # Half size of the block (window)
 
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     # Compute the integral image and squared integral image
     integral_img = np.zeros((h + 1, w + 1))
@@ -196,13 +196,13 @@ def sauvola(img, n=25, R=0.5, k=0.2):
     return output_img
 
 
-@cc.export("phansalkar", "f8[:,:](f8[:,:], u2, f8, f8, f8, f8)")
+@cc.export("phansalkar", "f4[:,:](f4[:,:], u2, f4, f4, f4, f4)")
 def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
     # This function is completely duplicating seuvola, apart from the arguments accepted and the formula for the local threshold. This is mostly done to for marginal performance gains by avoiding some conditionals.
     h, w = img.shape
     w_half = n // 2  # Half size of the block (window)
 
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     # Compute the integral image and squared integral image
     integral_img = np.zeros((h + 1, w + 1))
@@ -277,7 +277,7 @@ def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
 # NOISE RELATED FUNCTIONS
 
 
-@cc.export("compare", "f8[:,:](f8[:,:], f8[:,:], u2, u2)")
+@cc.export("compare", "f4[:,:](f4[:,:], f8[:,:], u2, u2)")
 def compare(img, noise, h, w):
     # Doing it in this crude nested for loop seems to be a few times faster than using np.where
     for y in range(h):
@@ -289,7 +289,7 @@ def compare(img, noise, h, w):
     return img
 
 
-@cc.export("bayer_dither", "f8[:,:](f8[:,:], f8[:,:])")
+@cc.export("bayer_dither", "f4[:,:](f4[:,:], f8[:,:])")
 def bayer_dither(img, matrix):
     n = matrix.shape[0]
     for y in range(img.shape[0]):
@@ -307,7 +307,7 @@ def bayer_dither(img, matrix):
 
 
 # ERROR DIFFUSION FUNCTIONS. At some point EDOFDs should be added
-@cc.export("ed", "f8[:,:](f8[:,:], f8[:,:], f8)")
+@cc.export("ed", "f4[:,:](f4[:,:], f8[:,:], f4)")
 def ed(img, kernel, str_value):
     """
     A generic error diffusion fuction. Expects the image, the kernel (see src/image_processor for example) and a strength of diffusion as a float between 0 and 1 which controls the amount of error to be diffused.
@@ -348,7 +348,7 @@ def ed(img, kernel, str_value):
 
 
 # Same as above SERPENTINE
-@cc.export("eds", "f8[:,:](f8[:,:], f8[:,:], f8)")
+@cc.export("eds", "f4[:,:](f4[:,:], f8[:,:], f4)")
 def eds(img, kernel, str_value):
     """
     A generic error diffusion fuction. Expects the image, the kernel (see src/image_processor for example) and a strength of diffusion as a float between 0 and 1 which controls the amount of error to be diffused. This is the serpentine version. It was separated for performance reasons.
@@ -393,10 +393,10 @@ def eds(img, kernel, str_value):
 
 
 # GRAYSCALE CONVERSION functions follow.
-@cc.export("luminance", "f8[:,:](f8[:,:,:])")
+@cc.export("luminance", "f4[:,:](f4[:,:,:])")
 def luminance(img):
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float64)
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in range(h):
         for x in range(w):
@@ -405,10 +405,10 @@ def luminance(img):
     return output_img
 
 
-@cc.export("luma", "f8[:,:](f8[:,:,:])")
+@cc.export("luma", "f4[:,:](f4[:,:,:])")
 def luma(img):
     h, w, _ = img.shape
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in prange(h):
         for x in prange(w):
@@ -418,10 +418,10 @@ def luma(img):
     return output_img
 
 
-@cc.export("average", "f8[:,:](f8[:,:,:])")
+@cc.export("average", "f4[:,:](f4[:,:,:])")
 def average(img):
     h, w, _ = img.shape
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in prange(h):
         for x in prange(w):
@@ -431,10 +431,10 @@ def average(img):
     return output_img
 
 
-@cc.export("value", "f8[:,:](f8[:,:,:])")
+@cc.export("value", "f4[:,:](f4[:,:,:])")
 def value(img):
     h, w, _ = img.shape
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in prange(h):
         for x in prange(w):
@@ -444,10 +444,10 @@ def value(img):
     return output_img
 
 
-@cc.export("lightness", "f8[:,:](f8[:,:,:])")
+@cc.export("lightness", "f4[:,:](f4[:,:,:])")
 def lightness(img):
     h, w, _ = img.shape
-    output_img = np.zeros((h, w))
+    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in prange(h):
         for x in prange(w):
@@ -460,7 +460,7 @@ def lightness(img):
 
 
 # The IMAGE PROCESSING fuctions should go here if i decide to implement them from scratch instead of using pillow
-@cc.export("sharpen", "f8[:,:](f8[:,:],f8)")
+@cc.export("sharpen", "f4[:,:](f4[:,:],f8)")
 def sharpen(image, str=1.0):
     str *= 0.1
     x = str + 1.0
@@ -470,10 +470,10 @@ def sharpen(image, str=1.0):
     kernel = np.array([[0, y, 0], [y, x, y], [0, y, 0]]).astype(np.float32)
 
     # Create a padded image to avoid out of bounds error
-    padded_image = np.zeros((image.shape[0] + 2, image.shape[1] + 2)).astype(np.float32)
+    padded_image = np.zeros((image.shape[0] + 2, image.shape[1] + 2), dtype=np.float32)
     padded_image[1:-1, 1:-1] = image
 
-    sharpened = np.zeros((image.shape[0], image.shape[1]))
+    sharpened = np.zeros((image.shape[0], image.shape[1]), dtype=np.float32)
 
     for i in prange(image.shape[0]):
         for j in range(image.shape[1]):

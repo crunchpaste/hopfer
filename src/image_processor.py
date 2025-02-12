@@ -1,4 +1,5 @@
-from multiprocessing import Process, Queue
+from multiprocessing import Process, Queue, Event
+import concurrent.futures
 from queue import Empty
 
 import numpy as np
@@ -48,21 +49,15 @@ except ImportError:
     from algorithms.sharpen import sharpen
 
 
-def worker(queues, images, mode, im_settings, algorithm, settings, step=0):
-    original_image = images[0]
-    grayscale_image = images[1]
-    enhanced_image = images[2]
+def worker(image, mode, im_settings, algorithm, settings, step=0):
     if step == 0:
-        grayscale_image = worker_g(original_image, mode)
-        queues[0].put(grayscale_image)
+        image = worker_g(image, mode)
 
     if step <= 1:
-        enhanced_image = worker_e(grayscale_image, im_settings)
-        queues[1].put(enhanced_image)
+        image = worker_e(image, im_settings)
 
-    processed_image = worker_h(enhanced_image, algorithm, settings)
-    queues[2].put(processed_image)
-    return
+    processed_image = worker_h(image, algorithm, settings)
+    return processed_image
 
 
 def worker_g(image, mode):
@@ -114,14 +109,14 @@ def worker_e(image, im_settings):
     if _sharpness > 0:
         converted = True
         if pil_needed:
-            _image = np.array(pil_image) / 255
+            _image = (np.array(pil_image) / 255).astype(np.float32)
         else:
             _image = image
         image = sharpen(_image, _sharpness)
 
     if not converted and pil_needed:
         # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
-        image = np.array(pil_image) / 255
+        image = (np.array(pil_image) / 255).astype(np.float32)
     return image
 
 
@@ -129,7 +124,7 @@ def worker_h(image, algorithm, settings):
     """
     This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
     """
-
+    image = np.copy(image).astype(np.float32)
     processed_image = apply_algorithm(image, algorithm, settings)
     return processed_image
 
@@ -161,8 +156,6 @@ def apply_algorithm(image, algorithm, settings):
     :param settings: Settings for the algorithm (like threshold, dither levels).
     :return: The processed image as a NumPy array.
     """
-    # print(f"Applying {algorithm} to the image with settings: {settings}")
-
     # Apply the chosen halftoning algorithm using the respective kernel
     if algorithm == "Fixed threshold":
         processed_image = threshold(image, settings)
@@ -383,8 +376,10 @@ class ImageProcessor(QObject):
         :param storage: The ImageStorage instance for accessing image data.
         """
         super().__init__(parent)
-        self.queue = Queue()
+        self.queue = None
         self.process = None
+        self.killswitch = Event()
+        self.processes = []
         self.storage = storage
         self.main_window = main_window
         self.algorithm = "None"
@@ -410,85 +405,57 @@ class ImageProcessor(QObject):
         # Displays the Processing... label in the viewer
         self.main_window.viewer.labelVisible(True)
 
-        # Checks if there is another process running already. If there is terminates it.
-        if self.process is not None:
-            try:
-                if self.process.is_alive():
-                    self.process.terminate()
-                    self.process.join()
-            except Exception as e:
-                print(e)
-
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
         #
-        self.queues = [Queue() for _ in range(3)]
-        images = [None for _ in range(3)]
 
-        if not self.storage.original_grayscale and step == 0:
-            step = 0
-            images[0] = self.storage.get_original_image()
-        elif step <= 1:
-            step = 1
-            images[1] = self.storage.get_grayscale_image()
-        else:
-            step = 2
-            images[2] = self.storage.get_enhanced_image()
+        convert = not self.storage.original_grayscale and step == 0
+        enhance =  step <= 1
 
-        self.process = Process(
-            target=worker,
-            args=(
-                self.queues,
-                images,
-                self.grayscale_mode,
-                self.image_settings,
-                self.algorithm,
-                self.settings,
-                step,
-            ),
-        )
+        if convert:
+            original_image = self.storage.get_original_image()
+            with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    worker_g,
+                    original_image,
+                    self.grayscale_mode,
+                )
 
-        self.process.start()
-
-        grayscale_image = None
-        enhanced_image = None
-        processed_image = None
-
-        # Tries to get the resulting image in a while. If it is not yet available the GUI is repainted.
-        while self.process.is_alive():
-            try:
-                grayscale_image = self.queues[0].get_nowait()
-            except Empty:
-                QCoreApplication.processEvents()
-
-            try:
-                enhanced_image = self.queues[1].get_nowait()
-            except Empty:
-                QCoreApplication.processEvents()
-
-            try:
-                processed_image = self.queues[2].get_nowait()
-            except Empty:
-                QCoreApplication.processEvents()
-
-        try:
-            if grayscale_image is not None:
+                grayscale_image = future.result()
                 self.storage.grayscale_image = grayscale_image
 
-            if enhanced_image is not None:
+        if enhance:
+            grayscale_image = self.storage.get_grayscale_image()
+            with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
+                future = executor.submit(
+                    worker_e,
+                    grayscale_image,
+                    self.image_settings,
+                )
+
+                enhanced_image = future.result()
+
                 self.storage.enhanced_image = enhanced_image
 
+        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
+            enhanced_image = self.storage.get_enhanced_image()
+
+            future = executor.submit(
+                worker_h,
+                enhanced_image,
+                self.algorithm,
+                self.settings,
+            )
+
+            processed_image = future.result()
+
+        try:
             self.send_result(processed_image)
-            self.process.join()
         except Exception as e:
             print(e)
 
-    def wait_for_process(self):
-        while self.process.is_alive():
-            try:
-                _image = self.queue.get_nowait()
-                return _image
-            except Empty:
-                QCoreApplication.processEvents()
+    def wait_for_result(self, future):
+        while not future.done():
+            QCoreApplication.processEvents()
 
     def send_result(self, image):
         self.storage.set_processed_image(image, self.reset)

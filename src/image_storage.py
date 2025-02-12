@@ -62,6 +62,8 @@ class ImageStorage(QObject):
         self.grayscale_signal.emit(self.original_grayscale)
         if self.original_grayscale:
             self.grayscale_image = self.original_image
+        self.enhanced_image = self.grayscale_image
+        self.processed_image = self.enhanced_image
         self.main_window.processor.reset = True
         self.main_window.processor.start()
         self.main_window.sidebar.toolbox.enable_buttons()
@@ -136,26 +138,26 @@ class ImageStorage(QObject):
 
     def extract_alpha(self, image):
         if image.mode == "LA":
-            np_image = np.array(image) / self.NORMALIZED_MAX
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
             L = np_image[:, :, 0]
             A = np_image[:, :, 1]
             self.original_grayscale = True
             return L, A
         elif image.mode == "L":
-            np_image = np.array(image) / self.NORMALIZED_MAX
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
             L = np_image
             A = None
             self.original_grayscale = True
             return L, A
         elif image.mode == "RGBA":
-            np_image = np.array(image) / self.NORMALIZED_MAX
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
             RGB = np_image[:, :, :3]
             A = np_image[:, :, 3]
             RGB, is_gray = self.check_grayscale(RGB)
             self.original_grayscale = is_gray
             return RGB, A
         elif image.mode == "RGB":
-            np_image = np.array(image) / self.NORMALIZED_MAX
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
             RGB = np_image
             A = None
             RGB, is_gray = self.check_grayscale(RGB)
@@ -163,7 +165,7 @@ class ImageStorage(QObject):
             return RGB, A
         else:
             image = image.convert("RGB")
-            np_image = np.array(image) / self.NORMALIZED_MAX
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
             RGB = np_image
             RGB, is_gray = self.check_grayscale(RGB)
             A = None
@@ -281,7 +283,7 @@ class ImageStorage(QObject):
         if self.enhanced_image is not None:
             return self.enhanced_image
         else:
-            return self.grayscale_image
+            return self.get_grayscale_image()
 
     def get_original_pixmap(self):
         """

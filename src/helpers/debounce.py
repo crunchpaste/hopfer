@@ -10,24 +10,19 @@ def debounce(wait):
     """
 
     def decorator(fn):
-        timers = {}  # Dictionary to store timers per function instance
-
-        @wraps(fn)  # Preserve function metadata
+        @wraps(fn)  # Without wrapping the deboucer breaks in Nuitka
         def debounced(*args, **kwargs):
-            instance = args[0]  # Get the instance (e.g., self in a class method)
-
             def call_it():
-                timers[instance] = None
+                debounced._timer = None
                 fn(*args, **kwargs)
 
-            # Cancel previous timer if it exists
-            if instance in timers and timers[instance] is not None:
-                timers[instance].cancel()
+            if debounced._timer is not None:
+                debounced._timer.cancel()
 
-            # Set new timer
-            timers[instance] = threading.Timer(wait, call_it)
-            timers[instance].start()
+            debounced._timer = threading.Timer(wait, call_it)
+            debounced._timer.start()
 
+        debounced._timer = None
         return debounced
 
     return decorator
