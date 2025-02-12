@@ -46,6 +46,25 @@ class Shortcuts:
         self.halftone_shortcut.activated.connect(
             lambda: self.main_window.sidebar.activateTab(1)
         )
+
+        # Image manipulation
+        # Inverts the colors of the image
+        self.invert_shortcut = QShortcut(QKeySequence("Ctrl+Shift+I"), self.main_window)
+        self.invert_shortcut.activated.connect(self.main_window.sidebar.toolbox._invert)
+        # Rotates the image CW
+        self.rotcw_shortcut = QShortcut(QKeySequence("Ctrl+R"), self.main_window)
+        self.rotcw_shortcut.activated.connect(
+            lambda: self.main_window.sidebar.toolbox._rotate(True)
+        )
+        # Rotates the image CCW
+        self.rotccw_shortcut = QShortcut(QKeySequence("Ctrl+Shift+R"), self.main_window)
+        self.rotccw_shortcut.activated.connect(
+            lambda: self.main_window.sidebar.toolbox._rotate(False)
+        )
+        # Flips the image LR
+        self.flip_shortcut = QShortcut(QKeySequence("Ctrl+F"), self.main_window)
+        self.flip_shortcut.activated.connect(self.main_window.sidebar.toolbox._flip)
+
         # Image viewer shortcuts
         # Toggles the preview blurring
         self.blur_shortcut = QShortcut(QKeySequence("Ctrl+B"), self.main_window)
