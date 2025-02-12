@@ -401,7 +401,7 @@ class ImageProcessor(QObject):
             try:
                 if self.process.is_alive():
                     self.process.terminate()
-                    self.pocess.join()
+                    self.process.join()
             except Exception as e:
                 print(e)
 
