@@ -61,10 +61,15 @@ class ShortcutsTab(QWidget):
             ShortcutLayout("Image from clipboard", ["Ctrl", "Shift", "V"]),
             ShortcutLayout("Save image", ["Ctrl", "S"]),
             ShortcutLayout("Save image as", ["Ctrl", "Shift", "S"]),
+            ShortcutLayout("Image to clipboard", ["Ctrl", "C"]),
             ShortcutLayout("Image tab", ["Ctrl", "I"]),
             ShortcutLayout("Halftone tab", ["Ctrl", "H"]),
             ShortcutLayout("Blur preview", ["Ctrl", "B"]),
             ShortcutLayout("Zoom level", ["Ctrl", "0-9"]),
+            ShortcutLayout("Invert colors", ["Ctrl", "Shift", "I"]),
+            ShortcutLayout("Rotate CW", ["Ctrl", "R"]),
+            ShortcutLayout("Rotate CCW", ["Ctrl", "Shift", "R"]),
+            ShortcutLayout("Flip horizontally", ["Ctrl", "F"]),
         ]
 
         for sc in shortcuts:
