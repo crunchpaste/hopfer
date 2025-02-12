@@ -48,16 +48,38 @@ except ImportError:
     from algorithms.sharpen import sharpen
 
 
-def worker_g(queue, image, mode):
-    """
-    This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
-    """
-    image = convert_to_grayscale(image, mode)
-    queue.put(image)
+def worker(queues, images, mode, im_settings, algorithm, settings, step=0):
+    original_image = images[0]
+    grayscale_image = images[1]
+    enhanced_image = images[2]
+    if step == 0:
+        grayscale_image = worker_g(original_image, mode)
+        queues[0].put(grayscale_image)
+
+    if step <= 1:
+        enhanced_image = worker_e(grayscale_image, im_settings)
+        queues[1].put(enhanced_image)
+
+    processed_image = worker_h(enhanced_image, algorithm, settings)
+    queues[2].put(processed_image)
     return
 
 
-def worker_e(queue, image, im_settings):
+def worker_g(image, mode):
+    """
+    This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
+    """
+    try:
+        print("Inside worker_g")  # This should print
+        image = convert_to_grayscale(image, mode)
+        return image
+    except Exception as e:
+        print(f"worker_g failed: {e}")
+        return None
+
+
+
+def worker_e(image, im_settings):
     """
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
     """
@@ -105,19 +127,16 @@ def worker_e(queue, image, im_settings):
     if not converted and pil_needed:
         # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
         image = np.array(pil_image) / 255
-
-    queue.put(image)
-    return
+    return image
 
 
-def worker_h(queue, image, algorithm, settings):
+def worker_h(image, algorithm, settings):
     """
     This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
     """
 
     processed_image = apply_algorithm(image, algorithm, settings)
-    queue.put(processed_image)
-    return
+    return processed_image
 
 
 def convert_to_grayscale(image, mode):
@@ -406,59 +425,69 @@ class ImageProcessor(QObject):
                 print(e)
 
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
-        convert = not self.storage.original_grayscale and step == 0
+        #
+        self.queues = [Queue() for _ in range(3)]
+        images = [None for _ in range(3)]
 
-        if convert:
-            image = self.storage.get_original_image()
-            mode = self.grayscale_mode
-            self.queue = Queue()
-            self.process = Process(target=worker_g, args=(self.queue, image, mode))
-
-            self.process.start()
-            grayscale_img = self.wait_for_process()
-            self.process.join()
-
-            # Set the result as the new grayscale image to avoid reprocessing it again.
-            self.storage.grayscale_image = grayscale_img
+        if not self.storage.original_grayscale and step == 0:
+            step = 0
+            images[0] = self.storage.get_original_image()
+        elif step <= 1:
+            step = 1
+            images[1] = self.storage.get_grayscale_image()
         else:
-            grayscale_img = self.storage.get_grayscale_image()
+            step = 2
+            images[2] = self.storage.get_enhanced_image()
 
-        enchance = step <= 1
-
-        if enchance:
-            image = self.storage.get_grayscale_image()
-            im_settings = self.image_settings
-            self.queue = Queue()
-            self.process = Process(
-                target=worker_e, args=(self.queue, image, im_settings)
-            )
-            self.process.start()
-            enhanced_image = self.wait_for_process()
-            self.process.join()
-
-            # Set the result as the storage enhanced image to avoid furher reprocessing.
-            self.storage.enhanced_image = enhanced_image
-
-        image = self.storage.get_enhanced_image()
-        algorithm = self.algorithm
-        settings = self.settings
-        self.queue = Queue()
-
-        # Creates the subprocess
         self.process = Process(
-            target=worker_h, args=(self.queue, image, algorithm, settings)
+            target=worker,
+            args=(
+                self.queues,
+                images,
+                self.grayscale_mode,
+                self.image_settings,
+                self.algorithm,
+                self.settings,
+                step,
+            ),
         )
-        # Actually start the process
+
         self.process.start()
 
+        grayscale_image = None
+        enhanced_image = None
+        processed_image = None
+
         # Tries to get the resulting image in a while. If it is not yet available the GUI is repainted.
-        processed_image = self.wait_for_process()
+        while self.process.is_alive():
+            try:
+                grayscale_image = self.queues[0].get_nowait()
+            except Empty:
+                QCoreApplication.processEvents()
+
+            try:
+                enhanced_image = self.queues[1].get_nowait()
+            except Empty:
+                QCoreApplication.processEvents()
+
+            try:
+                processed_image = self.queues[2].get_nowait()
+            except Empty:
+                QCoreApplication.processEvents()
 
         try:
+            if grayscale_image is not None:
+                self.storage.grayscale_image = grayscale_image
+
+            if enhanced_image is not None:
+                self.storage.enhanced_image = enhanced_image
+
             self.send_result(processed_image)
             self.process.join()
+            print("tried")
         except Exception as e:
             print(e)
+        print("finished")
 
     def wait_for_process(self):
         while self.process.is_alive():
