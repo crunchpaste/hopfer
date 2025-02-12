@@ -78,3 +78,12 @@ class MainWindow(QMainWindow):
     def get_focus(self):
         self.activateWindow()
         self.raise_()
+
+    def closeEvent(self, event):
+        # Prevents zombie processes
+        if self.processor.process is not None:
+            try:
+                self.processor.process.join()
+            except Exception as e:
+                print(e)
+        event.accept()  # Accept the close event

@@ -69,14 +69,9 @@ def worker_g(image, mode):
     """
     This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
-    try:
-        print("Inside worker_g")  # This should print
-        image = convert_to_grayscale(image, mode)
-        return image
-    except Exception as e:
-        print(f"worker_g failed: {e}")
-        return None
 
+    image = convert_to_grayscale(image, mode)
+    return image
 
 
 def worker_e(image, im_settings):
@@ -484,10 +479,8 @@ class ImageProcessor(QObject):
 
             self.send_result(processed_image)
             self.process.join()
-            print("tried")
         except Exception as e:
             print(e)
-        print("finished")
 
     def wait_for_process(self):
         while self.process.is_alive():
