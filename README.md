@@ -3,7 +3,11 @@
 ---
 
 <p align="center">
-  <video src="https://github.com/user-attachments/assets/1d057a71-8733-4be5-95ac-585cc8cf2457" width="100%" controls autoplay loop muted playsinline/>
+  <picture>
+    <source srcset="demo.webp" type="image/webp">
+    <source srcset="demo.gif" type="image/gif">
+    <img src="demo.gif" alt="Demo" width="800" height="568" />
+  </picture>
 </p>
 
 # hopfer

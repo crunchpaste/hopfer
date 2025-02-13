@@ -315,7 +315,7 @@ class ErrorDiffusionSettings(HalftoneSettings):
         self.serpentine_toggle = ToggleWithLabel(label="Serpentine")
         self.serpentine_toggle.toggleChanged.connect(self.emit_settings_changed)
 
-        self.noise_toggle = ToggleWithLabel(label="Prime with noise")
+        self.noise_toggle = ToggleWithLabel(label="Prime w/ noise")
         self.noise_toggle.toggleChanged.connect(self.emit_settings_changed)
 
         # Add widgets to layout
