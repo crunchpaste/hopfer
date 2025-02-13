@@ -1,3 +1,5 @@
+import numpy as np
+
 from .static import ed, eds
 
 
@@ -14,10 +16,15 @@ def error_diffusion(img, kernel, settings):
     """
     str = settings["diffusion_factor"] / 100
     serpentine = settings["serpentine"]
-    print(str, serpentine)
+    noise = settings["noise"]
+    if noise:
+        noise_array = np.random.random((20, img.shape[1])).astype(np.float32)
+        img = np.vstack((noise_array, img))
     if serpentine:
         output_img = eds(img, kernel, str)
     else:
         output_img = ed(img, kernel, str)
+    if noise:
+        output_img = output_img[20:, :]
 
     return output_img

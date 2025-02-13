@@ -315,9 +315,13 @@ class ErrorDiffusionSettings(HalftoneSettings):
         self.serpentine_toggle = ToggleWithLabel(label="Serpentine")
         self.serpentine_toggle.toggleChanged.connect(self.emit_settings_changed)
 
+        self.noise_toggle = ToggleWithLabel(label="Prime with noise")
+        self.noise_toggle.toggleChanged.connect(self.emit_settings_changed)
+
         # Add widgets to layout
         self.layout.addWidget(self.diffusion_factor)
         self.layout.addWidget(self.serpentine_toggle)
+        self.layout.addWidget(self.noise_toggle)
         self.layout.addStretch()
 
     def emit_settings_changed(self):
@@ -326,5 +330,6 @@ class ErrorDiffusionSettings(HalftoneSettings):
             settings = {
                 "diffusion_factor": self.diffusion_factor.slider.value(),
                 "serpentine": self.serpentine_toggle.is_toggle_checked(),
+                "noise": self.noise_toggle.is_toggle_checked(),
             }
             self.settingsChanged.emit(settings)
