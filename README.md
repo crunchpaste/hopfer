@@ -1,5 +1,11 @@
 ![hopfer](thumbnail.svg)
 
+---
+
+<p align="center">
+  <video src="https://github.com/user-attachments/assets/1d057a71-8733-4be5-95ac-585cc8cf2457" width="100%" controls autoplay loop muted playsinline/>
+</p>
+
 # hopfer
 
 **hopfer** is a Python-based GUI application that implements a wide range of halftoning algorithms from scratch, primarily designed for printmaking purposes.
