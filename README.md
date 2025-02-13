@@ -14,6 +14,22 @@ The application uses Qt6 for the GUI and implements the halftoning algorithms us
 
 This project was originally created as a companion to my PhD thesis on digital halftoning methods for analog printmaking techniques.
 
+## Features
+
+- A variety of **halftoning algorithms**, including:
+  - Fixed threshold
+  - Local thresholds
+  - Random dithering
+  - Ordered dithering
+  - Error diffusion dithering
+- **Basic image editing tools**, such as:
+  - Rotation
+  - Brightness & contrast adjustments
+  - Gaussian blurring
+  - Sharpening
+- **Support for a wide range of image formats**, including:
+  - PNG, JPEG, BMP, GIF, TIFF, WebP and more (anything supported by [Pillow](https://pillow.readthedocs.io/en/stable/))
+
 ## Requirements
 
 Not sure yet.
