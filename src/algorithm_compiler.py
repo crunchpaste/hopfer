@@ -386,7 +386,9 @@ def eds(img, kernel, str_value):
                         img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
                             error * kernel[ky, kx]
                         )
-                        # actually diffuse the error maybe the index could be precomputed
+                        # actually diffuse the error. maybe the index could be precomputed
+    # Flip it one last time if needed
+    if h.size % 2 != 0:
         img = np.fliplr(img)
 
     return img  # return the image in a dithered form
@@ -410,8 +412,8 @@ def luma(img):
     h, w, _ = img.shape
     output_img = np.zeros((h, w), dtype=np.float32)
 
-    for y in prange(h):
-        for x in prange(w):
+    for y in range(h):
+        for x in range(w):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = 0.30 * r + 0.59 * g + 0.11 * b
 
@@ -423,8 +425,8 @@ def average(img):
     h, w, _ = img.shape
     output_img = np.zeros((h, w), dtype=np.float32)
 
-    for y in prange(h):
-        for x in prange(w):
+    for y in range(h):
+        for x in range(w):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = (r + g + b) / 3
 
@@ -436,8 +438,8 @@ def value(img):
     h, w, _ = img.shape
     output_img = np.zeros((h, w), dtype=np.float32)
 
-    for y in prange(h):
-        for x in prange(w):
+    for y in range(h):
+        for x in range(w):
             values = img[y, x, 0:3]
             output_img[y, x] = np.max(values)
 
@@ -449,8 +451,8 @@ def lightness(img):
     h, w, _ = img.shape
     output_img = np.zeros((h, w), dtype=np.float32)
 
-    for y in prange(h):
-        for x in prange(w):
+    for y in range(h):
+        for x in range(w):
             values = img[y, x, 0:3]
             max = np.max(values)
             min = np.min(values)
