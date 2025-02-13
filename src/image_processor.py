@@ -1,6 +1,5 @@
-from multiprocessing import Process, Queue, Event
 import concurrent.futures
-from queue import Empty
+from multiprocessing import Event
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
@@ -409,7 +408,7 @@ class ImageProcessor(QObject):
         #
 
         convert = not self.storage.original_grayscale and step == 0
-        enhance =  step <= 1
+        enhance = step <= 1
 
         if convert:
             original_image = self.storage.get_original_image()

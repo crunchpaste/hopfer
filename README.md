@@ -8,9 +8,9 @@
 
 # hopfer
 
-**hopfer** is a Python-based GUI application that implements a wide range of halftoning algorithms from scratch, primarily designed for printmaking purposes.
+**hopfer** is a Python-based GUI application that implements a wide range of halftoning algorithms from scratch, and is primarily meant for printmaking purposes.
 
-The application uses Qt6 for the GUI and implements the halftoning algorithms using NumPy and Numba for much better performance.
+The application uses [**Qt6**](https://doc.qt.io/qtforpython-6/index.html) for the GUI and implements the halftoning algorithms using [**NumPy**](https://numpy.org/) and [**Numba**](https://numba.pydata.org/) for much better performance.
 
 This project was originally created as a companion to my PhD thesis on digital halftoning methods for analog printmaking techniques.
 
@@ -62,7 +62,7 @@ python src/hopfer.py
 
 ### Optional: Compile to a static binary
 
-Despite depending on *numba* you can still compile **hopfer** to a single static binary using *nuitka*. To do so:
+Despite depending on *numba* you can still compile **hopfer** to a single static binary using [**nuitka**](https://nuitka.net/). To do so:
 
 #### Compile all numba functions to a static binary
 
