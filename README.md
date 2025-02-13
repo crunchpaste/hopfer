@@ -6,7 +6,7 @@
   <picture>
     <source srcset="demo.webp" type="image/webp">
     <source srcset="demo.gif" type="image/gif">
-    <img src="demo.gif" alt="Demo" width="800" height="568" />
+    <img src="demo.gif" alt="Demo" style="max-width: 100%; height: auto;" />
   </picture>
 </p>
 
