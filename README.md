@@ -1,4 +1,12 @@
-![hopfer](thumbnail.svg)
+<p align="center">
+  <img src="thumbnail.svg" alt="Logo" style="max-width: 100%; height: auto;">
+</p>
+
+<h1 align="center">A Python GUI for halftoning</h1>
+
+<p align="center">
+<b>hopfer</b> is a Python-based GUI application that implements a wide range of halftoning algorithms from scratch primarily meant for printmaking purposes.
+</p>
 
 ---
 
@@ -10,11 +18,7 @@
   </picture>
 </p>
 
-# hopfer
-
-**hopfer** is a Python-based GUI application that implements a wide range of halftoning algorithms from scratch, and is primarily meant for printmaking purposes.
-
-The application uses [**Qt6**](https://doc.qt.io/qtforpython-6/index.html) for the GUI and implements the halftoning algorithms using [**NumPy**](https://numpy.org/) and [**Numba**](https://numba.pydata.org/) for much better performance.
+**hopfer** uses [**Qt6**](https://doc.qt.io/qtforpython-6/index.html) for the GUI and implements the halftoning algorithms using [**NumPy**](https://numpy.org/) and [**Numba**](https://numba.pydata.org/) for much better performance.
 
 This project was originally created as a companion to my PhD thesis on digital halftoning methods for analog printmaking techniques.
 
