@@ -4,6 +4,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
+from controls.toggle import ToggleContainer
 from helpers.debounce import debounce
 from settings import (
     BayerSettings,
@@ -154,13 +155,13 @@ class ImageTab(QWidget):
         self.layout = QVBoxLayout()
 
         self.combobox = GrayscaleCombo()
-        self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
 
         self.brightness = SliderControl("Brightness", (-100, 100), 0, 100)
         self.brightness.slider.valueChanged.connect(self.on_settings_changed)
         self.brightness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.brightness)
 
+        self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
         self.contrast = SliderControl("Contrast", (-100, 100), 0, 100)
         self.contrast.slider.valueChanged.connect(self.on_settings_changed)
         self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
@@ -176,11 +177,46 @@ class ImageTab(QWidget):
         self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.sharpness)
 
+        self.u_radius = SliderControl("Radius", (0, 100), 30, 10)
+        self.u_radius.slider.valueChanged.connect(self.on_settings_changed)
+        self.u_radius.slider.sliderReleased.connect(self.on_settings_changed)
+
+        self.u_strenght = SliderControl("Strength", (0, 100), 25, 100)
+        self.u_strenght.slider.valueChanged.connect(self.on_settings_changed)
+        self.u_strenght.slider.sliderReleased.connect(self.on_settings_changed)
+
+        self.u_thresh = SliderControl("Threshold", (0, 20), 3, 1)
+        self.u_thresh.slider.valueChanged.connect(self.on_settings_changed)
+        self.u_thresh.slider.sliderReleased.connect(self.on_settings_changed)
+
+        self.bc_toggle = ToggleContainer(
+            "Brightness/contrast", (self.brightness, self.contrast)
+        )
+        self.bc_toggle.toggle.toggleChanged.connect(
+            lambda: self.on_settings_changed(sender=self.bc_toggle)
+        )
+
+        self.blur_toggle = ToggleContainer("Gaussian blur", (self.blur,))
+        self.blur_toggle.toggle.toggleChanged.connect(
+            lambda: self.on_settings_changed(sender=self.unsharp_toggle)
+        )
+
+        self.unsharp_toggle = ToggleContainer(
+            "Unsharp mask", (self.u_radius, self.u_strenght, self.u_thresh)
+        )
+        self.unsharp_toggle.toggle.toggleChanged.connect(
+            lambda: self.on_settings_changed(sender=None)
+        )
+
         self.layout.addWidget(self.combobox)
-        self.layout.addWidget(self.brightness)
-        self.layout.addWidget(self.contrast)
-        self.layout.addWidget(self.blur)
-        self.layout.addWidget(self.sharpness)
+        self.layout.addWidget(self.bc_toggle)
+        self.layout.addWidget(self.blur_toggle)
+        self.layout.addWidget(self.unsharp_toggle)
+
+        # self.layout.addWidget(self.brightness)
+        # self.layout.addWidget(self.contrast)
+        # self.layout.addWidget(self.blur)
+        # self.layout.addWidget(self.sharpness)
 
         # Add stretch to the layout
         self.layout.addStretch()
@@ -202,19 +238,32 @@ class ImageTab(QWidget):
         self.processor.start(step=0)
 
     @debounce(0.5)
-    def on_settings_changed(self, value=None):
+    def on_settings_changed(self, value=None, sender=None):
         """
         Trigger image processing when settings are changed.
         """
         for slider in self.sliders:
             if slider.is_dragging:
                 return
+
+        if sender is not None:  # noqa: SIM102
+            # should happen only for containers. also i do prefer the loop separate
+            # that's why the warning is ignored.
+            if all(item.slider.value() == item.default for item in sender.items):
+                return
+
         storage = self.processor.storage
         settings = {
+            "bc_t": self.bc_toggle.toggle.is_toggle_checked(),
+            "blur_t": self.blur_toggle.toggle.is_toggle_checked(),
+            "unsharp_t": self.unsharp_toggle.toggle.is_toggle_checked(),
             "brightness": self.brightness.slider.value(),
             "contrast": self.contrast.slider.value(),
             "blur": self.blur.slider.value(),
-            "sharpness": self.sharpness.slider.value(),
+            "u_radius": self.u_radius.slider.value(),
+            "u_strenght": self.u_strenght.slider.value(),
+            "u_thresh": self.u_thresh.slider.value(),
+            # "sharpness": self.sharpness.slider.value(),
         }
         self.processor.image_settings = settings
         if storage.original_image is not None:

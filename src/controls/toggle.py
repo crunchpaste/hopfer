@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QSlider,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -62,3 +63,39 @@ class ToggleWithLabel(QWidget):
     def is_toggle_checked(self):
         """Returns whether the toggle is checked (1) or unchecked (0)."""
         return self.toggle.value() == 1
+
+
+class ToggleContainer(QWidget):
+    def __init__(self, label, items, parent=None):
+        super().__init__(parent)
+
+        self.items = items
+        # Main layout
+        self.layout = QVBoxLayout(self)
+        self.layout.setContentsMargins(0, 0, 0, 0)
+
+        # Your custom toggle widget
+        self.toggle = ToggleWithLabel(label)  # Assuming this is your custom widget
+        self.layout.addWidget(self.toggle)
+
+        self.content_widget = QWidget()
+        self.content_layout = QVBoxLayout(self.content_widget)
+        self.content_layout.setContentsMargins(10, 5, 10, 5)  # Add spacing for clarity
+        self.layout.addWidget(self.content_widget)
+
+        for item in self.items:
+            self.content_layout.addWidget(item)
+
+        # Initially hide content
+        self.content_widget.setVisible(False)
+
+        # Connect toggle state change
+        self.toggle.toggleChanged.connect(self.toggle_content)
+
+    def toggle_content(self, checked):
+        """Show or hide the content based on toggle state."""
+        self.content_widget.setVisible(checked)
+
+    def add_widget(self, widget):
+        """Convenience method to add widgets to the collapsible content."""
+        self.content_layout.addWidget(widget)

@@ -42,10 +42,10 @@ try:
 except ImportError:
     from algorithms.grayscale import average, lightness, luma, luminance, value
 
-try:
-    from algorithms.static import sharpen
-except ImportError:
-    from algorithms.sharpen import sharpen
+# try:
+#     from algorithms.static import sharpen
+# except ImportError:
+#     pass
 
 
 def worker(image, mode, im_settings, algorithm, settings, step=0):
@@ -73,6 +73,7 @@ def worker_e(image, im_settings):
     This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
     """
     _brightness = im_settings["brightness"] / 100
+
     if _brightness > 0:
         # using a log function makes the adjustment feel a bit more natural
         _brightness = 5 * (np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01))
@@ -83,35 +84,41 @@ def worker_e(image, im_settings):
         _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
     _contrast += 1
     _blur = im_settings["blur"] / 10
-    _sharpness = im_settings["sharpness"]
+    # _sharpness = im_settings["sharpness"]
 
     pil_needed = False
     converted = False  # if the image has already been converted back
-
-    if _contrast != 1.0 or _brightness != 1.0 or _blur > 0:
+    if im_settings["bc_t"] or im_settings["blur_t"] or im_settings["unsharp_t"] > 0:
         # if PIL manupulation is needed, convert to a PIL image once
         pil_needed = True
 
         _image = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(_image)
 
-    if _brightness != 1.0:
-        # if PIL manupulation is needed, convert to a PIL image once
-        pil_needed = True
-        enhancer = ImageEnhance.Brightness(pil_image)
-        pil_image = enhancer.enhance(_brightness)
-    if _contrast != 1.0:
-        enhancer = ImageEnhance.Contrast(pil_image)
-        pil_image = enhancer.enhance(_contrast)
-    if _blur > 0:
+    if im_settings["bc_t"]:
+        if _brightness != 1.0:
+            # if PIL manupulation is needed, convert to a PIL image once
+            pil_needed = True
+            enhancer = ImageEnhance.Brightness(pil_image)
+            pil_image = enhancer.enhance(_brightness)
+        if _contrast != 1.0:
+            enhancer = ImageEnhance.Contrast(pil_image)
+            pil_image = enhancer.enhance(_contrast)
+    if im_settings["blur_t"] and _blur > 0:
         pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
-    if _sharpness > 0:
-        converted = True
-        if pil_needed:
-            _image = (np.array(pil_image) / 255).astype(np.float32)
-        else:
-            _image = image
-        image = sharpen(_image, _sharpness)
+    if im_settings["unsharp_t"]:
+        radius = im_settings["u_radius"] / 10
+        strenght = int(im_settings["u_strenght"] * 2)
+        thresh = im_settings["u_thresh"]
+
+        pil_image = pil_image.filter(ImageFilter.UnsharpMask(radius, strenght, thresh))
+        # if _sharpness > 0:
+        #     converted = True
+        #     if pil_needed:
+        #         _image = (np.array(pil_image) / 255).astype(np.float32)
+        #     else:
+        #         _image = image
+        #     image = sharpen(_image, _sharpness)
 
     if not converted and pil_needed:
         # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
@@ -386,6 +393,9 @@ class ImageProcessor(QObject):
         self.settings = {}
 
         self.image_settings = {
+            "bc_t": False,
+            "blur_t": False,
+            "unsharp_t": False,
             "brightness": 0.0,
             "contrast": 0.0,
             "sharpness": 0.0,
