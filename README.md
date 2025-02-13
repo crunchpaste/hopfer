@@ -18,10 +18,21 @@
   </picture>
 </p>
 
-**hopfer** uses [**Qt6**](https://doc.qt.io/qtforpython-6/index.html) for the GUI and implements the halftoning algorithms using [**NumPy**](https://numpy.org/) and [**Numba**](https://numba.pydata.org/) for much better performance.
 
-This project was originally created as a companion to my PhD thesis on digital halftoning methods for analog printmaking techniques.
+## Table of contents
 
+* [Introduction](#introduction)
+* [Features](#features)
+* [Requirements](#requirements)
+* [Installation](#installation)
+
+## Introduction
+
+**hopfer** is a digital halftoning tool built with Qt6 for the GUI, while leveraging NumPy and Numba for high-performance halftoning.
+
+Originally developed as part of my PhD research on digital halftoning for analog printmaking techniques, **hopfer** is designed primarily for this purpose. While it may have applications in image compression and visual effects, these are not its main focus.
+
+At present, **hopfer** does not support palette-based halftoning or multi-level dithering, and there are no plans to add these features.
 ## Features
 
 - A variety of **halftoning algorithms**, including:
