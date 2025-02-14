@@ -157,12 +157,44 @@ class ImageTab(QWidget):
         self.combobox = GrayscaleCombo()
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
 
+        self.rgb_widget = QWidget()
+        rgb_layout = QVBoxLayout()
+        self.red = SliderControl("Red", (0, 100), 33, 100)
+        self.red.slider.valueChanged.connect(lambda: self.on_mode_changed("Manual RGB"))
+        self.red.slider.sliderReleased.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
+        self.green = SliderControl("Green", (0, 100), 33, 100)
+        self.green.slider.valueChanged.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
+        self.green.slider.sliderReleased.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
+        self.blue = SliderControl("Blue", (0, 100), 33, 100)
+        self.blue.slider.valueChanged.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
+        self.blue.slider.sliderReleased.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
+
+        rgb_layout.addWidget(self.red)
+        rgb_layout.addWidget(self.green)
+        rgb_layout.addWidget(self.blue)
+
+        self.rgb_widget.setLayout(rgb_layout)
+        # Initially set as invisible
+        self.rgb_widget.setVisible(False)
+
+        # numpy related toggles
         self.normalize = ToggleWithLabel(label="Normalize histogram")
         self.normalize.toggleChanged.connect(self.on_settings_changed)
 
         self.equalize = ToggleWithLabel(label="Equalize histogram")
         self.equalize.toggleChanged.connect(self.on_settings_changed)
 
+        # pillow related sliders
         self.brightness = SliderControl("Brightness", (-100, 100), 0, 100)
         self.brightness.slider.valueChanged.connect(self.on_settings_changed)
         self.brightness.slider.sliderReleased.connect(self.on_settings_changed)
@@ -195,6 +227,7 @@ class ImageTab(QWidget):
         self.u_thresh.slider.valueChanged.connect(self.on_settings_changed)
         self.u_thresh.slider.sliderReleased.connect(self.on_settings_changed)
 
+        # Toggle containers
         self.bc_toggle = ToggleContainer(
             "Brightness/contrast", (self.brightness, self.contrast)
         )
@@ -204,7 +237,7 @@ class ImageTab(QWidget):
 
         self.blur_toggle = ToggleContainer("Gaussian blur", (self.blur,))
         self.blur_toggle.toggle.toggleChanged.connect(
-            lambda: self.on_settings_changed(sender=self.unsharp_toggle)
+            lambda: self.on_settings_changed(sender=self.blur_toggle)
         )
 
         self.unsharp_toggle = ToggleContainer(
@@ -215,6 +248,7 @@ class ImageTab(QWidget):
         )
 
         self.layout.addWidget(self.combobox)
+        self.layout.addWidget(self.rgb_widget)
         self.layout.addWidget(self.normalize)
         self.layout.addWidget(self.equalize)
         self.layout.addWidget(self.bc_toggle)
@@ -240,6 +274,17 @@ class ImageTab(QWidget):
         Args:
             mode_name (str): The selected grayscaling mode.
         """
+
+        if mode_name == "Manual RGB":
+            self.rgb_widget.setVisible(True)
+            self.processor.grayscale_settings = {
+                "r": self.red.slider.value(),
+                "g": self.green.slider.value(),
+                "b": self.blue.slider.value(),
+            }
+        else:
+            self.rgb_widget.setVisible(False)
+            self.processor.grayscale_settings = {}
 
         self.processor.grayscale_mode = mode_name
         self.processor.convert = True

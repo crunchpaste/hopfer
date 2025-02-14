@@ -42,6 +42,8 @@ try:
 except ImportError:
     from algorithms.grayscale import average, lightness, luma, luminance, value
 
+from algorithms.grayscale import manual
+
 # try:
 #     from algorithms.static import sharpen
 # except ImportError:
@@ -59,12 +61,12 @@ def worker(image, mode, im_settings, algorithm, settings, step=0):
     return processed_image
 
 
-def worker_g(image, mode):
+def worker_g(image, mode, settings):
     """
     This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
 
-    image = convert_to_grayscale(image, mode)
+    image = convert_to_grayscale(image, mode, settings)
     return image
 
 
@@ -150,7 +152,7 @@ def worker_h(image, algorithm, settings):
     return processed_image
 
 
-def convert_to_grayscale(image, mode):
+def convert_to_grayscale(image, mode, settings):
     """
     The function responsible for the grayscale conversion in the main worker_p.
     """
@@ -165,6 +167,11 @@ def convert_to_grayscale(image, mode):
         return value(image)
     elif mode == "Lightness":
         return lightness(image)
+    elif mode == "Manual RGB":
+        r = settings["r"] / 100
+        g = settings["g"] / 100
+        b = settings["b"] / 100
+        return manual(image, r, g, b)
     else:
         return luminance(image)
 
@@ -405,7 +412,7 @@ class ImageProcessor(QObject):
         self.main_window = main_window
         self.algorithm = "None"
         self.grayscale_mode = "Luminance"  # Initialize the processor with Luminance as the grayscale mode as it is the best.
-        self.settings = {}
+        self.grayscale_settings = {}
 
         self.image_settings = {
             "normalize": False,
@@ -418,6 +425,8 @@ class ImageProcessor(QObject):
             "sharpness": 0.0,
             "blur": 0.0,
         }
+
+        self.settings = {}
 
         self.convert = True  # Does the image need reconversion from RGB to Grayscale
         self.reset = True  # Does the viewer need to be reset. Set to True when a new image is loaded.
@@ -444,6 +453,7 @@ class ImageProcessor(QObject):
                     worker_g,
                     original_image,
                     self.grayscale_mode,
+                    self.grayscale_settings,
                 )
 
                 grayscale_image = future.result()

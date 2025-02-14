@@ -8,7 +8,7 @@ def luminance(img):
     output_img = np.zeros((h, w))
 
     for y in prange(h):
-        for x in prange(w):
+        for x in range(w):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = 0.22 * r + 0.72 * g + 0.06 * b
 
@@ -21,7 +21,7 @@ def luma(img):
     output_img = np.zeros((h, w))
 
     for y in prange(h):
-        for x in prange(w):
+        for x in range(w):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = 0.30 * r + 0.59 * g + 0.11 * b
 
@@ -34,7 +34,7 @@ def average(img):
     output_img = np.zeros((h, w))
 
     for y in prange(h):
-        for x in prange(w):
+        for x in range(w):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = (r + g + b) / 3
 
@@ -47,7 +47,7 @@ def value(img):
     output_img = np.zeros((h, w))
 
     for y in prange(h):
-        for x in prange(w):
+        for x in range(w):
             values = img[y, x, 0:3]
             output_img[y, x] = np.max(values)
 
@@ -60,10 +60,23 @@ def lightness(img):
     output_img = np.zeros((h, w))
 
     for y in prange(h):
-        for x in prange(w):
+        for x in range(w):
             values = img[y, x, 0:3]
             max = np.max(values)
             min = np.min(values)
             output_img[y, x] = (max + min) * 0.5
+
+    return output_img
+
+
+@njit(parallel=True, cache=True)
+def manual(img, rf, gf, bf):
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w))
+
+    for y in prange(h):
+        for x in range(w):
+            r, g, b = img[y, x, 0:3]
+            output_img[y, x] = rf * r + gf * g + bf * b
 
     return output_img

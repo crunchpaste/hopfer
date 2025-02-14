@@ -36,7 +36,7 @@ class GrayscaleCombo(QWidget):
             QComboBox: The combo box with the available grayscale modes.
         """
         combobox = QComboBox()
-        modes = ["Luminance", "Luma", "Lightness", "Average", "Value"]
+        modes = ["Luminance", "Luma", "Lightness", "Average", "Value", "Manual RGB"]
         combobox.addItems(modes)
         combobox.setView(
             QListView()
