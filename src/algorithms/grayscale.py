@@ -79,4 +79,7 @@ def manual(img, rf, gf, bf):
             r, g, b = img[y, x, 0:3]
             output_img[y, x] = rf * r + gf * g + bf * b
 
+    # There was overflow in nuitka compiled binary
+    output_img = np.clip(output_img, 0, 1)
+
     return output_img
