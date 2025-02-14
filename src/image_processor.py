@@ -38,11 +38,9 @@ except ImportError:
     from algorithms.error_diffusion import error_diffusion
 
 try:
-    from algorithms.static import average, lightness, luma, luminance, value
+    from algorithms.static import average, lightness, luma, luminance, manual, value
 except ImportError:
-    from algorithms.grayscale import average, lightness, luma, luminance, value
-
-from algorithms.grayscale import manual
+    from algorithms.grayscale import average, lightness, luma, luminance, manual, value
 
 # try:
 #     from algorithms.static import sharpen

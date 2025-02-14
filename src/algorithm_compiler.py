@@ -461,6 +461,19 @@ def lightness(img):
     return output_img
 
 
+@cc.export("manual", "f4[:,:](f4[:,:,:], f8, f8, f8)")
+def manual(img, rf, gf, bf):
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w), dtype=np.float32)
+
+    for y in prange(h):
+        for x in range(w):
+            r, g, b = img[y, x, 0:3]
+            output_img[y, x] = rf * r + gf * g + bf * b
+
+    return output_img
+
+
 # The IMAGE PROCESSING fuctions should go here if i decide to implement them from scratch instead of using pillow
 @cc.export("sharpen", "f4[:,:](f4[:,:],f8)")
 def sharpen(image, str=1.0):
