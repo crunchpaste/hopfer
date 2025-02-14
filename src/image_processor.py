@@ -88,12 +88,6 @@ def worker_e(image, im_settings):
 
     pil_needed = False
     converted = False  # if the image has already been converted back
-    if im_settings["bc_t"] or im_settings["blur_t"] or im_settings["unsharp_t"] > 0:
-        # if PIL manupulation is needed, convert to a PIL image once
-        pil_needed = True
-
-        _image = (image * 255).astype(np.uint8)
-        pil_image = Image.fromarray(_image)
 
     if im_settings["normalize"]:
         min_val = np.min(image)
@@ -109,6 +103,13 @@ def worker_e(image, im_settings):
         image = np.interp(image.flatten(), bins[:-1], cdf_normalized).reshape(
             image.shape
         )
+
+    if im_settings["bc_t"] or im_settings["blur_t"] or im_settings["unsharp_t"] > 0:
+        # if PIL manupulation is needed, convert to a PIL image once
+        pil_needed = True
+
+        _image = (image * 255).astype(np.uint8)
+        pil_image = Image.fromarray(_image)
 
     if im_settings["bc_t"]:
         if _brightness != 1.0:
