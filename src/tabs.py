@@ -5,7 +5,7 @@ from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
 from controls.toggle import ToggleContainer, ToggleWithLabel
-from helpers.debounce import debounce
+from helpers.decorators import debounce
 from settings import (
     BayerSettings,
     BetaSettings,
@@ -121,7 +121,7 @@ class HalftoneTab(QWidget):
             self.settings_widget.setVisible(False)
             self.settings_widget.deleteLater()
 
-    @debounce(0.5)
+    @debounce(0.15)
     def on_settings_changed(self, settings):
         """
         Trigger image processing when settings are changed.
@@ -266,7 +266,7 @@ class ImageTab(QWidget):
         # Set the layout for the widget
         self.setLayout(self.layout)
 
-    @debounce(0.5)
+    @debounce(0.15)
     def on_mode_changed(self, mode_name):
         """
         Handle the change of grayscaling mode and trigger re-processing.
@@ -290,14 +290,11 @@ class ImageTab(QWidget):
         self.processor.convert = True
         self.processor.start(step=0)
 
-    @debounce(0.5)
+    @debounce(0.15)
     def on_settings_changed(self, value=None, sender=None):
         """
         Trigger image processing when settings are changed.
         """
-        for slider in self.sliders:
-            if slider.is_dragging:
-                return
 
         if sender is not None:  # noqa: SIM102
             # should happen only for containers. also i do prefer the loop separate

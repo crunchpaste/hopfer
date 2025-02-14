@@ -1,11 +1,10 @@
 import concurrent.futures
-from multiprocessing import Event
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 from PySide6.QtCore import QCoreApplication, QObject, Signal
 
-from helpers.debounce import debounce
+from helpers.decorators import queue
 
 try:
     from algorithms.thresholdc import (
@@ -394,6 +393,9 @@ class ImageProcessor(QObject):
 
     result_signal = Signal(bool)
 
+    # The ProcessPoolExecutor for all worker processes
+    executor = concurrent.futures.ProcessPoolExecutor(max_workers=1)
+
     def __init__(self, main_window, storage, parent=None):
         """
         Initialize the ImageProcessor with the selected algorithm, settings, and storage instance.
@@ -403,10 +405,10 @@ class ImageProcessor(QObject):
         :param storage: The ImageStorage instance for accessing image data.
         """
         super().__init__(parent)
-        self.queue = None
-        self.process = None
-        self.killswitch = Event()
-        self.processes = []
+
+        self.processing = False
+        self.queued_call = None
+
         self.storage = storage
         self.main_window = main_window
         self.algorithm = "None"
@@ -430,9 +432,10 @@ class ImageProcessor(QObject):
         self.convert = True  # Does the image need reconversion from RGB to Grayscale
         self.reset = True  # Does the viewer need to be reset. Set to True when a new image is loaded.
 
-    @debounce(0.5)
+    @queue
     def start(self, step=0):
         """Start the image processing in a separate process."""
+
         if self.storage.original_image is None:
             return
 
@@ -440,48 +443,39 @@ class ImageProcessor(QObject):
         self.main_window.viewer.labelVisible(True)
 
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
-        #
-
         convert = not self.storage.original_grayscale and step == 0
         enhance = step <= 1
 
         if convert:
             original_image = self.storage.get_original_image()
-            with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(
-                    worker_g,
-                    original_image,
-                    self.grayscale_mode,
-                    self.grayscale_settings,
-                )
+            future = self.executor.submit(
+                worker_g,
+                original_image,
+                self.grayscale_mode,
+                self.grayscale_settings,
+            )
 
-                grayscale_image = future.result()
-                self.storage.grayscale_image = grayscale_image
+            grayscale_image = future.result()
+            self.storage.grayscale_image = grayscale_image
 
         if enhance:
             grayscale_image = self.storage.get_grayscale_image()
-            with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
-                future = executor.submit(
-                    worker_e,
-                    grayscale_image,
-                    self.image_settings,
-                )
-
-                enhanced_image = future.result()
-
-                self.storage.enhanced_image = enhanced_image
-
-        with concurrent.futures.ProcessPoolExecutor(max_workers=1) as executor:
-            enhanced_image = self.storage.get_enhanced_image()
-
-            future = executor.submit(
-                worker_h,
-                enhanced_image,
-                self.algorithm,
-                self.settings,
+            future = self.executor.submit(
+                worker_e,
+                grayscale_image,
+                self.image_settings,
             )
+            enhanced_image = future.result()
+            self.storage.enhanced_image = enhanced_image
 
-            processed_image = future.result()
+        enhanced_image = self.storage.get_enhanced_image()
+        future = self.executor.submit(
+            worker_h,
+            enhanced_image,
+            self.algorithm,
+            self.settings,
+        )
+        processed_image = future.result()
 
         try:
             self.send_result(processed_image)
@@ -498,6 +492,9 @@ class ImageProcessor(QObject):
         # Go back to default behavior
         if self.reset:
             self.reset = False
+
+    def _delayed_method_call(self, method, args, kwargs):
+        method(self, *args, **kwargs)
 
     def handle_error(self, error_message):
         """Handle any errors during processing."""

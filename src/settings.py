@@ -45,9 +45,8 @@ class ThresholdSettings(HalftoneSettings):
 
     def emit_settings_changed(self):
         """Emit the current settings when the threshold value changes."""
-        if not self.threshold_value.is_dragging:
-            settings = {"threshold_value": self.threshold_value.slider.value()}
-            self.settingsChanged.emit(settings)
+        settings = {"threshold_value": self.threshold_value.slider.value()}
+        self.settingsChanged.emit(settings)
 
 
 class NiblackSettings(HalftoneSettings):
@@ -71,12 +70,11 @@ class NiblackSettings(HalftoneSettings):
 
     def emit_settings_changed(self):
         """Emit the current settings when the threshold value changes."""
-        if not self.block_size.is_dragging and not self.k_factor.is_dragging:
-            settings = {
-                "block_size": self.block_size.slider.value(),
-                "k_factor": self.k_factor.slider.value(),
-            }
-            self.settingsChanged.emit(settings)
+        settings = {
+            "block_size": self.block_size.slider.value(),
+            "k_factor": self.k_factor.slider.value(),
+        }
+        self.settingsChanged.emit(settings)
 
 
 class SauvolaSettings(HalftoneSettings):
@@ -106,17 +104,12 @@ class SauvolaSettings(HalftoneSettings):
 
     def emit_settings_changed(self):
         """Emit the current settings when the threshold value changes."""
-        if (
-            not self.block_size.is_dragging
-            and not self.dynamic_range.is_dragging
-            and not self.k_factor.is_dragging
-        ):
-            settings = {
-                "block_size": self.block_size.slider.value(),
-                "dynamic_range": self.dynamic_range.slider.value(),
-                "k_factor": self.k_factor.slider.value(),
-            }
-            self.settingsChanged.emit(settings)
+        settings = {
+            "block_size": self.block_size.slider.value(),
+            "dynamic_range": self.dynamic_range.slider.value(),
+            "k_factor": self.k_factor.slider.value(),
+        }
+        self.settingsChanged.emit(settings)
 
 
 class PhansalkarSettings(HalftoneSettings):
@@ -224,14 +217,13 @@ class GaussSettings(HalftoneSettings):
 
     def emit_settings_changed(self):
         """Emit the current settings when the threshold value changes."""
-        if not self.location.is_dragging and not self.std.is_dragging:
-            self.settingsChanged.emit(
-                {
-                    "seed": self.spin.spinbox.value(),
-                    "location": self.location.slider.value(),
-                    "std": self.std.slider.value(),
-                }
-            )
+        self.settingsChanged.emit(
+            {
+                "seed": self.spin.spinbox.value(),
+                "location": self.location.slider.value(),
+                "std": self.std.slider.value(),
+            }
+        )
 
 
 class BetaSettings(HalftoneSettings):
@@ -265,14 +257,13 @@ class BetaSettings(HalftoneSettings):
             elif sender == self.beta.slider:
                 self.alpha.slider.setValue(self.beta.slider.value())
 
-        if not self.alpha.is_dragging and not self.beta.is_dragging:
-            self.settingsChanged.emit(
-                {
-                    "seed": self.spin.spinbox.value(),
-                    "alpha": self.alpha.slider.value(),
-                    "beta": self.beta.slider.value(),
-                }
-            )
+        self.settingsChanged.emit(
+            {
+                "seed": self.spin.spinbox.value(),
+                "alpha": self.alpha.slider.value(),
+                "beta": self.beta.slider.value(),
+            }
+        )
 
 
 class BayerSettings(HalftoneSettings):
@@ -296,12 +287,12 @@ class BayerSettings(HalftoneSettings):
 
     def emit_settings_changed(self):
         """Emit the current settings when any control changes."""
-        if not self.size.is_dragging:
-            settings = {
-                "size": self.size.slider.value(),
-                "offset": self.offset.slider.value(),
-            }
-            self.settingsChanged.emit(settings)
+
+        settings = {
+            "size": self.size.slider.value(),
+            "offset": self.offset.slider.value(),
+        }
+        self.settingsChanged.emit(settings)
 
 
 class ErrorDiffusionSettings(HalftoneSettings):
@@ -328,10 +319,10 @@ class ErrorDiffusionSettings(HalftoneSettings):
 
     def emit_settings_changed(self):
         """Emit the current settings when any control changes."""
-        if not self.diffusion_factor.is_dragging:
-            settings = {
-                "diffusion_factor": self.diffusion_factor.slider.value(),
-                "serpentine": self.serpentine_toggle.is_toggle_checked(),
-                "noise": self.noise_toggle.is_toggle_checked(),
-            }
-            self.settingsChanged.emit(settings)
+
+        settings = {
+            "diffusion_factor": self.diffusion_factor.slider.value(),
+            "serpentine": self.serpentine_toggle.is_toggle_checked(),
+            "noise": self.noise_toggle.is_toggle_checked(),
+        }
+        self.settingsChanged.emit(settings)

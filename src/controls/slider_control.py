@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from controls.custom_range import RangeSlider
-from helpers.debounce import debounce_alt
+from helpers.decorators import debounce_alt
 
 
 class SliderControl(QWidget):
