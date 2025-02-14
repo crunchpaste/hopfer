@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
 )
 
 from controls.custom_range import RangeSlider
-from helpers.debounce import debounce
+from helpers.debounce import debounce_alt
 
 
 class SliderControl(QWidget):
@@ -94,7 +94,7 @@ class SliderControl(QWidget):
 
         self.show_reset(value)
 
-    @debounce(0.5)
+    @debounce_alt(0.5)
     def show_reset(self, value):
         if value != self.default:
             self.reset.setVisible(True)

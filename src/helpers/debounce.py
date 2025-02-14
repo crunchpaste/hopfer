@@ -26,3 +26,31 @@ def debounce(wait):
         return debounced
 
     return decorator
+
+
+def debounce_alt(wait):
+    """
+    This is functionally the same but keeps indipendent timers. It is mostly
+    a workaround for linked sliders.
+    """
+
+    def decorator(fn):
+        timers = {}
+
+        @wraps(fn)
+        def debounced(*args, **kwargs):
+            instance = args[0]
+
+            def call_it():
+                timers[instance] = None
+                fn(*args, **kwargs)
+
+            if instance in timers and timers[instance] is not None:
+                timers[instance].cancel()
+
+            timers[instance] = threading.Timer(wait, call_it)
+            timers[instance].start()
+
+        return debounced
+
+    return decorator
