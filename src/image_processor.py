@@ -95,6 +95,21 @@ def worker_e(image, im_settings):
         _image = (image * 255).astype(np.uint8)
         pil_image = Image.fromarray(_image)
 
+    if im_settings["normalize"]:
+        min_val = np.min(image)
+        max_val = np.max(image)
+        image = (image - min_val) / (max_val - min_val)
+
+    if im_settings["equalize"]:
+        hist, bins = np.histogram(image.flatten(), bins=256, range=[0, 1])
+
+        cdf = hist.cumsum()
+        cdf_normalized = cdf / cdf[-1]
+
+        image = np.interp(image.flatten(), bins[:-1], cdf_normalized).reshape(
+            image.shape
+        )
+
     if im_settings["bc_t"]:
         if _brightness != 1.0:
             # if PIL manupulation is needed, convert to a PIL image once
@@ -393,6 +408,8 @@ class ImageProcessor(QObject):
         self.settings = {}
 
         self.image_settings = {
+            "normalize": False,
+            "equalize": False,
             "bc_t": False,
             "blur_t": False,
             "unsharp_t": False,

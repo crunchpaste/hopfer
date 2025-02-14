@@ -4,7 +4,7 @@ from PySide6.QtWidgets import QVBoxLayout, QWidget
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
-from controls.toggle import ToggleContainer
+from controls.toggle import ToggleContainer, ToggleWithLabel
 from helpers.debounce import debounce
 from settings import (
     BayerSettings,
@@ -155,13 +155,19 @@ class ImageTab(QWidget):
         self.layout = QVBoxLayout()
 
         self.combobox = GrayscaleCombo()
+        self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
+
+        self.normalize = ToggleWithLabel(label="Normalize histogram")
+        self.normalize.toggleChanged.connect(self.on_settings_changed)
+
+        self.equalize = ToggleWithLabel(label="Equalize histogram")
+        self.equalize.toggleChanged.connect(self.on_settings_changed)
 
         self.brightness = SliderControl("Brightness", (-100, 100), 0, 100)
         self.brightness.slider.valueChanged.connect(self.on_settings_changed)
         self.brightness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.brightness)
 
-        self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
         self.contrast = SliderControl("Contrast", (-100, 100), 0, 100)
         self.contrast.slider.valueChanged.connect(self.on_settings_changed)
         self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
@@ -209,6 +215,8 @@ class ImageTab(QWidget):
         )
 
         self.layout.addWidget(self.combobox)
+        self.layout.addWidget(self.normalize)
+        self.layout.addWidget(self.equalize)
         self.layout.addWidget(self.bc_toggle)
         self.layout.addWidget(self.blur_toggle)
         self.layout.addWidget(self.unsharp_toggle)
@@ -254,6 +262,8 @@ class ImageTab(QWidget):
 
         storage = self.processor.storage
         settings = {
+            "normalize": self.normalize.is_toggle_checked(),
+            "equalize": self.equalize.is_toggle_checked(),
             "bc_t": self.bc_toggle.toggle.is_toggle_checked(),
             "blur_t": self.blur_toggle.toggle.is_toggle_checked(),
             "unsharp_t": self.unsharp_toggle.toggle.is_toggle_checked(),
