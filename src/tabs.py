@@ -205,7 +205,7 @@ class ImageTab(QWidget):
         self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.contrast)
 
-        self.blur = SliderControl("Blur", (0, 150), 0, 10)
+        self.blur = SliderControl("Blur", (0, 150), 0, 10, precision=1)
         self.blur.slider.valueChanged.connect(self.on_settings_changed)
         self.blur.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.blur)
@@ -215,7 +215,7 @@ class ImageTab(QWidget):
         self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.sharpness)
 
-        self.u_radius = SliderControl("Radius", (0, 100), 30, 10)
+        self.u_radius = SliderControl("Radius", (0, 100), 30, 10, precision=1)
         self.u_radius.slider.valueChanged.connect(self.on_settings_changed)
         self.u_radius.slider.sliderReleased.connect(self.on_settings_changed)
 
@@ -223,7 +223,7 @@ class ImageTab(QWidget):
         self.u_strenght.slider.valueChanged.connect(self.on_settings_changed)
         self.u_strenght.slider.sliderReleased.connect(self.on_settings_changed)
 
-        self.u_thresh = SliderControl("Threshold", (0, 20), 3, 1)
+        self.u_thresh = SliderControl("Threshold", (0, 20), 3, 1, precision=1)
         self.u_thresh.slider.valueChanged.connect(self.on_settings_changed)
         self.u_thresh.slider.sliderReleased.connect(self.on_settings_changed)
 

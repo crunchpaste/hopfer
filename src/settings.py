@@ -144,7 +144,9 @@ class PhansalkarSettings(HalftoneSettings):
         self.p_factor.slider.sliderReleased.connect(self.emit_settings_changed)
 
         # The slider that controls the q range of the local threshold
-        self.q_factor = SliderControl("Exponential decay", (1, 100), 10, 10)
+        self.q_factor = SliderControl(
+            "Exponential decay", (1, 100), 10, 10, precision=1
+        )
         self.q_factor.slider.valueChanged.connect(self.emit_settings_changed)
         self.q_factor.slider.sliderReleased.connect(self.emit_settings_changed)
 
@@ -241,11 +243,11 @@ class BetaSettings(HalftoneSettings):
         self.lock_toggle = ToggleWithLabel(label="Lock alpha/beta")
         self.lock_toggle.set_toggle_checked(True)
 
-        self.alpha = SliderControl("Alpha", (1, 100), 5, 10)
+        self.alpha = SliderControl("Alpha", (1, 100), 5, 10, precision=1)
         self.alpha.slider.valueChanged.connect(self.emit_settings_changed)
         self.alpha.slider.sliderReleased.connect(self.emit_settings_changed)
 
-        self.beta = SliderControl("Beta", (1, 100), 5, 10)
+        self.beta = SliderControl("Beta", (1, 100), 5, 10, precision=1)
         self.beta.slider.valueChanged.connect(self.emit_settings_changed)
         self.beta.slider.sliderReleased.connect(self.emit_settings_changed)
 

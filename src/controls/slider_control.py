@@ -13,10 +13,11 @@ from helpers.debounce import debounce_alt
 
 
 class SliderControl(QWidget):
-    def __init__(self, label, range, value, div, double=False):
+    def __init__(self, label, range, value, div, double=False, precision=2):
         super().__init__()
 
         self.div = div
+        self.precision = precision
         self.is_dragging = False
         self.default = value
         self.double = double
@@ -43,11 +44,11 @@ class SliderControl(QWidget):
         if self.div:
             if self.double:
                 self.right_label = QLabel(
-                    f"{self.slider.value()[0] / self.div:.2f} → {self.slider.value()[1] / self.div:.2f}"
+                    f"{self.slider.value()[0] / self.div:.{self.precision}f} → {self.slider.value()[1] / self.div:.{self.precision}f}".format()
                 )
             else:
                 self.right_label = QLabel(
-                    f"{self.slider.value() / self.div}"
+                    f"{self.slider.value() / self.div:.{self.precision}f}".format()
                 )  # Initial value
         else:
             if self.double:
@@ -81,10 +82,12 @@ class SliderControl(QWidget):
         if self.div:
             if self.double:
                 self.right_label.setText(
-                    f"{self.slider.value()[0] / self.div:.2f} → {self.slider.value()[1] / self.div:.2f}"
+                    f"{self.slider.value()[0] / self.div:.{self.precision}f} → {self.slider.value()[1] / self.div:.{self.precision}f}".format()
                 )
             else:
-                self.right_label.setText(f"{value / self.div}")
+                self.right_label.setText(
+                    f"{value / self.div:.{self.precision}f}".format()
+                )
         else:
             if self.double:
                 self.right_label.setText(
