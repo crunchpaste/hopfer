@@ -7,7 +7,6 @@ class GrayscaleCombo(QWidget):
 
     def __init__(self):
         super().__init__()
-
         # Initialize UI components
         self._initialize_ui()
 
@@ -23,6 +22,10 @@ class GrayscaleCombo(QWidget):
 
         # Layout to contain the label and combo box
         self.layout = QVBoxLayout()
+
+        # it seems that some custom margins are needed for some reason
+        self.layout.setContentsMargins(7, 10, 7, 10)
+
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.combobox)
 
@@ -45,6 +48,7 @@ class GrayscaleCombo(QWidget):
 
     def emit_mode_changed(self, text):
         """Emit the modeChanged signal with the selected mode."""
+
         self.modeChanged.emit(text)
         print(f"Selected mode: {text}")
 

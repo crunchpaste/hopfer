@@ -57,6 +57,8 @@ class HalftoneCombo(QWidget):
 
         # Layout to contain the label and combo box
         self.layout = QVBoxLayout()
+        # it seems that some custom margins are needed for some reason
+        self.layout.setContentsMargins(7, 10, 7, 10)
         self.layout.addWidget(self.label)
         self.layout.addWidget(self.combobox)
 

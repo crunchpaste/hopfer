@@ -159,19 +159,19 @@ class ImageTab(QWidget):
 
         self.rgb_widget = QWidget()
         rgb_layout = QVBoxLayout()
-        self.red = SliderControl("Red", (0, 100), 33, 100)
+        self.red = SliderControl("Red", (0, 100), 33, 100, padding=0, stretch=True)
         self.red.slider.valueChanged.connect(lambda: self.on_mode_changed("Manual RGB"))
         self.red.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
-        self.green = SliderControl("Green", (0, 100), 33, 100)
+        self.green = SliderControl("Green", (0, 100), 33, 100, stretch=True)
         self.green.slider.valueChanged.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
         self.green.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
-        self.blue = SliderControl("Blue", (0, 100), 33, 100)
+        self.blue = SliderControl("Blue", (0, 100), 33, 100, stretch=True)
         self.blue.slider.valueChanged.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
@@ -194,6 +194,7 @@ class ImageTab(QWidget):
         # container and layout to hold the options
         container = QWidget()
         layout = QVBoxLayout(container)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # numpy related toggles
         self.normalize = ToggleWithLabel(label="Normalize histogram")
