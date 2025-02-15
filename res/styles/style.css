@@ -9,12 +9,7 @@ QWidget {
     color: @primary;
     font-size: 14px;
 }
-/* QWidget:focus {
-    background-color: @secondary;
-    border: 1px solid @accent;
-    color: @accent;
-    font-size: 14px;
-} */
+
 QPushButton {
     color: @secondary;
     background-color: @primary;
@@ -332,10 +327,6 @@ QScrollBar {
     height: 0px;
     width: 0px;
     margin: 0px;
-}
-
-QRangeSlider {
-    qproperty-barcolor: @primary;
 }
 
 QRangeSlider::sub-page:horizontal {

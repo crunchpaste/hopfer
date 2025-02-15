@@ -1,11 +1,12 @@
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
-    QMainWindow,
     QSplitter,
     QWidget,
 )
+from qframelesswindow import FramelessMainWindow
 
+from controls.titlebar import HopferTitleBar
 from image_processor import ImageProcessor
 from image_storage import ImageStorage
 from preferences import PreferencesDialog
@@ -13,7 +14,7 @@ from sidebar import SideBar
 from viewer import PhotoViewer
 
 
-class MainWindow(QMainWindow):
+class MainWindow(FramelessMainWindow):
     def __init__(self):
         super().__init__()
         self._initialize_components()
@@ -30,6 +31,8 @@ class MainWindow(QMainWindow):
         """Setup the main window layout and UI components."""
         self.setWindowTitle("hopfer")
         self.resize(1200, 800)
+
+        self.setTitleBar(HopferTitleBar(self))
 
         main_widget = QWidget()
         main_layout = QHBoxLayout()
@@ -57,6 +60,10 @@ class MainWindow(QMainWindow):
         # Connect preferences button
         p_button = self.sidebar.toolbox.preferences
         p_button.clicked.connect(self.open_preferences)
+
+        self.setMenuWidget(self.titleBar)
+
+        # self.titleBar.raise_()
 
     def update_progress(self, progress):
         """Update the UI based on progress."""
