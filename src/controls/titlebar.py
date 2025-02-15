@@ -21,19 +21,21 @@ class HopferTitleBar(TitleBar):
         self.maxBtn.deleteLater()
         self.closeBtn.deleteLater()
 
-        # customize the style of title bar button
+        # Add an svg logotype instead of label to avoid font import
         self.logo = QSvgWidget(get_path("res/w_icon.svg"))
+        # this is the actual size of the svg
         self.logo.setFixedSize(81, 40)
         self.logo.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
-        # self.logo.setFixedHeight(40)
         self.hBoxLayout.insertWidget(0, self.logo)
         self.hBoxLayout.insertStretch(1)
+
         spacer = QSpacerItem(
-            15, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
+            13, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
         )
+
         self.hBoxLayout.insertSpacerItem(0, spacer)
 
-        # Create SVG buttons
+        # Material design icons instead of the windows one provided by qframelesswindow
         self.minBtn = HMinimizeButton(
             iconPath=get_path("res/icons/minimize.svg"), parent=self
         )
@@ -78,10 +80,10 @@ class HopferTitleBar(TitleBar):
         """Toggle between maximized and normal state."""
         if self.window().isMaximized():
             self.window().showNormal()
-            self.maxBtn.setIcon(get_path("res/expand.svg"))
+            self.maxBtn.setIcon(get_path("res/icons/expand.svg"))
         else:
             self.window().showMaximized()
-            self.maxBtn.setIcon(get_path("res/collapse.svg"))
+            self.maxBtn.setIcon(get_path("res/icons/collapse.svg"))
 
 
 class HSvgTitleBarButton(SvgTitleBarButton):
@@ -138,19 +140,7 @@ class HMaximizeButton(HSvgTitleBarButton):
         self.setPressedBackgroundColor(QColor("transparent"))
 
     def setMaxState(self, isMax):
-        """Update the maximized state and icon"""
-        if self._isMax == isMax:
-            return
-
-        self._isMax = isMax
-        # Change icon based on max state
-        iconPath = (
-            get_path("res/icons/expand.svg")
-            if isMax
-            else get_path("res/icons/collapse.svg")
-        )
-        self.setIcon(iconPath)
-        # self.setState(TitleBarButtonState.NORMAL)
+        pass
 
 
 # Custom Close Button (using SVG)

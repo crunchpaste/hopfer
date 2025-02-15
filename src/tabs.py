@@ -1,5 +1,5 @@
 from PySide6.QtCore import QCoreApplication, Signal
-from PySide6.QtWidgets import QVBoxLayout, QWidget
+from PySide6.QtWidgets import QVBoxLayout, QWidget, QScrollArea
 
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
@@ -187,6 +187,14 @@ class ImageTab(QWidget):
         # Initially set as invisible
         self.rgb_widget.setVisible(False)
 
+        # a scroll area to hold all the possible image editing options
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+
+        # container and layout to hold the options
+        container = QWidget()
+        layout = QVBoxLayout(container)
+
         # numpy related toggles
         self.normalize = ToggleWithLabel(label="Normalize histogram")
         self.normalize.toggleChanged.connect(self.on_settings_changed)
@@ -248,12 +256,18 @@ class ImageTab(QWidget):
         )
 
         self.layout.addWidget(self.combobox)
-        self.layout.addWidget(self.rgb_widget)
-        self.layout.addWidget(self.normalize)
-        self.layout.addWidget(self.equalize)
-        self.layout.addWidget(self.bc_toggle)
-        self.layout.addWidget(self.blur_toggle)
-        self.layout.addWidget(self.unsharp_toggle)
+        layout.addWidget(self.rgb_widget)
+        layout.addWidget(self.normalize)
+        layout.addWidget(self.equalize)
+        layout.addWidget(self.bc_toggle)
+        layout.addWidget(self.blur_toggle)
+        layout.addWidget(self.unsharp_toggle)
+        layout.addStretch()
+
+        container.setLayout(layout)
+        scroll.setWidget(container)
+
+        self.layout.addWidget(scroll)
 
         # self.layout.addWidget(self.brightness)
         # self.layout.addWidget(self.contrast)
@@ -261,7 +275,6 @@ class ImageTab(QWidget):
         # self.layout.addWidget(self.sharpness)
 
         # Add stretch to the layout
-        self.layout.addStretch()
 
         # Set the layout for the widget
         self.setLayout(self.layout)

@@ -323,12 +323,6 @@ QSlider::handle:horizontal {
     border-radius: 0px;
 }
 
-QScrollBar {
-    height: 0px;
-    width: 0px;
-    margin: 0px;
-}
-
 QRangeSlider::sub-page:horizontal {
     background: @secondary;
     height: 6px;
@@ -352,11 +346,38 @@ QRangeSlider::sub-page:horizontal {
 QGraphicsView {
     border: 2px solid transparent;
     margin: 8px; /* should have been 10, but this is compensating for te border */
-    min-width: 250px;
+    min-width: 240px;
     background: url("@res/background.svg") no-repeat center center;
 }
 QGraphicsView focus {
     border: 1px solid @accent;
+}
+
+QScrollArea {
+    border: transparent;
+    padding: 0;
+    background: transparent;
+}
+
+QScrollBar:vertical {
+    border: transparent;
+    border-radius: 3px;
+    background: #202020;
+    width: 8px;
+}
+
+QScrollBar::handle {
+    background: #313532;
+    border-radius: 3px;
+    min-height: 30px;
+}
+
+QScrollBar::add-line:vertical {
+    height: 0px;
+}
+
+QScrollBar::sub-line:vertical {
+    height: 0px;
 }
 
 #viewer-controls QPushButton {

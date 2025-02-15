@@ -13,7 +13,7 @@ from helpers.decorators import debounce_alt
 
 
 class SliderControl(QWidget):
-    def __init__(self, label, range, value, div, double=False, precision=2):
+    def __init__(self, label, range, value, div, double=False, precision=2, padding=1):
         super().__init__()
 
         self.div = div
@@ -74,6 +74,8 @@ class SliderControl(QWidget):
         self.slider_labels.addWidget(self.right_label)
         self.slider_layout.addLayout(self.slider_labels)
         self.slider_layout.addWidget(self.slider)
+
+        self.slider_layout.setContentsMargins(10, padding, 10, 10)
 
         self.setLayout(self.slider_layout)
 
