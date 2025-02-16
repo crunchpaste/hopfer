@@ -1,5 +1,5 @@
 from PySide6.QtCore import QCoreApplication, Signal
-from PySide6.QtWidgets import QVBoxLayout, QWidget, QScrollArea
+from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo

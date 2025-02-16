@@ -12,7 +12,7 @@ class HalftoneSettings(QWidget):
     def __init__(self):
         super().__init__()
         self.layout = QVBoxLayout(self)
-        self.layout.setContentsMargins(0,0,0,0)
+        self.layout.setContentsMargins(0, 0, 0, 0)
 
     def emit_settings_changed(self):
         """Emit the current settings when any control changes."""
@@ -305,7 +305,7 @@ class ErrorDiffusionSettings(HalftoneSettings):
         self.diffusion_factor.slider.valueChanged.connect(self.emit_settings_changed)
         self.diffusion_factor.slider.sliderReleased.connect(self.emit_settings_changed)
 
-        self.diffusion_factor.slider_layout.setContentsMargins(10,10,10,10)
+        self.diffusion_factor.slider_layout.setContentsMargins(10, 10, 10, 10)
         # Serpentine toggle
         self.serpentine_toggle = ToggleWithLabel(label="Serpentine")
         self.serpentine_toggle.toggleChanged.connect(self.emit_settings_changed)

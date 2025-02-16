@@ -48,7 +48,7 @@ class HopferTitleBar(TitleBar):
 
         titlebar_buttons = [self.minBtn, self.maxBtn, self.closeBtn]
 
-        button_size = QSize(20, 20)
+        button_size = QSize(30, 30)
 
         for button in titlebar_buttons:
             button.setFixedSize(button_size)
@@ -58,7 +58,7 @@ class HopferTitleBar(TitleBar):
             self.hBoxLayout.addWidget(button, 0, Qt.AlignRight)
 
             self.hBoxLayout.addSpacerItem(
-                QSpacerItem(15, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+                QSpacerItem(10, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
             )
 
         # Connect buttons to window actions
@@ -99,10 +99,16 @@ class HSvgTitleBarButton(SvgTitleBarButton):
         painter.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
         color, bgColor = self._getColors()
 
-        # draw background
+        # Draw circular background (centered)
         painter.setBrush(bgColor)
         painter.setPen(Qt.NoPen)
-        painter.drawRect(self.rect())
+
+        # draw background
+        size = min(self.width(), self.height())  # Ensure it fits within the widget
+        center = self.rect().center()  # Get center of widget
+        radius = size // 2  # Radius of the circle
+
+        painter.drawEllipse(center.x() - radius, center.y() - radius, size, size)
 
         # draw icon
         color = color.name()
@@ -123,8 +129,8 @@ class HMinimizeButton(HSvgTitleBarButton):
         super().__init__(iconPath, parent)
         self.setHoverColor(Qt.white)
         self.setPressedColor(Qt.white)
-        self.setHoverBackgroundColor(QColor("transparent"))
-        self.setPressedBackgroundColor(QColor("transparent"))
+        self.setHoverBackgroundColor(QColor("#1c1d1d"))
+        self.setPressedBackgroundColor(QColor("#1c1d1d"))
 
 
 # Custom Maximize Button (using SVG)
@@ -136,8 +142,8 @@ class HMaximizeButton(HSvgTitleBarButton):
         self._isMax = False
         self.setHoverColor(Qt.white)
         self.setPressedColor(Qt.white)
-        self.setHoverBackgroundColor(QColor("transparent"))
-        self.setPressedBackgroundColor(QColor("transparent"))
+        self.setHoverBackgroundColor(QColor("#1c1d1d"))
+        self.setPressedBackgroundColor(QColor("#1c1d1d"))
 
     def setMaxState(self, isMax):
         pass
@@ -151,5 +157,5 @@ class HCloseButton(HSvgTitleBarButton):
         super().__init__(iconPath, parent)
         self.setHoverColor(Qt.white)
         self.setPressedColor(Qt.white)
-        self.setHoverBackgroundColor(QColor("transparent"))
-        self.setPressedBackgroundColor(QColor("transparent"))
+        self.setHoverBackgroundColor(QColor("#1c1d1d"))
+        self.setPressedBackgroundColor(QColor("#1c1d1d"))
