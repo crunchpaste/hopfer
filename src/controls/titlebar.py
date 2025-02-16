@@ -94,6 +94,58 @@ class HopferTitleBar(TitleBar):
         else:
             self.maxBtn.setIcon(get_path("res/icons/expand.svg"))
 
+class DialogTitleBar(TitleBar):
+    """Custom title bar for the preferences dialog"""
+
+    def __init__(self, parent):
+        super().__init__(parent)
+        # Remove old buttons from layout to replace with SVG versions
+        self.hBoxLayout.removeWidget(self.minBtn)
+        self.minBtn.setParent(None)
+        self.minBtn.deleteLater()
+
+        self.hBoxLayout.removeWidget(self.maxBtn)
+        self.maxBtn.setParent(None)
+        self.maxBtn.deleteLater()
+
+        self.hBoxLayout.removeWidget(self.closeBtn)
+        self.closeBtn.setParent(None)
+        self.closeBtn.deleteLater()
+
+        # self.hBoxLayout.update()
+        # self.update()
+
+        self.hBoxLayout.addStretch()
+
+        spacer = QSpacerItem(
+            13, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
+        )
+        self.closeBtn = HCloseButton(
+            iconPath=get_path("res/icons/close.svg"), parent=self
+        )
+
+        button_size = QSize(30, 30)
+
+        self.closeBtn.setFixedSize(button_size)
+        self.closeBtn._normalColor = QColor("#6a6d6b")
+        self.closeBtn._hoverColor = QColor("salmon")
+        self.closeBtn._pressedColor = QColor("#f0f6f0")
+        self.hBoxLayout.addWidget(self.closeBtn, 0, Qt.AlignRight)
+
+        self.hBoxLayout.addSpacerItem(spacer)
+
+        self.closeBtn.clicked.connect(parent.close)
+
+        self.setFixedHeight(45)
+        self.setAttribute(Qt.WA_StyledBackground, True)
+        self.setObjectName("customTitleBar")
+        self.setStyleSheet("""
+            #customTitleBar {
+                background: #202121;
+                border-bottom: 2px solid #192020;
+            }
+        """)
+
 
 class HSvgTitleBarButton(SvgTitleBarButton):
     """Title bar button using svg icon"""

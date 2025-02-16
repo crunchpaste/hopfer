@@ -12,7 +12,12 @@ from PySide6.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QWidget,
+    QSpacerItem,
+    QSizePolicy
 )
+
+from controls.titlebar import DialogTitleBar, HopferTitleBar
+from qframelesswindow import FramelessDialog
 
 from res_loader import get_path
 
@@ -122,14 +127,20 @@ class AboutTab(QWidget):
         self.setLayout(layout)
 
 
-class PreferencesDialog(QDialog):
+class PreferencesDialog(FramelessDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.setTitleBar(DialogTitleBar(self))
         self.setWindowTitle("Preferences")
         self.setModal(True)
         # self.setWindowFlag(Qt.FramelessWindowHint)
-        self.setFixedSize(445, 720)
+        self.setFixedSize(490, 720)
         layout = QVBoxLayout()
+
+        layout.addSpacerItem(
+            QSpacerItem(10, 45, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+        )
+
 
         self.logotype = QSvgWidget(get_path("res/type.svg"))
         self.logotype.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
@@ -158,3 +169,4 @@ class PreferencesDialog(QDialog):
         layout.addWidget(self.tabs)
 
         self.setLayout(layout)
+        self.titleBar.raise_()
