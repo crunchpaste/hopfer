@@ -130,15 +130,14 @@ class AboutTab(QWidget):
 class PreferencesDialog(FramelessDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setTitleBar(DialogTitleBar(self))
         self.setWindowTitle("Preferences")
         self.setModal(True)
-        # self.setWindowFlag(Qt.FramelessWindowHint)
-        self.setFixedSize(490, 720)
+
+        self.setFixedSize(445, 765)
         layout = QVBoxLayout()
 
         layout.addSpacerItem(
-            QSpacerItem(10, 45, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+            QSpacerItem(0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         )
 
 
@@ -169,4 +168,5 @@ class PreferencesDialog(FramelessDialog):
         layout.addWidget(self.tabs)
 
         self.setLayout(layout)
+        self.setTitleBar(DialogTitleBar(self))
         self.titleBar.raise_()
