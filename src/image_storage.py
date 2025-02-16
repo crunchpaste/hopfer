@@ -55,6 +55,20 @@ class ImageStorage(QObject):
         self.edited_image = None
         self.processed_image = None
 
+    def reset(self):
+        # keeps the paths but discards all images
+        # mostly there to make it easier to take screencaptures
+        self.original_image = None
+        self.original_grayscale = False
+        self.grayscale_image = None
+        self.enhanced_image = None
+        self.alpha = None
+        self.ignore_alpha = False
+        self.edited_image = None
+        self.processed_image = None
+
+        self.main_window.reset_viewer()
+
     def _load(self, image):
         # the final procedure of loading an image. expecs a pillow image.
 

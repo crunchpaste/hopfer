@@ -286,3 +286,22 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             # event is not triggered as it is quite jarring. The border is
             # compensated with the margin in style.css
             self.setStyleSheet("QGraphicsView {border: 2px solid transparent}")
+
+    def reset_to_default(self):
+        # removes image and resets everything to defaults
+        self._photo.setPixmap(QtGui.QPixmap())  # Clear the image
+        self._empty = True
+        self._zoom = 0
+
+        self.resetTransform()
+        self.setTransform(QtGui.QTransform())
+        self._photo.setTransformationMode(
+            QtCore.Qt.TransformationMode.FastTransformation
+        )
+
+        self.setDragMode(QtWidgets.QGraphicsView.DragMode.NoDrag)
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35, 0)))
+
+        self.setSceneRect(QtCore.QRectF())
+
+        self.update()

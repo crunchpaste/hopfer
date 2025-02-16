@@ -85,3 +85,7 @@ class MainWindow(FramelessMainWindow):
     def get_focus(self):
         self.activateWindow()
         self.raise_()
+
+    def reset_viewer(self):
+        # mostly for taking screencaptures
+        self.viewer.reset_to_default()
