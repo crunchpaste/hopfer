@@ -214,10 +214,25 @@ class ImageTab(QWidget):
         self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.contrast)
 
-        self.blur = SliderControl("Blur", (0, 150), 0, 10, precision=1)
+        self.blur = SliderControl("Gaussian filter", (0, 150), 0, 10, precision=1)
         self.blur.slider.valueChanged.connect(self.on_settings_changed)
         self.blur.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.blur)
+
+        self.median = SliderControl("Median filter", (1, 10), 0, 1, precision=1)
+        self.median.slider.valueChanged.connect(self.on_settings_changed)
+        self.median.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.median)
+
+        self.wl = SliderControl("Wavelet levels", (0, 10), 0, 1, precision=1)
+        self.wl.slider.valueChanged.connect(self.on_settings_changed)
+        self.wl.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.wl)
+
+        self.wt = SliderControl("Wavelet threshold", (0, 50), 0, 1, precision=1)
+        self.wt.slider.valueChanged.connect(self.on_settings_changed)
+        self.wt.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sliders.append(self.wt)
 
         self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
         self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
@@ -244,7 +259,7 @@ class ImageTab(QWidget):
             lambda: self.on_settings_changed(sender=self.bc_toggle)
         )
 
-        self.blur_toggle = ToggleContainer("Gaussian blur", (self.blur,))
+        self.blur_toggle = ToggleContainer("Blur/denoise", (self.blur, self.median))
         self.blur_toggle.toggle.toggleChanged.connect(
             lambda: self.on_settings_changed(sender=self.blur_toggle)
         )
@@ -326,6 +341,9 @@ class ImageTab(QWidget):
             "brightness": self.brightness.slider.value(),
             "contrast": self.contrast.slider.value(),
             "blur": self.blur.slider.value(),
+            "median": self.median.slider.value(),
+            "wl": self.wl.slider.value(),
+            "wt": self.wt.slider.value(),
             "u_radius": self.u_radius.slider.value(),
             "u_strenght": self.u_strenght.slider.value(),
             "u_thresh": self.u_thresh.slider.value(),

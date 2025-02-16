@@ -82,7 +82,6 @@ def worker_e(image, im_settings):
         # using a log function makes the adjustment feel a bit more natural
         _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
     _contrast += 1
-    _blur = im_settings["blur"] / 10
     # _sharpness = im_settings["sharpness"]
 
     pil_needed = False
@@ -119,8 +118,13 @@ def worker_e(image, im_settings):
         if _contrast != 1.0:
             enhancer = ImageEnhance.Contrast(pil_image)
             pil_image = enhancer.enhance(_contrast)
-    if im_settings["blur_t"] and _blur > 0:
-        pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
+    if im_settings["blur_t"]:
+        _blur = im_settings["blur"] / 10
+        _median = int(im_settings["median"] * 2 - 1)
+        if _blur > 0:
+            pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
+        if _median > 1:
+            pil_image = pil_image.filter(ImageFilter.GaussianBlur(_median))
     if im_settings["unsharp_t"]:
         radius = im_settings["u_radius"] / 10
         strenght = int(im_settings["u_strenght"] * 2)
