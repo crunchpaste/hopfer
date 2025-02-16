@@ -85,6 +85,15 @@ class HopferTitleBar(TitleBar):
             self.window().showMaximized()
             self.maxBtn.setIcon(get_path("res/icons/collapse.svg"))
 
+    def resizeEvent(self, event):
+        # Otherwise the icon does not change when the titlebar is double clicked
+        super().resizeEvent(event)
+
+        if self.window().isMaximized():
+            self.maxBtn.setIcon(get_path("res/icons/collapse.svg"))
+        else:
+            self.maxBtn.setIcon(get_path("res/icons/expand.svg"))
+
 
 class HSvgTitleBarButton(SvgTitleBarButton):
     """Title bar button using svg icon"""
