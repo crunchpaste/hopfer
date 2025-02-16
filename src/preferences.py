@@ -2,7 +2,6 @@ from PySide6.QtCore import Qt, QUrl
 from PySide6.QtGui import QDesktopServices
 from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import (
-    QDialog,
     QHBoxLayout,
     QLabel,
     QPushButton,
@@ -12,13 +11,10 @@ from PySide6.QtWidgets import (
     QTabWidget,
     QVBoxLayout,
     QWidget,
-    QSpacerItem,
-    QSizePolicy
 )
-
-from controls.titlebar import DialogTitleBar, HopferTitleBar
 from qframelesswindow import FramelessDialog
 
+from controls.titlebar import DialogTitleBar
 from res_loader import get_path
 
 # Quite messy should fix at some point
@@ -139,7 +135,6 @@ class PreferencesDialog(FramelessDialog):
         layout.addSpacerItem(
             QSpacerItem(0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
         )
-
 
         self.logotype = QSvgWidget(get_path("res/type.svg"))
         self.logotype.renderer().setAspectRatioMode(Qt.KeepAspectRatio)

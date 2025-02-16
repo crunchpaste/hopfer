@@ -94,6 +94,7 @@ class HopferTitleBar(TitleBar):
         else:
             self.maxBtn.setIcon(get_path("res/icons/expand.svg"))
 
+
 class DialogTitleBar(TitleBar):
     """Custom title bar for the preferences dialog"""
 
