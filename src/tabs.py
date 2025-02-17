@@ -385,6 +385,7 @@ class OutputTab(QWidget):
         self.colors.dark.color_changed.connect(self.on_color_change)
         self.colors.light.color_changed.connect(self.on_color_change)
         self.colors.alpha.color_changed.connect(self.on_color_change)
+        self.colors.output.toggleChanged.connect(self.on_preview_change)
 
         self.layout.addStretch()
 
@@ -407,3 +408,6 @@ class OutputTab(QWidget):
             self.storage.color_alpha = color
 
         self.storage.result_signal.emit(False)
+
+    def on_preview_change(self, value):
+        self.storage.save_like_preview = value

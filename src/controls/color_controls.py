@@ -14,6 +14,8 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from controls.toggle import ToggleWithLabel
+
 
 class ColorGroup(QGroupBox):
     def __init__(self, title="Preview colors", parent=None):
@@ -26,9 +28,14 @@ class ColorGroup(QGroupBox):
         self.light = ColorControl("Paper", (240, 246, 246))
         self.alpha = ColorControl("Alpha", (250, 128, 114))
 
+        self.output = ToggleWithLabel(label="Output like preview")
+        self.output_a = ToggleWithLabel(label="Alpha like preview")
+
         self.layout.addWidget(self.dark)
         self.layout.addWidget(self.light)
         self.layout.addWidget(self.alpha)
+        self.layout.addWidget(self.output)
+        # self.layout.addWidget(self.output_a)
 
         self.setLayout(self.layout)
 

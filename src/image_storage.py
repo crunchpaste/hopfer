@@ -46,6 +46,9 @@ class ImageStorage(QObject):
         self.save_path = None
         self.save_path_edited = False  # Track if the save path has been altered
 
+        self.save_like_preview = False
+        self.save_like_alpha = False
+
         self.original_image = None
         self.original_grayscale = False
         self.grayscale_image = None
@@ -225,7 +228,11 @@ class ImageStorage(QObject):
         base_name = os.path.basename(self.save_path)
         save_path = self.generate_unique_save_path(base_dir, base_name)
 
-        image = (self.processed_image * 255).astype(np.uint8)
+        if self.save_like_preview and self.main_window.processor.algorithm != "None":
+            image = style_image(self.processed_image, self.color_dark, self.color_light)
+        else:
+            image = (self.processed_image * 255).astype(np.uint8)
+
         # Convert processed image to PIL format and save
         if self.ignore_alpha or self.alpha is None:
             pil_image = Image.fromarray(image)
@@ -241,8 +248,18 @@ class ImageStorage(QObject):
     def save_to_clipboard(self):
         if self.processed_image is not None:
             clipboard = self.app.clipboard()
-            print(self.alpha)
-            img = numpy_to_pixmap(self.processed_image, alpha=self.alpha)
+
+            if (
+                self.save_like_preview
+                and self.main_window.processor.algorithm != "None"
+            ):
+                _img = style_image(
+                    self.processed_image, self.color_dark, self.color_light
+                )
+            else:
+                _img = self.processed_image
+
+            img = numpy_to_pixmap(_img, alpha=self.alpha)
 
             # TODO: I have to check how to create pixmaps directly from an array
             clipboard.setPixmap(img)
