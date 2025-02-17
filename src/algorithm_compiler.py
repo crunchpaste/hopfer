@@ -26,6 +26,35 @@ def style_image(img, black, white):
     return output_img
 
 
+@cc.export("alpha_composite", "u1[:,:,:](u1[:,:,:], f4[:,:], u1[:])")
+def alpha_composite(img, alpha, alpha_color):
+    h, w, _ = img.shape
+    output_img = np.zeros((h, w, 3), dtype=np.uint8)
+
+    alpha_r = alpha_color[0]
+    alpha_g = alpha_color[1]
+    alpha_b = alpha_color[2]
+
+    for y in range(h):
+        for x in range(w):
+            pixel = img[y, x]
+            alpha_pixel = alpha[y, x]
+
+            output_r = alpha_pixel * pixel[0] + (1 - alpha_pixel) * alpha_r
+            output_g = alpha_pixel * pixel[1] + (1 - alpha_pixel) * alpha_g
+            output_b = alpha_pixel * pixel[2] + (1 - alpha_pixel) * alpha_b
+
+            output_r = max(0, min(255, output_r))
+            output_g = max(0, min(255, output_g))
+            output_b = max(0, min(255, output_b))
+
+            output_img[y, x, 0] = output_r
+            output_img[y, x, 1] = output_g
+            output_img[y, x, 2] = output_b
+
+    return output_img
+
+
 # THESHOLDING METHODS. Should include local thresholding later.
 @cc.export("thresh", "f4[:,:](f4[:,:], f4)")
 def thresh(img, threshold_value):

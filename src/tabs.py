@@ -396,13 +396,13 @@ class OutputTab(QWidget):
         that emitted the signal.
         """
         # Check which ColorControl emitted the signal
-        if sender == self.dark_c:
+        if sender == self.colors.dark:
             print(f"Dark color changed to: {color}")
             self.storage.color_dark = color
-        elif sender == self.light_c:
+        elif sender == self.colors.light:
             print(f"Light color changed to: {color}")
             self.storage.color_light = color
-        elif sender == self.alpha_c:
+        elif sender == self.colors.alpha:
             print(f"Alpha color changed to: {color}")
             self.storage.color_alpha = color
 
