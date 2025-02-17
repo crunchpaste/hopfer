@@ -29,7 +29,7 @@ class ColorGroup(QGroupBox):
         self.alpha = ColorControl("Alpha", (250, 128, 114))
 
         self.output = ToggleWithLabel(label="Output like preview")
-        self.output_a = ToggleWithLabel(label="Alpha like preview")
+        self.output.layout.setContentsMargins(0, 15, 0, 0)
 
         self.layout.addWidget(self.dark)
         self.layout.addWidget(self.light)

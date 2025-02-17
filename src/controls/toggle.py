@@ -44,13 +44,13 @@ class ToggleWithLabel(QWidget):
         self.toggle.valueChanged.connect(self.on_toggle_changed)
 
         # Create the layout and add the toggle button with label
-        toggle_hbox = QHBoxLayout()
-        toggle_hbox.addWidget(self.toggle_label)
-        toggle_hbox.addStretch()
-        toggle_hbox.addWidget(self.toggle)
+        self.layout = QHBoxLayout()
+        self.layout.addWidget(self.toggle_label)
+        self.layout.addStretch()
+        self.layout.addWidget(self.toggle)
 
         # Set the layout for the widget
-        self.setLayout(toggle_hbox)
+        self.setLayout(self.layout)
 
     def on_toggle_changed(self, value):
         """Handle the toggle state change and emit the signal."""

@@ -125,12 +125,19 @@ class Toolbox(QWidget):
         """This method is called when the button is clicked to open a file dialog."""
         if self.storage.image_path is not None:
             file_dialog = QFileDialog(self)
+
+            if self.storage.save_path is None:
+                origin = ""
+            else:
+                origin = self.storage.save_path
+
             file_filter = (
                 "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
                 "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
             )
+
             file_path, _ = file_dialog.getSaveFileName(
-                None, "Save File", self.storage.save_path, file_filter
+                None, "Save File", origin, file_filter
             )
 
             if file_path:

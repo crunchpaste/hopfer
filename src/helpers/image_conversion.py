@@ -31,6 +31,9 @@ def numpy_to_pixmap(img_array, alpha=None):
     if image_array.dtype != np.uint8:
         # This one is quite slow for large images and definitely needs improvement
         image_array = (image_array * 255).clip(0, 255).astype(np.uint8)
+    if alpha_array.dtype != np.uint8:
+        # This one is quite slow for large images and definitely needs improvement
+        alpha_array = (alpha_array * 255).clip(0, 255).astype(np.uint8)
 
     if image_array.ndim == 2 and alpha is None:
         # This is the case only when the halftoning mode is None

@@ -5,6 +5,7 @@ from urllib.parse import unquote, urlparse
 import numpy as np
 import requests
 from PIL import Image, UnidentifiedImageError
+from platformdirs import user_pictures_dir
 from PySide6.QtCore import QBuffer, QObject, Signal
 from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QApplication  # used for clipboard management
@@ -42,8 +43,11 @@ class ImageStorage(QObject):
         self.app = QApplication.instance()
         self.main_window = main_window
 
-        self.image_path = None
-        self.save_path = None
+        # Defaulting the paths to the user Pictures directory and
+        # hopfer.png as the filename for saving
+        self.image_path = user_pictures_dir()
+        self.save_path = os.path.join(user_pictures_dir(), "hopfer.png")
+
         self.save_path_edited = False  # Track if the save path has been altered
 
         self.save_like_preview = False
@@ -219,10 +223,14 @@ class ImageStorage(QObject):
             )
             return
 
-        # Ensure the base name and directory are properly set
         if not self.save_path:
-            print("No image path specified!")
-            return
+            # If there is no save path, and this happens when an image is pasted from
+            # clipboard, save it to the user Pictures directory as hopfer.png and
+            # set the Pictures directory as the save path so that the user can
+            # find it if they miss the notification.
+            base_dir = user_pictures_dir()
+            save_path = os.path.join(base_dir, "hopfer.png")
+            self.save_path = save_path
 
         base_dir = os.path.dirname(self.save_path)
         base_name = os.path.basename(self.save_path)
@@ -240,7 +248,11 @@ class ImageStorage(QObject):
             alpha = (self.alpha * 255).astype(np.uint8)
             image_w_alpha = np.dstack((image, alpha))
             pil_image = Image.fromarray(image_w_alpha)
-        pil_image.save(save_path)
+
+        try:
+            pil_image.save(save_path)
+        except Exception as e:
+            self.show_notification(f"Error: {e}", duration=10000)
 
         self.show_notification(f"Image saved to {save_path}", duration=3000)
         print(f"Image saved to {save_path}")
@@ -249,20 +261,8 @@ class ImageStorage(QObject):
         if self.processed_image is not None:
             clipboard = self.app.clipboard()
 
-            if (
-                self.save_like_preview
-                and self.main_window.processor.algorithm != "None"
-            ):
-                _img = style_image(
-                    self.processed_image, self.color_dark, self.color_light
-                )
-            else:
-                _img = self.processed_image
-
-            img = numpy_to_pixmap(_img, alpha=self.alpha)
-
             # TODO: I have to check how to create pixmaps directly from an array
-            clipboard.setPixmap(img)
+            clipboard.setPixmap(self.get_processed_pixmap(compositing=False))
             self.show_notification("Image stored in clipboard.")
         else:
             self.show_notification(
@@ -346,7 +346,7 @@ class ImageStorage(QObject):
 
         return self.processed_image
 
-    def get_processed_pixmap(self):
+    def get_processed_pixmap(self, compositing=True):
         """
         Convert the processed image to a QPixmap. If no processed image exists,
         return the original pixmap.
@@ -365,13 +365,18 @@ class ImageStorage(QObject):
             if self.alpha is not None:
                 # alpha = np.copy(self.alpha) * 255
                 # result = np.dstack((themed_image, alpha.astype(np.uint8)))
-                result = style_alpha(
-                    self.processed_image,
-                    self.alpha,
-                    color_dark,
-                    color_light,
-                    color_alpha,
-                )
+                if compositing:
+                    result = style_alpha(
+                        self.processed_image,
+                        self.alpha,
+                        color_dark,
+                        color_light,
+                        color_alpha,
+                    )
+                else:
+                    _img = style_image(self.processed_image, color_dark, color_light)
+                    alpha = (self.alpha * 255).astype(np.uint8)
+                    result = np.dstack((_img, alpha))
             else:
                 result = style_image(self.processed_image, color_dark, color_light)
 
