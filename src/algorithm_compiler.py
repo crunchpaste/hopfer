@@ -26,31 +26,25 @@ def style_image(img, black, white):
     return output_img
 
 
-@cc.export("alpha_composite", "u1[:,:,:](u1[:,:,:], f4[:,:], u1[:])")
-def alpha_composite(img, alpha, alpha_color):
-    h, w, _ = img.shape
+# It seems to be much faster to just style and composite in one step
+# instead of calling separate functions for it
+@cc.export("style_alpha", "u1[:,:,:](f4[:,:], f4[:,:], u1[:], u1[:], u1[:])")
+def style_alpha(img, alpha_img, black, white, alpha):
+    h, w = img.shape
     output_img = np.zeros((h, w, 3), dtype=np.uint8)
-
-    alpha_r = alpha_color[0]
-    alpha_g = alpha_color[1]
-    alpha_b = alpha_color[2]
 
     for y in range(h):
         for x in range(w):
-            pixel = img[y, x]
-            alpha_pixel = alpha[y, x]
-
-            output_r = alpha_pixel * pixel[0] + (1 - alpha_pixel) * alpha_r
-            output_g = alpha_pixel * pixel[1] + (1 - alpha_pixel) * alpha_g
-            output_b = alpha_pixel * pixel[2] + (1 - alpha_pixel) * alpha_b
-
-            output_r = max(0, min(255, output_r))
-            output_g = max(0, min(255, output_g))
-            output_b = max(0, min(255, output_b))
-
-            output_img[y, x, 0] = output_r
-            output_img[y, x, 1] = output_g
-            output_img[y, x, 2] = output_b
+            alpha_px = alpha_img[y, x]
+            alpha_pxn = 1 - alpha_px
+            if img[y, x] == 0:
+                output_img[y, x, 0] = black[0] * alpha_px + alpha_pxn * alpha[0]
+                output_img[y, x, 1] = black[1] * alpha_px + alpha_pxn * alpha[1]
+                output_img[y, x, 2] = black[2] * alpha_px + alpha_pxn * alpha[2]
+            else:
+                output_img[y, x, 0] = white[0] * alpha_px + alpha_pxn * alpha[0]
+                output_img[y, x, 1] = white[1] * alpha_px + alpha_pxn * alpha[1]
+                output_img[y, x, 2] = white[2] * alpha_px + alpha_pxn * alpha[2]
 
     return output_img
 

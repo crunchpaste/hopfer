@@ -12,9 +12,9 @@ from PySide6.QtWidgets import QApplication  # used for clipboard management
 from helpers.image_conversion import numpy_to_pixmap
 
 try:
-    from algorithms.static import alpha_composite, style_image
+    from algorithms.static import style_alpha, style_image
 except ImportError:
-    from algorithms.style_preview import alpha_composite, style_image
+    from algorithms.style_preview import style_alpha, style_image
 
 
 class ImageStorage(QObject):
@@ -343,15 +343,20 @@ class ImageStorage(QObject):
         else:
             color_dark = self.color_dark
             color_light = self.color_light
-
-            themed_image = style_image(self.processed_image, color_dark, color_light)
+            color_alpha = self.color_alpha
 
             if self.alpha is not None:
                 # alpha = np.copy(self.alpha) * 255
                 # result = np.dstack((themed_image, alpha.astype(np.uint8)))
-                result = alpha_composite(themed_image, self.alpha, self.color_alpha)
+                result = style_alpha(
+                    self.processed_image,
+                    self.alpha,
+                    color_dark,
+                    color_light,
+                    color_alpha,
+                )
             else:
-                result = themed_image
+                result = style_image(self.processed_image, color_dark, color_light)
 
             return self._get_image_pixmap(result) or self.get_original_pixmap()
 
