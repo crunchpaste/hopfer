@@ -154,7 +154,6 @@ class HSvgTitleBarButton(SvgTitleBarButton):
     def __init__(self, iconPath, parent=None):
         super().__init__(iconPath, parent)
         self.setObjectName("HSvgButton")
-        print(f"Object Name: {self.objectName()}")  # Debug print
 
     def paintEvent(self, e):
         painter = QPainter(self)

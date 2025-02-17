@@ -219,7 +219,7 @@ class ImageTab(QWidget):
         self.blur.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.blur)
 
-        self.median = SliderControl("Median filter", (1, 10), 0, 1, precision=1)
+        self.median = SliderControl("Median filter", (1, 5), 1, 1, precision=1)
         self.median.slider.valueChanged.connect(self.on_settings_changed)
         self.median.slider.sliderReleased.connect(self.on_settings_changed)
         self.sliders.append(self.median)

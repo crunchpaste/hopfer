@@ -124,7 +124,7 @@ def worker_e(image, im_settings):
         if _blur > 0:
             pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
         if _median > 1:
-            pil_image = pil_image.filter(ImageFilter.GaussianBlur(_median))
+            pil_image = pil_image.filter(ImageFilter.MedianFilter(_median))
     if im_settings["unsharp_t"]:
         radius = im_settings["u_radius"] / 10
         strenght = int(im_settings["u_strenght"] * 2)
