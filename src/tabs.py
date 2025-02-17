@@ -1,6 +1,7 @@
 from PySide6.QtCore import QCoreApplication, Signal
 from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
+from controls.color_controls import ColorGroup
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
@@ -359,3 +360,50 @@ class ImageTab(QWidget):
             self.combobox.combobox.setCurrentIndex(0)
         else:
             self.combobox.combobox.setDisabled(is_grayscale)
+
+
+class OutputTab(QWidget):
+    def __init__(self, storage):
+        """
+        Initialize the HalftoneTab widget, which allows users to select halftoning algorithms
+        and configure related settings.
+        """
+        super().__init__()
+
+        self.storage = storage
+
+        self._initialize_ui()
+
+    def _initialize_ui(self):
+        self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(15, 20, 15, 15)
+
+        self.colors = ColorGroup()
+
+        self.layout.addWidget(self.colors)
+
+        self.colors.dark.color_changed.connect(self.on_color_change)
+        self.colors.light.color_changed.connect(self.on_color_change)
+        self.colors.alpha.color_changed.connect(self.on_color_change)
+
+        self.layout.addStretch()
+
+        self.setLayout(self.layout)
+
+    def on_color_change(self, color, sender):
+        """
+        Slot to handle the color change. The sender is the widget (ColorControl)
+        that emitted the signal.
+        """
+        # Check which ColorControl emitted the signal
+        if sender == self.dark_c:
+            print(f"Dark color changed to: {color}")
+            self.storage.color_dark = color
+        elif sender == self.light_c:
+            print(f"Light color changed to: {color}")
+            self.storage.color_light = color
+        elif sender == self.alpha_c:
+            print(f"Alpha color changed to: {color}")
+            self.storage.color_alpha = color
+
+        self.storage.result_signal.emit(False)

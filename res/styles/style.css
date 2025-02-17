@@ -174,6 +174,21 @@ QSpinBox::down-arrow:off {
     background: @secondary;
 }
 
+QLineEdit {
+    color: @primary;
+    background: @secondary;
+    height: 24px;
+    border: 2px solid @primary;
+    border-radius: 2px;
+    selection-color: @accent;
+    selection-background-color: @secondary;
+    padding-right: 15px;
+    padding-left: 15px;
+}
+QLineEdit:focus {
+    border: 2px solid @accent;
+}
+
 QTabWidget {
     background-color: @secondary;
     border: 1px solid @primary;
@@ -266,6 +281,21 @@ QTabBar::tab:hover {
 QTabWidget::pane {
     border: 1px solid @primary;
     background-color: transparent;
+}
+
+QGroupBox {
+    background-color: transparent;
+    border: none;
+    margin-top: 1ex;
+    padding: 5px;
+}
+
+QGroupBox::title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding-left: 0px;
+    margin-left: 0px;
+    padding-bottom: 30px;
 }
 
 QSlider {

@@ -1,7 +1,7 @@
 from PySide6.QtWidgets import QHBoxLayout, QTabWidget, QVBoxLayout, QWidget
 
 from status import NotificationPane
-from tabs import HalftoneTab, ImageTab
+from tabs import HalftoneTab, ImageTab, OutputTab
 from toolbox import Toolbox
 
 
@@ -22,9 +22,11 @@ class SideBar(QWidget):
         # Add individual tabs
         self.image_tab = ImageTab(self.processor)
         self.halftone_tab = HalftoneTab(self.processor)
+        self.output_tab = OutputTab(self.storage)
 
         self.tabs.addTab(self.image_tab, "Image")
         self.tabs.addTab(self.halftone_tab, "Halftone")
+        self.tabs.addTab(self.output_tab, "Output")
 
         self.layout.addWidget(self.toolbox)
         self.secondary_layout.addWidget(self.tabs)

@@ -55,6 +55,10 @@ class ImageStorage(QObject):
         self.edited_image = None
         self.processed_image = None
 
+        self.color_dark = np.array((34, 35, 35)).astype(np.uint8)
+        self.color_light = np.array((240, 246, 246)).astype(np.uint8)
+        self.color_alpha = None
+
     def reset(self):
         # keeps the paths but discards all images
         # mostly there to make it easier to take screencaptures
@@ -337,8 +341,8 @@ class ImageStorage(QObject):
             _img = np.ascontiguousarray(self.processed_image)
             return self._get_image_pixmap(_img) or self.get_original_pixmap()
         else:
-            color_dark = np.array((34, 35, 35)).astype(np.uint8)
-            color_light = np.array((240, 246, 246)).astype(np.uint8)
+            color_dark = self.color_dark
+            color_light = self.color_light
 
             themed_image = style_image(self.processed_image, color_dark, color_light)
 

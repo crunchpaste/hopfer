@@ -24,7 +24,7 @@ class HopferTitleBar(TitleBar):
         # Add an svg logotype instead of label to avoid font import
         self.logo = QSvgWidget(get_path("res/w_icon.svg"))
         # this is the actual size of the svg
-        self.logo.setFixedSize(81, 40)
+        self.logo.setFixedSize(71, 35)
         self.logo.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         self.hBoxLayout.insertWidget(0, self.logo)
         self.hBoxLayout.insertStretch(1)
