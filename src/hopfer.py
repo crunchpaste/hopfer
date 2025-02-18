@@ -1,6 +1,9 @@
+import json
+import os
 import subprocess
 import sys
 
+from platformdirs import user_config_dir, user_pictures_dir
 from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtWidgets import QApplication
 
@@ -54,6 +57,24 @@ def get_latest_hash():
         print(f"An unexpected error occurred: {e}")
 
 
+def generate_config_if_none():
+    config_folder = os.path.join(user_config_dir(), "hopfer")
+    config_path = os.path.join(config_folder, "config.json")
+
+    print(config_path)
+    if not os.path.exists(config_path):
+        os.makedirs(config_folder, exist_ok=True)
+        config = {
+            "window": {"width": 1200, "height": 800},
+            "paths": {
+                "open_path": user_pictures_dir(),
+                "save_path": user_pictures_dir(),
+            },
+        }
+        with open(config_path, "w") as f:
+            json.dump(config, f, indent=2)
+
+
 def main():
     """
     TODO: Create a splash screen.
@@ -63,6 +84,8 @@ def main():
     if not hasattr(sys.modules["__main__"], "__compiled__"):
         # only get the hash if this is not a nuitka compiled binary
         get_latest_hash()
+
+    generate_config_if_none()
 
     # Setup Linux environment if applicable
     # if sys.platform.startswith("linux") or platform.system() == "Linux":

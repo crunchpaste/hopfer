@@ -70,26 +70,23 @@ class ToggleContainer(QWidget):
         super().__init__(parent)
 
         self.items = items
-        # Main layout
+
         self.layout = QVBoxLayout(self)
         self.layout.setContentsMargins(0, 0, 0, 0)
 
-        # Your custom toggle widget
-        self.toggle = ToggleWithLabel(label)  # Assuming this is your custom widget
+        self.toggle = ToggleWithLabel(label)
         self.layout.addWidget(self.toggle)
 
         self.content_widget = QWidget()
         self.content_layout = QVBoxLayout(self.content_widget)
-        self.content_layout.setContentsMargins(10, 5, 10, 5)  # Add spacing for clarity
+        self.content_layout.setContentsMargins(10, 5, 10, 5)
         self.layout.addWidget(self.content_widget)
 
         for item in self.items:
             self.content_layout.addWidget(item)
 
-        # Initially hide content
         self.content_widget.setVisible(False)
 
-        # Connect toggle state change
         self.toggle.toggleChanged.connect(self.toggle_content)
 
     def toggle_content(self, checked):

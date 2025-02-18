@@ -1,3 +1,5 @@
+import json
+
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -7,6 +9,7 @@ from PySide6.QtWidgets import (
 from qframelesswindow import FramelessMainWindow
 
 from controls.titlebar import HopferTitleBar
+from helpers.paths import config_path
 from image_processor import ImageProcessor
 from image_storage import ImageStorage
 from preferences import PreferencesDialog
@@ -29,8 +32,22 @@ class MainWindow(FramelessMainWindow):
 
     def _setup_ui(self):
         """Setup the main window layout and UI components."""
+
         self.setWindowTitle("hopfer")
-        self.resize(1200, 800)
+
+        try:
+            with open(config_path(), "r") as f:
+                config = json.load(f)
+
+            # get the last window size from the config
+            w = config["window"]["width"]
+            h = config["window"]["height"]
+
+        except FileNotFoundError:
+            w = 1200
+            h = 800
+
+        self.resize(w, h)
 
         self.setTitleBar(HopferTitleBar(self))
 
@@ -89,3 +106,22 @@ class MainWindow(FramelessMainWindow):
     def reset_viewer(self):
         # mostly for taking screencaptures
         self.viewer.reset_to_default()
+
+    def save_settings(self):
+        geometry = self.geometry()
+        window = {
+            "width": geometry.width(),
+            "height": geometry.height(),
+        }
+
+        with open(config_path(), "r") as f:
+            config = json.load(f)
+
+        config["window"] = window
+
+        with open(config_path(), "w") as f:
+            json.dump(config, f, indent=2)
+
+    def closeEvent(self, event):
+        print(self.save_settings())
+        super().closeEvent(event)
