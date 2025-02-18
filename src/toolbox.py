@@ -125,6 +125,8 @@ class Toolbox(QWidget):
         """This method is called when the button is clicked to open a file dialog."""
         if self.storage.image_path is not None:
             file_dialog = QFileDialog(self)
+            options = QFileDialog.Options()
+            options |= QFileDialog.DontConfirmOverwrite
 
             if self.storage.save_path is None:
                 origin = ""
@@ -137,13 +139,18 @@ class Toolbox(QWidget):
             )
 
             file_path, _ = file_dialog.getSaveFileName(
-                None, "Save File", origin, file_filter
+                None, "Save File", origin, file_filter, options=options
             )
 
             if file_path:
                 self.storage.save_path = file_path
+
+                if self.storage.image_path != file_path:
+                    self.storage.save_path_edited = True
+                else:
+                    self.storage.save_path_edited = False
+
                 self.storage.save_image()
-                # self.file_opened_signal.emit()
         else:
             # This is just so that an error pops in the notification pane.
             self.storage.save_image()

@@ -1,4 +1,5 @@
 import io
+import json
 import os
 from urllib.parse import unquote, urlparse
 
@@ -11,6 +12,7 @@ from PySide6.QtGui import QPixmap
 from PySide6.QtWidgets import QApplication  # used for clipboard management
 
 from helpers.image_conversion import numpy_to_pixmap
+from helpers.paths import config_path
 
 try:
     from algorithms.static import style_alpha, style_image
@@ -44,9 +46,18 @@ class ImageStorage(QObject):
         self.main_window = main_window
 
         # Defaulting the paths to the user Pictures directory and
-        # hopfer.png as the filename for saving
-        self.image_path = user_pictures_dir()
-        self.save_path = os.path.join(user_pictures_dir(), "hopfer.png")
+        # hopfer.png as the filename for saving if config is not found
+        try:
+            with open(config_path(), "r") as f:
+                config = json.load(f)
+                image_path = config["paths"]["open_path"]
+                save_path = config["paths"]["save_path"]
+        except Exception:
+            image_path = user_pictures_dir()
+            save_path = os.path.join(user_pictures_dir(), "hopfer.png")
+
+        self.image_path = image_path
+        self.save_path = save_path
 
         self.save_path_edited = False  # Track if the save path has been altered
 
@@ -102,9 +113,38 @@ class ImageStorage(QObject):
         try:
             self.image_path = image_path
 
-            path_without_ext = image_path.rsplit(".", 1)[0]
-            save_path = path_without_ext + ".png"
-            self.save_path = save_path
+            with open(config_path(), "r") as f:
+                config = json.load(f)
+
+            base_path = os.path.dirname(image_path)
+            config["paths"]["open_path"] = base_path
+
+            if (
+                config["paths"]["open_path"] == config["paths"]["save_path"]
+                and not self.save_path_edited
+            ):
+                # this should only happen if the user has not set a different folder
+                # for saving this time, or the peviouslt in the config. I may be a
+                # personal opinion but I quite prer havin independent input/output
+                # folders.
+                config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
+
+            # elif self.save_path.endswith("hopfer.png"):
+            #     # in case this is the default save path, loaded from config
+            #     # replace the placeholder hopfer.png with the actual filename
+            #     # + .png
+            #     name_wo_ext = os.path.splitext(os.path.basename(image_path))[0]
+            #     self.save_path = self.save_path.replace(
+            #         "hopfer.png", f"{name_wo_ext}.png"
+            #     )
+            else:
+                #
+                name_wo_ext = os.path.splitext(os.path.basename(image_path))[0]
+                old_image = os.path.basename(self.save_path)
+                self.save_path = self.save_path.replace(old_image, f"{name_wo_ext}.png")
+
+            with open(config_path(), "w") as f:
+                json.dump(config, f, indent=2)
 
             pil_image = Image.open(image_path)
 
@@ -228,13 +268,25 @@ class ImageStorage(QObject):
             # clipboard, save it to the user Pictures directory as hopfer.png and
             # set the Pictures directory as the save path so that the user can
             # find it if they miss the notification.
-            base_dir = user_pictures_dir()
-            save_path = os.path.join(base_dir, "hopfer.png")
+            base_path = user_pictures_dir()
+            save_path = os.path.join(base_path, "hopfer.png")
             self.save_path = save_path
 
-        base_dir = os.path.dirname(self.save_path)
+        # only if the path was actually edited save it to the confing
+        # so that next time it should be the default with a hopfer.png
+        if self.save_path_edited:
+            base_path = os.path.dirname(self.save_path)
+            with open(config_path(), "r") as f:
+                config = json.load(f)
+
+            config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
+
+            with open(config_path(), "w") as f:
+                json.dump(config, f, indent=2)
+
+        base_path = os.path.dirname(self.save_path)
         base_name = os.path.basename(self.save_path)
-        save_path = self.generate_unique_save_path(base_dir, base_name)
+        save_path = self.generate_unique_save_path(base_path, base_name)
 
         if self.save_like_preview and self.main_window.processor.algorithm != "None":
             image = style_image(self.processed_image, self.color_dark, self.color_light)
@@ -269,12 +321,12 @@ class ImageStorage(QObject):
                 "Image? What image? You haven't opened one yet.", duration=5000
             )
 
-    def generate_unique_save_path(self, base_dir, base_name):
+    def generate_unique_save_path(self, base_path, base_name):
         """
         Generate a unique save path for the image. If the file exists,
         a counter is appended to the base filename.
 
-        :param base_dir: The directory to save the image.
+        :param base_path: The directory to save the image.
         :param base_name: The base name of the file (including extension).
         :return: A unique file path for saving.
         """
@@ -283,11 +335,11 @@ class ImageStorage(QObject):
         file_format = "." + base_name.rsplit(".", 1)[1] if "." in base_name else ".png"
 
         counter = 1
-        save_path = os.path.join(base_dir, f"{base_name_without_ext}{file_format}")
+        save_path = os.path.join(base_path, f"{base_name_without_ext}{file_format}")
 
         while os.path.exists(save_path) and counter < self.MAX_SAVE_ATTEMPTS:
             save_path = os.path.join(
-                base_dir, f"{base_name_without_ext}_{counter:03d}{file_format}"
+                base_path, f"{base_name_without_ext}_{counter:03d}{file_format}"
             )
             counter += 1
 
