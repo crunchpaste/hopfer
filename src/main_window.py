@@ -42,12 +42,16 @@ class MainWindow(FramelessMainWindow):
             # get the last window size from the config
             w = config["window"]["width"]
             h = config["window"]["height"]
+            maximized = config["window"]["maximized"]
 
-        except FileNotFoundError:
+        except Exception:
             w = 1200
             h = 800
+            maximized = False
 
         self.resize(w, h)
+        if maximized:
+            self.showMaximized()
 
         self.setTitleBar(HopferTitleBar(self))
 
@@ -112,6 +116,7 @@ class MainWindow(FramelessMainWindow):
         window = {
             "width": geometry.width(),
             "height": geometry.height(),
+            "maximized": self.isMaximized(),
         }
 
         with open(config_path(), "r") as f:

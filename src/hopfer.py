@@ -65,7 +65,7 @@ def generate_config_if_none():
     if not os.path.exists(config_path):
         os.makedirs(config_folder, exist_ok=True)
         config = {
-            "window": {"width": 1200, "height": 800},
+            "window": {"width": 1200, "height": 800, "maximized": False},
             "paths": {
                 "open_path": user_pictures_dir(),
                 "save_path": user_pictures_dir(),
