@@ -1,4 +1,4 @@
-from PySide6.QtCore import QCoreApplication, Signal
+from PySide6.QtCore import QCoreApplication, Qt, Signal
 from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
 from controls.color_controls import ColorGroup
@@ -185,11 +185,13 @@ class ImageTab(QWidget):
         rgb_layout.addWidget(self.blue)
 
         self.rgb_widget.setLayout(rgb_layout)
+
         # Initially set as invisible
         self.rgb_widget.setVisible(False)
 
         # a scroll area to hold all the possible image editing options
         scroll = QScrollArea()
+        scroll.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         scroll.setWidgetResizable(True)
 
         # container and layout to hold the options
@@ -199,10 +201,10 @@ class ImageTab(QWidget):
 
         # numpy related toggles
         self.normalize = ToggleWithLabel(label="Normalize histogram")
-        self.normalize.toggleChanged.connect(self.on_settings_changed)
+        self.normalize.toggle_changed.connect(self.on_settings_changed)
 
         self.equalize = ToggleWithLabel(label="Equalize histogram")
-        self.equalize.toggleChanged.connect(self.on_settings_changed)
+        self.equalize.toggle_changed.connect(self.on_settings_changed)
 
         # pillow related sliders
         self.brightness = SliderControl("Brightness", (-100, 100), 0, 100)
@@ -256,19 +258,19 @@ class ImageTab(QWidget):
         self.bc_toggle = ToggleContainer(
             "Brightness/contrast", (self.brightness, self.contrast)
         )
-        self.bc_toggle.toggle.toggleChanged.connect(
+        self.bc_toggle.toggle.toggle_changed.connect(
             lambda: self.on_settings_changed(sender=self.bc_toggle)
         )
 
         self.blur_toggle = ToggleContainer("Blur/denoise", (self.blur, self.median))
-        self.blur_toggle.toggle.toggleChanged.connect(
+        self.blur_toggle.toggle.toggle_changed.connect(
             lambda: self.on_settings_changed(sender=self.blur_toggle)
         )
 
         self.unsharp_toggle = ToggleContainer(
             "Unsharp mask", (self.u_radius, self.u_strenght, self.u_thresh)
         )
-        self.unsharp_toggle.toggle.toggleChanged.connect(
+        self.unsharp_toggle.toggle.toggle_changed.connect(
             lambda: self.on_settings_changed(sender=None)
         )
 
@@ -285,13 +287,6 @@ class ImageTab(QWidget):
         scroll.setWidget(container)
 
         self.layout.addWidget(scroll)
-
-        # self.layout.addWidget(self.brightness)
-        # self.layout.addWidget(self.contrast)
-        # self.layout.addWidget(self.blur)
-        # self.layout.addWidget(self.sharpness)
-
-        # Add stretch to the layout
 
         # Set the layout for the widget
         self.setLayout(self.layout)
@@ -385,7 +380,7 @@ class OutputTab(QWidget):
         self.colors.dark.color_changed.connect(self.on_color_change)
         self.colors.light.color_changed.connect(self.on_color_change)
         self.colors.alpha.color_changed.connect(self.on_color_change)
-        self.colors.output.toggleChanged.connect(self.on_preview_change)
+        self.colors.output.toggle_changed.connect(self.on_preview_change)
 
         self.layout.addStretch()
 
@@ -398,13 +393,10 @@ class OutputTab(QWidget):
         """
         # Check which ColorControl emitted the signal
         if sender == self.colors.dark:
-            print(f"Dark color changed to: {color}")
             self.storage.color_dark = color
         elif sender == self.colors.light:
-            print(f"Light color changed to: {color}")
             self.storage.color_light = color
         elif sender == self.colors.alpha:
-            print(f"Alpha color changed to: {color}")
             self.storage.color_alpha = color
 
         self.storage.result_signal.emit(False)

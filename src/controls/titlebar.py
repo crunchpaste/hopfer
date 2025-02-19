@@ -5,6 +5,7 @@ from PySide6.QtSvgWidgets import QSvgWidget
 from PySide6.QtWidgets import QSizePolicy, QSpacerItem
 from qframelesswindow import SvgTitleBarButton, TitleBar
 
+from controls.focus_widget import FocusWidget
 from res_loader import get_path
 
 
@@ -15,10 +16,15 @@ class HopferTitleBar(TitleBar):
         super().__init__(parent)
         # Remove old buttons from layout to replace with SVG versions
         self.hBoxLayout.removeWidget(self.minBtn)
-        self.hBoxLayout.removeWidget(self.maxBtn)
-        self.hBoxLayout.removeWidget(self.closeBtn)
+        self.minBtn.setParent(None)
         self.minBtn.deleteLater()
+
+        self.hBoxLayout.removeWidget(self.maxBtn)
+        self.maxBtn.setParent(None)
         self.maxBtn.deleteLater()
+
+        self.hBoxLayout.removeWidget(self.closeBtn)
+        self.closeBtn.setParent(None)
         self.closeBtn.deleteLater()
 
         # Add an svg logotype instead of label to avoid font import
@@ -26,8 +32,11 @@ class HopferTitleBar(TitleBar):
         # this is the actual size of the svg
         self.logo.setFixedSize(71, 35)
         self.logo.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
+        self.focus = FocusWidget()
+
         self.hBoxLayout.insertWidget(0, self.logo)
-        self.hBoxLayout.insertStretch(1)
+        self.hBoxLayout.addWidget(self.focus)
+        self.hBoxLayout.addStretch()
 
         spacer = QSpacerItem(
             13, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
@@ -51,6 +60,7 @@ class HopferTitleBar(TitleBar):
         button_size = QSize(30, 30)
 
         for button in titlebar_buttons:
+            button.setFocusPolicy(Qt.NoFocus)
             button.setFixedSize(button_size)
             button._normalColor = QColor("#6a6d6b")
             button._hoverColor = QColor("salmon")
@@ -113,9 +123,6 @@ class DialogTitleBar(TitleBar):
         self.closeBtn.setParent(None)
         self.closeBtn.deleteLater()
 
-        # self.hBoxLayout.update()
-        # self.update()
-
         self.hBoxLayout.addStretch()
 
         spacer = QSpacerItem(
@@ -160,14 +167,13 @@ class HSvgTitleBarButton(SvgTitleBarButton):
         painter.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
         color, bgColor = self._getColors()
 
-        # Draw circular background (centered)
         painter.setBrush(bgColor)
         painter.setPen(Qt.NoPen)
 
         # draw background
-        size = min(self.width(), self.height())  # Ensure it fits within the widget
-        center = self.rect().center()  # Get center of widget
-        radius = size // 2  # Radius of the circle
+        size = min(self.width(), self.height())
+        center = self.rect().center()
+        radius = size // 2
 
         painter.drawEllipse(center.x() - radius, center.y() - radius, size, size)
 

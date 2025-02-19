@@ -29,6 +29,7 @@ class SeedSpinBox(QWidget):
         self.button = QPushButton("\ueb40")
         self.button.setObjectName("seed")
         self.button.setToolTip("New random seed")
+        self.button.setFocusPolicy(Qt.FocusPolicy.TabFocus)
         self.button.clicked.connect(self.new_seed)
 
         layout_inner.addWidget(self.spinbox)

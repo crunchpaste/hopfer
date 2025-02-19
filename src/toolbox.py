@@ -1,4 +1,4 @@
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QFileDialog,
     QPushButton,
@@ -93,6 +93,7 @@ class Toolbox(QWidget):
         icon_unicode = chr(int(unicode, 16))
         button = QPushButton(icon_unicode)
         button.setToolTip(tooltip)
+        button.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
         if click_handler:
             button.clicked.connect(click_handler)

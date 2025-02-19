@@ -64,7 +64,6 @@ class MainWindow(FramelessMainWindow):
 
         self.viewer = PhotoViewer(self, self.storage)
         self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus)
-        # self.viewer_controls = ViewerControls(self.viewer)
 
         self.splitter.addWidget(self.sidebar)
         self.splitter.addWidget(self.viewer)
@@ -83,7 +82,9 @@ class MainWindow(FramelessMainWindow):
         p_button.clicked.connect(self.open_preferences)
 
         self.setMenuWidget(self.titleBar)
+        self.titleBar.focus.setFocus()
 
+        # it says its needed in the docs, doesnt seem to actually be
         # self.titleBar.raise_()
 
     def update_progress(self, progress):
@@ -126,6 +127,13 @@ class MainWindow(FramelessMainWindow):
 
         with open(config_path(), "w") as f:
             json.dump(config, f, indent=2)
+
+    def mousePressEvent(self, event):
+        # just clearing the focus as it was quite annoying when trying to
+        # use shortcuts while focused on an input field
+        super().mousePressEvent(event)
+        self.titleBar.focus.setFocus()
+        self.clearFocus()
 
     def closeEvent(self, event):
         print(self.save_settings())

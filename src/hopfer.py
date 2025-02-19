@@ -7,6 +7,7 @@ from platformdirs import user_config_dir, user_pictures_dir
 from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtWidgets import QApplication
 
+from controls.focus_widget import FocusDebugger
 from helpers.load_stylesheet import load_qss
 from helpers.no_outline import NoFocusProxyStyle
 from main_window import MainWindow
@@ -91,7 +92,8 @@ def main():
     # if sys.platform.startswith("linux") or platform.system() == "Linux":
     #     desktop_file_path = setup_linux_icon()
 
-    # AA_DontUseNativeDialogs is used for custom styling of the Open File Dialog. Not yet stiled.
+    # AA_DontUseNativeDialogs is used for custom styling of
+    # the Open File Dialog. Not yet styled.
     # QCoreApplication.setAttribute(Qt.ApplicationAttribute.AA_DontUseNativeDialogs)
 
     app = QApplication(sys.argv)
@@ -99,15 +101,18 @@ def main():
 
     load_font("res/fonts/JetBrainsMono.ttf")
     load_font("res/fonts/mat_s/MaterialSymbols.ttf")
-    # app.setStyle("Windows") # leads to minor differences
-    #
+    app.setStyle("Fusion")  # Fixes some issues on windows
     app.setStyle(NoFocusProxyStyle())
-    # In ths case a .css file is used insread of .qss as it easier to highlight in an editor.
+    # In ths case a .css file is used insread of .qss as it easier to
+    # highlight in an editor.
     load_qss(app, get_path("res/styles/style.css"))
 
     window = MainWindow()
     window.setWindowIcon(QIcon(get_path("res/hopfer.png")))
     window.show()
+
+    focus_debugger = FocusDebugger()
+    app.installEventFilter(focus_debugger)
 
     Shortcuts(app, window)
 

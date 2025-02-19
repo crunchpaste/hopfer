@@ -34,15 +34,14 @@ class SliderControl(QWidget):
 
         min_value, max_value = range[0], range[1]
 
-        # Initialize slider and labels
         if self.double:
             self.slider = RangeSlider(Qt.Orientation.Horizontal)
         else:
             self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(min_value, max_value)
         self.slider.setValue(value)
+        self.slider.setFocusPolicy(Qt.FocusPolicy.TabFocus)
 
-        # Labels for the slider
         self.left_label = QLabel(label)
 
         self.reset = QPushButton("\ue5d5")
@@ -59,7 +58,7 @@ class SliderControl(QWidget):
             else:
                 self.right_label = QLabel(
                     f"{self.slider.value() / self.div:.{self.precision}f}".format()
-                )  # Initial value
+                )
         else:
             if self.double:
                 self.right_label = QLabel(
@@ -68,14 +67,10 @@ class SliderControl(QWidget):
             else:
                 self.right_label = QLabel(f"{self.slider.value()}")
 
-        # Connect slider signals
         self.slider.valueChanged.connect(self.update_value)
-        self.slider.sliderPressed.connect(
-            self.on_slider_pressed
-        )  # Track when dragging starts
+        self.slider.sliderPressed.connect(self.on_slider_pressed)
         self.slider.sliderReleased.connect(self.on_slider_released)
 
-        # Layout for slider and labels
         self.slider_layout = QVBoxLayout()
         self.slider_labels = QHBoxLayout()
         self.slider_labels.addWidget(self.left_label)
@@ -122,8 +117,8 @@ class SliderControl(QWidget):
 
     def on_slider_pressed(self):
         """Called when the slider starts being dragged."""
-        self.is_dragging = True  # Mark that dragging has started
+        self.is_dragging = True
 
     def on_slider_released(self):
         """Called when the slider is released after dragging."""
-        self.is_dragging = False  # Mark that dragging has finished
+        self.is_dragging = False

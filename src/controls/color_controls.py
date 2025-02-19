@@ -35,7 +35,6 @@ class ColorGroup(QGroupBox):
         self.layout.addWidget(self.light)
         self.layout.addWidget(self.alpha)
         self.layout.addWidget(self.output)
-        # self.layout.addWidget(self.output_a)
 
         self.setLayout(self.layout)
 
@@ -74,10 +73,6 @@ class ColorControl(QWidget):
         hbox.addWidget(self.hex)
         hbox.addSpacerItem(spacer1)
         hbox.addWidget(self.swatch)
-
-        # vbox = QVBoxLayout()
-        # # vbox.addWidget(self.label)
-        # vbox.addLayout(hbox)
 
         self.setLayout(hbox)
 

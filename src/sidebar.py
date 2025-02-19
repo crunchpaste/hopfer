@@ -1,3 +1,4 @@
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import QHBoxLayout, QTabWidget, QVBoxLayout, QWidget
 
 from status import NotificationPane
@@ -14,7 +15,6 @@ class SideBar(QWidget):
         self.secondary_layout = QVBoxLayout()
 
         self.toolbox = Toolbox(storage)
-        # Create the tabs container
         self.tabs = QTabWidget()
 
         self.notifications = NotificationPane(self)
@@ -27,6 +27,8 @@ class SideBar(QWidget):
         self.tabs.addTab(self.image_tab, "Image")
         self.tabs.addTab(self.halftone_tab, "Halftone")
         self.tabs.addTab(self.output_tab, "Output")
+
+        self.tabs.tabBar().setFocusPolicy(Qt.FocusPolicy.TabFocus)
 
         self.layout.addWidget(self.toolbox)
         self.secondary_layout.addWidget(self.tabs)
