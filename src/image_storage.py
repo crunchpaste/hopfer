@@ -129,14 +129,6 @@ class ImageStorage(QObject):
                 # folders.
                 config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
 
-            # elif self.save_path.endswith("hopfer.png"):
-            #     # in case this is the default save path, loaded from config
-            #     # replace the placeholder hopfer.png with the actual filename
-            #     # + .png
-            #     name_wo_ext = os.path.splitext(os.path.basename(image_path))[0]
-            #     self.save_path = self.save_path.replace(
-            #         "hopfer.png", f"{name_wo_ext}.png"
-            #     )
             else:
                 #
                 name_wo_ext = os.path.splitext(os.path.basename(image_path))[0]
@@ -312,9 +304,12 @@ class ImageStorage(QObject):
     def save_to_clipboard(self):
         if self.processed_image is not None:
             clipboard = self.app.clipboard()
+            styled = self.save_like_preview
 
             # TODO: I have to check how to create pixmaps directly from an array
-            clipboard.setPixmap(self.get_processed_pixmap(compositing=False))
+            clipboard.setPixmap(
+                self.get_processed_pixmap(compositing=False, styled=styled)
+            )
             self.show_notification("Image stored in clipboard.")
         else:
             self.show_notification(
@@ -398,7 +393,7 @@ class ImageStorage(QObject):
 
         return self.processed_image
 
-    def get_processed_pixmap(self, compositing=True):
+    def get_processed_pixmap(self, compositing=True, styled=True):
         """
         Convert the processed image to a QPixmap. If no processed image exists,
         return the original pixmap.
@@ -410,27 +405,37 @@ class ImageStorage(QObject):
             _img = np.ascontiguousarray(self.processed_image)
             return self._get_image_pixmap(_img) or self.get_original_pixmap()
         else:
-            color_dark = self.color_dark
-            color_light = self.color_light
-            color_alpha = self.color_alpha
+            if styled:
+                color_dark = self.color_dark
+                color_light = self.color_light
+                color_alpha = self.color_alpha
 
-            if self.alpha is not None:
-                # alpha = np.copy(self.alpha) * 255
-                # result = np.dstack((themed_image, alpha.astype(np.uint8)))
-                if compositing:
-                    result = style_alpha(
-                        self.processed_image,
-                        self.alpha,
-                        color_dark,
-                        color_light,
-                        color_alpha,
-                    )
+                if self.alpha is not None:
+                    # alpha = np.copy(self.alpha) * 255
+                    # result = np.dstack((themed_image, alpha.astype(np.uint8)))
+                    if compositing:
+                        result = style_alpha(
+                            self.processed_image,
+                            self.alpha,
+                            color_dark,
+                            color_light,
+                            color_alpha,
+                        )
+                    else:
+                        _img = style_image(
+                            self.processed_image, color_dark, color_light
+                        )
+                        alpha = (self.alpha * 255).astype(np.uint8)
+                        result = np.dstack((_img, alpha))
                 else:
-                    _img = style_image(self.processed_image, color_dark, color_light)
-                    alpha = (self.alpha * 255).astype(np.uint8)
-                    result = np.dstack((_img, alpha))
+                    result = style_image(self.processed_image, color_dark, color_light)
             else:
-                result = style_image(self.processed_image, color_dark, color_light)
+                _img = (self.processed_image * 255).astype(np.uint8)
+                if self.alpha is not None:
+                    alpha = (self.alpha * 255).astype(np.uint8)
+                    result = np.dstack((_img, _img, _img, alpha))
+                else:
+                    result = _img
 
             return self._get_image_pixmap(result) or self.get_original_pixmap()
 

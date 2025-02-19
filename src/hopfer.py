@@ -2,6 +2,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 
 from platformdirs import user_config_dir, user_pictures_dir
 from PySide6.QtGui import QFont, QFontDatabase, QIcon
@@ -80,7 +81,9 @@ def main():
     """
     TODO: Create a splash screen.
     """
+
     # desktop_file_path = None
+    start = time.perf_counter()
 
     if not hasattr(sys.modules["__main__"], "__compiled__"):
         # only get the hash if this is not a nuitka compiled binary
@@ -115,6 +118,10 @@ def main():
     app.installEventFilter(focus_debugger)
 
     Shortcuts(app, window)
+
+    end = time.perf_counter()
+
+    print(f"Boot time: {end - start} seconds")
 
     sys.exit(app.exec())
     # pass
