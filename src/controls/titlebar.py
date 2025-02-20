@@ -110,6 +110,7 @@ class DialogTitleBar(TitleBar):
 
     def __init__(self, parent, label=None):
         super().__init__(parent)
+        self._isDoubleClickEnabled = False
         # Remove old buttons from layout to replace with SVG versions
         self.hBoxLayout.removeWidget(self.minBtn)
         self.minBtn.setParent(None)
