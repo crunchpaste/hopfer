@@ -191,6 +191,11 @@ class RGBSliders(QWidget):
         self.g_slider.show_reset(g)
         self.b_slider.show_reset(b)
 
+        # calling the update value too
+        self.r_slider.update_value(r)
+        self.g_slider.update_value(g)
+        self.b_slider.update_value(b)
+
         # Signals reneabled after the value of the sliders is set
         self.r_slider.slider.blockSignals(False)
         self.g_slider.slider.blockSignals(False)
