@@ -63,8 +63,7 @@ def worker_g(image, mode, settings):
     This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
 
-    image = convert_to_grayscale(image, mode, settings)
-    return image
+    return convert_to_grayscale(image, mode, settings)
 
 
 def worker_e(image, im_settings):

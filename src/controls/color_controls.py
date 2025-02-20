@@ -2,6 +2,7 @@ import numpy as np
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import (
+    QApplication,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -13,6 +14,7 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
+from color_picker import ColorPicker
 from controls.toggle import ToggleWithLabel
 
 
@@ -113,9 +115,9 @@ class ColorControl(QWidget):
     def open_color_chooser(self):
         # color = QColorDialog.getColor()
 
-        from color_picker import ColorPicker
+        main_window = QApplication.instance().activeWindow()
 
-        dialog = ColorPicker(color=self.previous_color)
+        dialog = ColorPicker(color=self.previous_color, parent=main_window)
 
         if dialog.exec():
             color = dialog.pick_color()

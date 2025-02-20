@@ -89,6 +89,8 @@ def main():
         # only get the hash if this is not a nuitka compiled binary
         get_latest_hash()
 
+    setup_linux_icon()
+
     generate_config_if_none()
 
     # Setup Linux environment if applicable
