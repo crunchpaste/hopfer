@@ -2,7 +2,7 @@ from PySide6.QtCore import QRectF, QSize, Qt
 from PySide6.QtGui import QColor, QPainter
 from PySide6.QtSvg import QSvgRenderer
 from PySide6.QtSvgWidgets import QSvgWidget
-from PySide6.QtWidgets import QSizePolicy, QSpacerItem
+from PySide6.QtWidgets import QLabel, QSizePolicy, QSpacerItem
 from qframelesswindow import SvgTitleBarButton, TitleBar
 
 from controls.focus_widget import FocusWidget
@@ -108,7 +108,7 @@ class HopferTitleBar(TitleBar):
 class DialogTitleBar(TitleBar):
     """Custom title bar for the preferences dialog"""
 
-    def __init__(self, parent):
+    def __init__(self, parent, label=None):
         super().__init__(parent)
         # Remove old buttons from layout to replace with SVG versions
         self.hBoxLayout.removeWidget(self.minBtn)
@@ -123,7 +123,20 @@ class DialogTitleBar(TitleBar):
         self.closeBtn.setParent(None)
         self.closeBtn.deleteLater()
 
+        if label is not None:
+            self.label = QLabel(label)
+            self.label.setStyleSheet("background: transparent")
+            label_spacer = QSpacerItem(
+                20, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
+            )
+            self.hBoxLayout.insertSpacerItem(0, label_spacer)
+            self.hBoxLayout.insertWidget(1, self.label)
+
         self.hBoxLayout.addStretch()
+
+        # adding the focus widget to be able to reset the focus
+        self.focus = FocusWidget()
+        self.hBoxLayout.addWidget(self.focus)
 
         spacer = QSpacerItem(
             13, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
@@ -160,6 +173,7 @@ class HSvgTitleBarButton(SvgTitleBarButton):
 
     def __init__(self, iconPath, parent=None):
         super().__init__(iconPath, parent)
+        self.setFocusPolicy(Qt.FocusPolicy.NoFocus)
         self.setObjectName("HSvgButton")
 
     def paintEvent(self, e):

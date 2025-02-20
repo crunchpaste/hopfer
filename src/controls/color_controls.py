@@ -2,7 +2,6 @@ import numpy as np
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import (
-    QColorDialog,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -112,13 +111,23 @@ class ColorControl(QWidget):
         self.hex.setText(color_code)
 
     def open_color_chooser(self):
-        color = QColorDialog.getColor()
+        # color = QColorDialog.getColor()
+
+        from color_picker import ColorPicker
+
+        dialog = ColorPicker(color=self.previous_color)
+
+        if dialog.exec():
+            color = dialog.pick_color()
+        else:
+            return
 
         if color.isValid():
             self.color = np.array([color.red(), color.green(), color.blue()]).astype(
                 np.uint8
             )
             self.update_button_color(color)
+            self.previous_color = color
             self.color_changed.emit(self.color, self)
 
     def is_valid_hex(self, text):
