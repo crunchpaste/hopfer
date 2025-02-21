@@ -148,7 +148,10 @@ def worker_h(image, algorithm, settings):
     """
     This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
     """
-    image = np.copy(image).astype(np.float32)
+    # There is no need for a copy as it seems that multiprocessing
+    # is copying the image anyway when it's transferring it to the newly
+    # spawned process
+    # image = np.copy(image).astype(np.float32)
     processed_image = apply_algorithm(image, algorithm, settings)
     return processed_image
 
