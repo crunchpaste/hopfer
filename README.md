@@ -11,7 +11,7 @@
 ---
 
 <p align="center">
-    <img src="demo.svg" alt="Demo" style="max-width: 100%; height: auto;" />
+    <img src="demo.webp" alt="Demo" style="max-width: 100%; height: auto;" />
 </p>
 
 
