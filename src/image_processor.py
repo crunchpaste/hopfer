@@ -160,7 +160,7 @@ def convert_to_grayscale(image, mode, settings):
     """
     The function responsible for the grayscale conversion in the main worker_p.
     """
-
+    print(image.dtype)
     if mode == "Luminance":
         return luminance(image)
     if mode == "Luma":
@@ -453,7 +453,8 @@ class ImageProcessor(QObject):
         enhance = step <= 1
 
         if convert:
-            original_image = self.storage.get_original_image()
+            print("converting")
+            original_image = self.storage.original_image
             future = self.executor.submit(
                 worker_g,
                 original_image,
@@ -465,7 +466,9 @@ class ImageProcessor(QObject):
             self.storage.grayscale_image = grayscale_image
 
         if enhance:
-            grayscale_image = self.storage.get_grayscale_image()
+            print("enhancing")
+            if not convert:
+                grayscale_image = self.storage.grayscale_image
             future = self.executor.submit(
                 worker_e,
                 grayscale_image,
@@ -474,7 +477,9 @@ class ImageProcessor(QObject):
             enhanced_image = future.result()
             self.storage.enhanced_image = enhanced_image
 
-        enhanced_image = self.storage.get_enhanced_image()
+        if not enhance:
+            print("processing")
+            enhanced_image = self.storage.enhanced_image
         future = self.executor.submit(
             worker_h,
             enhanced_image,
@@ -493,7 +498,9 @@ class ImageProcessor(QObject):
             QCoreApplication.processEvents()
 
     def send_result(self, image):
-        self.storage.set_processed_image(image, self.reset)
+        self.storage.reset_view = self.reset
+        self.storage.algorithm = self.algorithm
+        self.storage.processed_image = image
 
         # Go back to default behavior
         if self.reset:

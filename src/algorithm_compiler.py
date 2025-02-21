@@ -8,21 +8,21 @@ cc.output_dir = "src/algorithms"
 
 
 # STYLING: Could later be used for outputting in different colors
-@cc.export("style_image", "u1[:,:,:](f4[:,:], u1[:], u1[:])")
+@cc.export("style_image", "u1[:,:,:](b1[:,:], u1[:], u1[:])")
 def style_image(img, black, white):
     h, w = img.shape
     output_img = np.zeros((h, w, 3), dtype=np.uint8)
 
     for y in range(h):
         for x in range(w):
-            if img[y, x] == 0:
-                output_img[y, x, 0] = black[0]
-                output_img[y, x, 1] = black[1]
-                output_img[y, x, 2] = black[2]
-            else:
+            if img[y, x]:
                 output_img[y, x, 0] = white[0]
                 output_img[y, x, 1] = white[1]
                 output_img[y, x, 2] = white[2]
+            else:
+                output_img[y, x, 0] = black[0]
+                output_img[y, x, 1] = black[1]
+                output_img[y, x, 2] = black[2]
     return output_img
 
 
@@ -58,19 +58,19 @@ def thresh(img, threshold_value):
     for i in range(h):
         for j in range(w):
             if img[i, j] > threshold_value:
-                output_img[i, j] = 1.0
+                output_img[i, j] = 1
             else:
-                output_img[i, j] = 0.0
+                output_img[i, j] = 0
     return output_img
 
 
-@cc.export("niblack", "f4[:,:](f4[:,:], u2, f4)")
+@cc.export("niblack", "b1[:,:](f4[:,:], u2, f4)")
 def niblack(img, n=25, k=0.2):
     # exaclty the same as sauvola() and phansalkar() apart for the formula for the threshold
     h, w = img.shape
     w_half = n // 2  # Half size of the block (window)
 
-    output_img = np.zeros((h, w), dtype=np.float32)
+    output_img = np.zeros((h, w), dtype=np.bool)
 
     # Compute the integral image and squared integral image
     integral_img = np.zeros((h + 1, w + 1))
@@ -142,12 +142,12 @@ def niblack(img, n=25, k=0.2):
     return output_img
 
 
-@cc.export("sauvola", "f4[:,:](f4[:,:], u2, f8, f8)")
+@cc.export("sauvola", "b1[:,:](f4[:,:], u2, f8, f8)")
 def sauvola(img, n=25, R=0.5, k=0.2):
     h, w = img.shape
     w_half = n // 2  # Half size of the block (window)
 
-    output_img = np.zeros((h, w), dtype=np.float32)
+    output_img = np.zeros((h, w), dtype=np.bool)
 
     # Compute the integral image and squared integral image
     integral_img = np.zeros((h + 1, w + 1))
@@ -219,13 +219,13 @@ def sauvola(img, n=25, R=0.5, k=0.2):
     return output_img
 
 
-@cc.export("phansalkar", "f4[:,:](f4[:,:], u2, f4, f4, f4, f4)")
+@cc.export("phansalkar", "b1[:,:](f4[:,:], u2, f4, f4, f4, f4)")
 def phansalkar(img, n=25, R=0.5, k=0.2, p=3, q=10):
     # This function is completely duplicating seuvola, apart from the arguments accepted and the formula for the local threshold. This is mostly done to for marginal performance gains by avoiding some conditionals.
     h, w = img.shape
     w_half = n // 2  # Half size of the block (window)
 
-    output_img = np.zeros((h, w), dtype=np.float32)
+    output_img = np.zeros((h, w), dtype=np.bool)
 
     # Compute the integral image and squared integral image
     integral_img = np.zeros((h + 1, w + 1))

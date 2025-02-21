@@ -64,30 +64,35 @@ class ImageStorage(QObject):
         self.save_like_preview = False
         self.save_like_alpha = False
 
-        self.original_image = None
+        self._original_image = None
         self.original_grayscale = False
-        self.grayscale_image = None
-        self.enhanced_image = None
+        self._grayscale_image = None
+        self._enhanced_image = None
         self.alpha = None
         self.ignore_alpha = False
         self.edited_image = None
-        self.processed_image = None
+        self._processed_image = None
 
         self.color_dark = np.array((34, 35, 35)).astype(np.uint8)
         self.color_light = np.array((240, 246, 246)).astype(np.uint8)
         self.color_alpha = np.array((250, 128, 114)).astype(np.uint8)
 
+        self.reset_view = True
+        self.algorithm = "None"
+
     def reset(self):
         # keeps the paths but discards all images
         # mostly there to make it easier to take screencaptures
-        self.original_image = None
+        self._original_image = None
         self.original_grayscale = False
-        self.grayscale_image = None
+        self._grayscale_image = None
         self.enhanced_image = None
         self.alpha = None
         self.ignore_alpha = False
         self.edited_image = None
         self.processed_image = None
+
+        self.reset_view = True
 
         self.main_window.reset_viewer()
 
@@ -340,32 +345,96 @@ class ImageStorage(QObject):
 
         return save_path
 
-    def get_original_image(self):
+    @staticmethod
+    def f32(image):
+        if image.dtype == np.float32:
+            return image
+        else:
+            return image.astype(np.float32)
+
+    @staticmethod
+    def f16(image):
+        if image.dtype == np.float16:
+            return image
+        else:
+            return image.astype(np.float16)
+
+    @staticmethod
+    def b1(image):
+        if image.dtype == np.bool:
+            return image
+        else:
+            return image.astype(np.bool)
+
+    @property
+    def original_image(self):
         """
         Return the original image as a NumPy array (normalized to [0, 1]).
 
         :return: Original image array.
         """
-        return self.original_image
+        if self._original_image is not None:
+            return self.f32(self._original_image)
 
-    def get_grayscale_image(self):
-        """
-        Return the grayscale image as a NumPy array (normalized to [0, 1]).
+    @original_image.setter
+    def original_image(self, image):
+        if image is not None:
+            self._original_image = self.f16(image)
 
-        :return: Grayscale image array.
+    @property
+    def grayscale_image(self):
         """
+        Return the original image as a NumPy array (normalized to [0, 1]).
+
+        :return: Original image array.
+        """
+        if self._grayscale_image is not None:
+            return self.f32(self._grayscale_image)
+
+    @grayscale_image.setter
+    def grayscale_image(self, image):
+        if image is not None:
+            self._grayscale_image = self.f16(image)
+
+    @property
+    def enhanced_image(self):
+        """
+        Return the original image as a NumPy array (normalized to [0, 1]).
+
+        :return: Original image array.
+        """
+        if self._enhanced_image is not None:
+            return self.f32(self._grayscale_image)
         return self.grayscale_image
 
-    def get_enhanced_image(self):
-        """
-        Return the grayscale image as a NumPy array (normalized to [0, 1]).
+    @enhanced_image.setter
+    def enhanced_image(self, image):
+        if image is not None:
+            self._enhanced_image = self.f16(image)
 
-        :return: Grayscale image array.
+    @property
+    def processed_image(self):
         """
-        if self.enhanced_image is not None:
-            return self.enhanced_image
-        else:
-            return self.get_grayscale_image()
+        Return the original image as a NumPy array (normalized to [0, 1]).
+
+        :return: Original image array.
+        """
+        if self._processed_image is not None:
+            if self.algorithm != "None":
+                return self.b1(self._processed_image)
+            else:
+                return self._processed_image
+        return self.enhanced_image
+
+    @processed_image.setter
+    def processed_image(self, image):
+        if image is not None:
+            if self.algorithm != "None":
+                self._processed_image = self.b1(image)
+            else:
+                self._processed_image = self.f16(image)
+
+        self.result_signal.emit(self.reset_view)
 
     def get_original_pixmap(self):
         """
@@ -409,6 +478,8 @@ class ImageStorage(QObject):
                 color_dark = self.color_dark
                 color_light = self.color_light
                 color_alpha = self.color_alpha
+
+                # return boolean_pixmap(self.processed_image, color_dark, color_light)
 
                 if self.alpha is not None:
                     # alpha = np.copy(self.alpha) * 255
