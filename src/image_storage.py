@@ -198,11 +198,21 @@ class ImageStorage(QObject):
         else:
             self.show_notification("Error: No image data in clipboard.", duration=10000)
 
+    @staticmethod
+    def discard_alpha(alpha):
+        # discard the alpha channel if its full of equal numbers
+        # to save on furher processing.
+        if np.all(alpha == alpha[0, 0]):
+            return None
+        else:
+            return alpha
+
     def extract_alpha(self, image):
         if image.mode == "LA":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
-            L = np_image[:, :, 0]
-            A = np_image[:, :, 1]
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float16)
+            L = np.image[:, :, 0]
+            A = self.discard_alpha(np_image[:, :, 1])
+
             self.original_grayscale = True
             return L, A
         elif image.mode == "L":
@@ -214,7 +224,7 @@ class ImageStorage(QObject):
         elif image.mode == "RGBA":
             np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
             RGB = np_image[:, :, :3]
-            A = np_image[:, :, 3]
+            A = self.discard_alpha(np_image[:, :, 3])
             RGB, is_gray = self.check_grayscale(RGB)
             self.original_grayscale = is_gray
             return RGB, A

@@ -160,7 +160,6 @@ def convert_to_grayscale(image, mode, settings):
     """
     The function responsible for the grayscale conversion in the main worker_p.
     """
-    print(image.dtype)
     if mode == "Luminance":
         return luminance(image)
     if mode == "Luma":
@@ -453,7 +452,6 @@ class ImageProcessor(QObject):
         enhance = step <= 1
 
         if convert:
-            print("converting")
             original_image = self.storage.original_image
             future = self.executor.submit(
                 worker_g,
@@ -466,7 +464,6 @@ class ImageProcessor(QObject):
             self.storage.grayscale_image = grayscale_image
 
         if enhance:
-            print("enhancing")
             if not convert:
                 grayscale_image = self.storage.grayscale_image
             future = self.executor.submit(
@@ -478,7 +475,6 @@ class ImageProcessor(QObject):
             self.storage.enhanced_image = enhanced_image
 
         if not enhance:
-            print("processing")
             enhanced_image = self.storage.enhanced_image
         future = self.executor.submit(
             worker_h,
