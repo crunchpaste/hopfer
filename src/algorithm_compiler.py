@@ -420,83 +420,129 @@ def eds(img, kernel, str_value):
 # GRAYSCALE CONVERSION functions follow.
 @cc.export("luminance", "f4[:,:](f4[:,:,:])")
 def luminance(img):
+    # reusing the original array as it is copied by multiprocessing anyway.
+    # returns just the red channel which it uses for storing the grayscale
+    # data. makes it about 10% faster and saves on a bit of memory.
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in range(h):
         for x in range(w):
-            r, g, b = img[y, x, 0:3]
-            output_img[y, x] = 0.22 * r + 0.72 * g + 0.06 * b
-    return output_img
+            # indexing in this idiotic way proved to be at much faster than
+            # slicing the array.
+            r = img[y, x, 0]
+            g = img[y, x, 1]
+            b = img[y, x, 2]
+            img[y, x, 0] = 0.22 * r + 0.72 * g + 0.06 * b
+    return img[:, :, 0]
 
 
 @cc.export("luma", "f4[:,:](f4[:,:,:])")
 def luma(img):
+    # reusing the original array as it is copied by multiprocessing anyway.
+    # returns just the red channel which it uses for storing the grayscale
+    # data. makes it about 10% faster and saves on a bit of memory.
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in range(h):
         for x in range(w):
-            r, g, b = img[y, x, 0:3]
-            output_img[y, x] = 0.30 * r + 0.59 * g + 0.11 * b
+            # indexing in this idiotic way proved to be at much faster than
+            # slicing the array.
+            r = img[y, x, 0]
+            g = img[y, x, 1]
+            b = img[y, x, 2]
+            img[y, x, 0] = 0.30 * r + 0.59 * g + 0.11 * b
 
-    return output_img
+    return img[:, :, 0]
 
 
 @cc.export("average", "f4[:,:](f4[:,:,:])")
 def average(img):
+    # reusing the original array as it is copied by multiprocessing anyway.
+    # returns just the red channel which it uses for storing the grayscale
+    # data. makes it about 10% faster and saves on a bit of memory.
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float32)
+    third = np.float32(1 / 3)
 
     for y in range(h):
         for x in range(w):
-            r, g, b = img[y, x, 0:3]
-            output_img[y, x] = (r + g + b) / 3
+            # indexing in this idiotic way proved to be at much faster than
+            # slicing the array.
+            r = img[y, x, 0]
+            g = img[y, x, 1]
+            b = img[y, x, 2]
 
-    return output_img
+            img[y, x, 0] = (r + g + b) * third
+
+    return img[:, :, 0]
 
 
 @cc.export("value", "f4[:,:](f4[:,:,:])")
 def value(img):
+    # reusing the original array as it is copied by multiprocessing anyway.
+    # returns just the red channel which it uses for storing the grayscale
+    # data. makes it about 10% faster and saves on a bit of memory.
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in range(h):
         for x in range(w):
-            values = img[y, x, 0:3]
-            output_img[y, x] = np.max(values)
+            # indexing in this idiotic way proved to be at much faster than
+            # slicing the array.
+            r = img[y, x, 0]
+            g = img[y, x, 1]
+            b = img[y, x, 2]
 
-    return output_img
+            img[y, x, 0] = max(r, g, b)
+
+    return img[:, :, 0]
 
 
 @cc.export("lightness", "f4[:,:](f4[:,:,:])")
 def lightness(img):
+    # reusing the original array as it is copied by multiprocessing anyway.
+    # returns just the red channel which it uses for storing the grayscale
+    # data. makes it about 10% faster and saves on a bit of memory.
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float32)
 
     for y in range(h):
         for x in range(w):
-            values = img[y, x, 0:3]
-            max = np.max(values)
-            min = np.min(values)
-            output_img[y, x] = (max + min) * 0.5
+            # indexing in this idiotic way proved to be at much faster than
+            # slicing the array.
+            r = img[y, x, 0]
+            g = img[y, x, 1]
+            b = img[y, x, 2]
 
-    return output_img
+            # using _v suffix to avoid compilation error
+            max_v = max(r, g, b)
+            min_v = min(r, g, b)
+
+            img[y, x, 0] = (max_v + min_v) * 0.5
+
+    return img[:, :, 0]
 
 
 @cc.export("manual", "f4[:,:](f4[:,:,:], f8, f8, f8)")
 def manual(img, rf, gf, bf):
+    # reusing the original array as it is copied by multiprocessing anyway.
+    # returns just the red channel which it uses for storing the grayscale
+    # data. makes it about 10% faster and saves on a bit of memory.
     h, w, _ = img.shape
-    output_img = np.zeros((h, w), dtype=np.float32)
+    # converting to float32 gives some 10-20% speed bump
+    rf = np.float32(rf)
+    gf = np.float32(gf)
+    bf = np.float32(bf)
 
-    for y in prange(h):
+    for y in range(h):
         for x in range(w):
-            r, g, b = img[y, x, 0:3]
-            output_img[y, x] = rf * r + gf * g + bf * b
+            # indexing in this idiotic way proved to be at much faster than
+            # slicing the array.
+            r = img[y, x, 0]
+            g = img[y, x, 1]
+            b = img[y, x, 2]
+            # avoiding np.clip nearly doubled the execution speed. the value
+            # could never be negative, therefore it's clipped only on the top
+            img[y, x, 0] = min((rf * r + gf * g + bf * b), 1)
 
-    # There was overflow in nuitka compiled binary
-    output_img = np.clip(output_img, 0, 1)
-    return output_img
+    return img[:, :, 0]
 
 
 # The IMAGE PROCESSING fuctions should go here if i decide to implement them from scratch instead of using pillow
