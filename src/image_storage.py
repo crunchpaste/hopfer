@@ -7,10 +7,9 @@ from urllib.parse import unquote, urlparse
 
 import numpy as np
 import requests
-import SharedArray as sa
 from PIL import Image, UnidentifiedImageError
 from platformdirs import user_pictures_dir
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject
 from PySide6.QtGui import QPixmap
 
 from helpers.image_conversion import numpy_to_pixmap
@@ -25,24 +24,20 @@ except ImportError:
 class ImageStorage(QObject):
     """
     Class for managing the loading, processing, and saving of images.
-    Handles original and processed images.
+    Handles the original and processed image, as well as varous conversions.
     """
 
     # Constants for image processing and saving
     MAX_SAVE_ATTEMPTS = 100
     NORMALIZED_MAX = 255.0
 
-    # Captured by the ImageTab. It is used to disable the GrayscaleCombo.
-    grayscale_signal = Signal(bool)
-
     def __init__(self, daemon):
         """
-        Initialize the image storage with the main window context for notifications.
+        Initialize the image storage.
 
-        :param main_window: The main window of the application, used for showing notifications.
+        :param daemon: The daemon, used to get the shared environment - the processor, the queue, the paths.
         """
         super().__init__()
-        # self.main_window = main_window
 
         self.daemon = daemon
 
@@ -67,9 +62,6 @@ class ImageStorage(QObject):
         except Exception:
             image_path = user_pictures_dir()
             save_path = os.path.join(user_pictures_dir(), "hopfer.png")
-
-        # self.image_path = image_path
-        # self.save_path = save_path
 
         self.paths["image_path"] = image_path
         self.paths["save_path"] = save_path
@@ -98,8 +90,6 @@ class ImageStorage(QObject):
     def create_shm(self, height, width):
         if self.smm is not None:
             self.smm.shutdown()
-        # self.smm = SharedMemoryManager()
-        # self.smm.start()
         self.shm = self.smm.SharedMemory(size=height * width * 3)
         self.shm_preview = np.ndarray(
             (height, width, 3), dtype=np.uint8, buffer=self.shm.buf
@@ -109,17 +99,6 @@ class ImageStorage(QObject):
             "name": self.shm.name,
             "size": (height, width, 3),
         }
-        self.res_queue.put(message)
-
-    def create_shms(self, height, width):
-        sa.delete("shm://gray")
-        sa.delete("shm://rgb")
-        # Create shared memory for the 2D grayscale array
-        self.shm_preview = sa.create("shm://gray", (height, width), dtype=np.uint8)
-
-        # Create shared memory for the 3D RGB array
-        self.shm_rgb = sa.create("shm://rgb", (height, width, 3), dtype=np.uint8)
-        message = {"type": "shared_arrays"}
         self.res_queue.put(message)
 
     def reset(self):
@@ -150,7 +129,10 @@ class ImageStorage(QObject):
         except Exception as e:
             print(f"CREATING SHM: {e}")
 
-        message = {"type": "original_grayscale", "value": self.original_grayscale}
+        message = {
+            "type": "original_grayscale",
+            "value": self.original_grayscale,
+        }
 
         self.res_queue.put(message)
 
@@ -196,7 +178,9 @@ class ImageStorage(QObject):
                 # for saving this time, or the peviouslt in the config. I may be a
                 # personal opinion but I quite prer havin independent input/output
                 # folders.
-                config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
+                config["paths"]["save_path"] = os.path.join(
+                    base_path, "hopfer.png"
+                )
 
             else:
                 #
@@ -253,7 +237,9 @@ class ImageStorage(QObject):
                     url = local_path
                 self.load_image(url)
         else:
-            self.show_notification("Error: No image data in clipboard.", duration=10000)
+            self.show_notification(
+                "Error: No image data in clipboard.", duration=10000
+            )
 
     @staticmethod
     def discard_alpha(alpha):
@@ -266,27 +252,35 @@ class ImageStorage(QObject):
 
     def extract_alpha(self, image):
         if image.mode == "LA":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float16)
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
+                np.float16
+            )
             L = np_image[:, :, 0]
             A = self.discard_alpha(np_image[:, :, 1])
 
             self.original_grayscale = True
             return L, A
         elif image.mode == "L":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
+                np.float32
+            )
             L = np_image
             A = None
             self.original_grayscale = True
             return L, A
         elif image.mode == "RGBA":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
+                np.float32
+            )
             RGB = np_image[:, :, :3]
             A = self.discard_alpha(np_image[:, :, 3])
             RGB, is_gray = self.check_grayscale(RGB)
             self.original_grayscale = is_gray
             return RGB, A
         elif image.mode == "RGB":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
+                np.float32
+            )
             RGB = np_image
             A = None
             RGB, is_gray = self.check_grayscale(RGB)
@@ -294,7 +288,9 @@ class ImageStorage(QObject):
             return RGB, A
         else:
             image = image.convert("RGB")
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float32)
+            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
+                np.float32
+            )
             RGB = np_image
             RGB, is_gray = self.check_grayscale(RGB)
             A = None
@@ -330,10 +326,10 @@ class ImageStorage(QObject):
         save_path = self.paths["save_path"]
 
         if not save_path:
-            # If there is no save path, and this happens when an image is pasted from
-            # clipboard, save it to the user Pictures directory as hopfer.png and
-            # set the Pictures directory as the save path so that the user can
-            # find it if they miss the notification.
+            # If there is no save path, and this happens when an image is
+            # pasted from clipboard, save it to the user Pictures directory
+            # as hopfer.png and set the Pictures directory as the save path
+            # so that the user can find it if they miss the notification.
             base_path = user_pictures_dir()
             save_path = os.path.join(base_path, "hopfer.png")
             self.paths["save_path"] = save_path
@@ -355,7 +351,9 @@ class ImageStorage(QObject):
         save_path = self.generate_unique_save_path(base_path, base_name)
 
         if self.save_like_preview and self.daemon.processor.algorithm != "None":
-            image = style_image(self.processed_image, self.color_dark, self.color_light)
+            image = style_image(
+                self.processed_image, self.color_dark, self.color_light
+            )
         else:
             image = (self.processed_image * 255).astype(np.uint8)
 
@@ -403,10 +401,14 @@ class ImageStorage(QObject):
         """
         # Extract the file extension (format) from the base_name
         base_name_without_ext = base_name.rsplit(".", 1)[0]
-        file_format = "." + base_name.rsplit(".", 1)[1] if "." in base_name else ".png"
+        file_format = (
+            "." + base_name.rsplit(".", 1)[1] if "." in base_name else ".png"
+        )
 
         counter = 1
-        save_path = os.path.join(base_path, f"{base_name_without_ext}{file_format}")
+        save_path = os.path.join(
+            base_path, f"{base_name_without_ext}{file_format}"
+        )
 
         while os.path.exists(save_path) and counter < self.MAX_SAVE_ATTEMPTS:
             save_path = os.path.join(
@@ -531,72 +533,79 @@ class ImageStorage(QObject):
 
         return self.processed_image
 
-    def generate_processed_pixmap(self, compositing=True, styled=True, clipboard=False):
-        """
-        Convert the processed image to a QPixmap. If no processed image exists,
-        return the original pixmap.
-
-        :return: QPixmap of the processed image (or original if not processed).
-        """
+    def generate_processed_pixmap(
+        self, compositing=True, styled=True, clipboard=False
+    ):
         reset = self.reset_view
-        if self.daemon.processor.algorithm == "None":
-            # needed to avoid not C contiguous error
-            _img = np.ascontiguousarray(self.processed_image)
+        processor = self.daemon.processor
 
-            try:
-                self.shm_preview[:, :, 0] = (_img * 255).astype(np.uint8)
-            except Exception as e:
-                print(f"GENERATING PIXMAPS: {e}")
-            message = {"type": "display_image", "array": "gray", "reset": reset}
-            self.res_queue.put(message)
-            if clipboard:
-                return _img
-            return
-        else:
-            if styled:
-                color_dark = self.color_dark
-                color_light = self.color_light
-                color_alpha = self.color_alpha
+        if processor.algorithm == "None":
+            return self._handle_no_algorithm(reset, clipboard)
 
-                # return boolean_pixmap(self.processed_image, color_dark, color_light)
+        result = self._process_image(compositing, styled)
 
-                if self.alpha is not None:
-                    # alpha = np.copy(self.alpha) * 255
-                    # result = np.dstack((themed_image, alpha.astype(np.uint8)))
-                    if compositing:
-                        print("COMPOSITING")
-                        try:
-                            result = style_alpha(
-                                self.processed_image.astype(np.float32),
-                                self.alpha.astype(np.float32),
-                                color_dark,
-                                color_light,
-                                color_alpha,
-                            )
-                        except Exception as e:
-                            print(e)
-                    else:
-                        _img = style_image(
-                            self.processed_image,
-                            color_dark,
-                            color_light,
-                        )
-                        alpha = (self.alpha * 255).astype(np.uint8)
-                        result = np.dstack((_img, alpha))
-                else:
-                    result = style_image(self.processed_image, color_dark, color_light)
-            else:
-                _img = (self.processed_image * 255).astype(np.uint8)
-                if self.alpha is not None:
-                    alpha = (self.alpha * 255).astype(np.uint8)
-                    result = np.dstack((_img, _img, _img, alpha))
-                else:
-                    result = _img
         if clipboard:
             return result
+
         self.shm_preview[:] = result
-        message = {"type": "display_image", "array": "rgb", "reset": reset}
-        self.res_queue.put(message)
+        self.res_queue.put(
+            {"type": "display_image", "array": "rgb", "reset": reset}
+        )
+
+    def _handle_no_algorithm(self, reset, clipboard):
+        # Handles the case when "None" is the algo
+        try:
+            processed_img = np.ascontiguousarray(self.processed_image)
+            self.shm_preview[:, :, 0] = (processed_img * 255).astype(np.uint8)
+            self.res_queue.put(
+                {"type": "display_image", "array": "gray", "reset": reset}
+            )
+        except Exception as e:
+            print(f"GENERATING PIXMAPS: {e}")
+
+        return processed_img if clipboard else None
+
+    def _process_image(self, compositing, styled):
+        # Applies styling
+        if not styled:
+            return self._convert_to_uint8()
+
+        color_params = (self.color_dark, self.color_light, self.color_alpha)
+
+        if self.alpha is not None:
+            return self._apply_styling_with_alpha(compositing, *color_params)
+
+        return style_image(self.processed_image, *color_params[:2])
+
+    def _apply_styling_with_alpha(
+        self, compositing, color_dark, color_light, color_alpha
+    ):
+        # Applies the styling and composits
+        if compositing:
+            try:
+                return style_alpha(
+                    self.processed_image.astype(np.float32),
+                    self.alpha.astype(np.float32),
+                    color_dark,
+                    color_light,
+                    color_alpha,
+                )
+            except Exception as e:
+                print(e)
+
+        styled_img = style_image(self.processed_image, color_dark, color_light)
+        alpha = (self.alpha * 255).astype(np.uint8)
+        return np.dstack((styled_img, alpha))
+
+    def _convert_to_uint8(self):
+        # Cenverts to uint8 and adds alpha
+        img_uint8 = (self.processed_image * 255).astype(np.uint8)
+
+        if self.alpha is not None:
+            alpha = (self.alpha * 255).astype(np.uint8)
+            return np.dstack((img_uint8, img_uint8, img_uint8, alpha))
+
+        return img_uint8
 
     def _get_image_pixmap(self, image_array):
         """

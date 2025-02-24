@@ -35,12 +35,18 @@ class Toolbox(QWidget):
         spacer1 = QSpacerItem(20, 15)
 
         # File buttons
-        self.open = self._create_button("e43e", "Open image", self.open_file_dialog)
+        self.open = self._create_button(
+            "e43e", "Open image", self.open_file_dialog
+        )
 
-        self.save = self._create_button("e161", "Save image", self.writer.save_image)
+        self.save = self._create_button(
+            "e161", "Save image", self.writer.save_image
+        )
         self.save.setEnabled(False)  # Initial state is disabled
 
-        self.saveas = self._create_button("eb60", "Save as", self.save_file_dialog)
+        self.saveas = self._create_button(
+            "eb60", "Save as", self.save_file_dialog
+        )
         self.saveas.setEnabled(False)  # Initial state is disabled
 
         # # Image buttons

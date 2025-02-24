@@ -1,3 +1,6 @@
 [tool.ruff]
 lint.select = ["F", "E", "W", "I", "B", "SIM", "RUF"]
 lint.ignore = ["E501", "SIM108", "RUF003"]
+line-length = 80
+[tool.ruff.format]
+line-ending = "lf"

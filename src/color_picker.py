@@ -1,7 +1,14 @@
 import sys
 
 from PySide6.QtCore import Qt, Signal
-from PySide6.QtGui import QBrush, QColor, QLinearGradient, QPainter, QPen, QPixmap
+from PySide6.QtGui import (
+    QBrush,
+    QColor,
+    QLinearGradient,
+    QPainter,
+    QPen,
+    QPixmap,
+)
 from PySide6.QtWidgets import (
     QApplication,
     QGraphicsLineItem,
@@ -56,13 +63,17 @@ class ColorPicker(FramelessDialog):
         self.accept_button.clicked.connect(self.accept)
 
         outer_layout.addSpacerItem(
-            QSpacerItem(0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+            QSpacerItem(
+                0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed
+            )
         )
 
         layout.addWidget(self.hsv)
 
         layout.addSpacerItem(
-            QSpacerItem(15, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+            QSpacerItem(
+                15, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
+            )
         )
 
         layout.addWidget(self.controls)
@@ -157,9 +168,15 @@ class RGBSliders(QWidget):
         layout = QVBoxLayout()
         layout.setContentsMargins(0, 0, 0, 0)
 
-        self.r_slider = SliderControl("Red", (0, 255), self.r, False, stretch=True)
-        self.g_slider = SliderControl("Green", (0, 255), self.g, False, stretch=True)
-        self.b_slider = SliderControl("Blue", (0, 255), self.b, False, stretch=True)
+        self.r_slider = SliderControl(
+            "Red", (0, 255), self.r, False, stretch=True
+        )
+        self.g_slider = SliderControl(
+            "Green", (0, 255), self.g, False, stretch=True
+        )
+        self.b_slider = SliderControl(
+            "Blue", (0, 255), self.b, False, stretch=True
+        )
 
         self.sliders = [self.r_slider, self.g_slider, self.b_slider]
 
@@ -227,14 +244,18 @@ class HSVWidget(QWidget):
         self.sv = SaturationValueWidget()
 
         layout.addSpacerItem(
-            QSpacerItem(0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+            QSpacerItem(
+                0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed
+            )
         )
 
         self.h.h_changed.connect(self.on_hue_changed)
         self.sv.sv_changed.connect(self.on_sv_changed)
         layout.addWidget(self.h)
         layout.addSpacerItem(
-            QSpacerItem(25, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+            QSpacerItem(
+                25, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
+            )
         )
         layout.addWidget(self.sv)
 
@@ -435,11 +456,15 @@ class HueWidget(QGraphicsView):
         # Dark #222323
         # Light #f0f6f0
         # create the inner crosshair (dark line)
-        self.crosshair_hline_o = QGraphicsLineItem(0, 0, width, 0)  # Horizontal line
+        self.crosshair_hline_o = QGraphicsLineItem(
+            0, 0, width, 0
+        )  # Horizontal line
         self.crosshair_hline_o.setPen(QPen(QColor("#f0f6f0"), 3))
 
         # create the inner crosshair (light line)
-        self.crosshair_hline_i = QGraphicsLineItem(0, 0, width, 0)  # Horizontal line
+        self.crosshair_hline_i = QGraphicsLineItem(
+            0, 0, width, 0
+        )  # Horizontal line
         self.crosshair_hline_i.setPen(QPen(QColor("#222323"), 1))
 
         self._scene.addItem(self.crosshair_hline_o)

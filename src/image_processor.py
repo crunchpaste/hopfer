@@ -37,9 +37,23 @@ except ImportError:
     from algorithms.error_diffusion import error_diffusion
 
 try:
-    from algorithms.static import average, lightness, luma, luminance, manual, value
+    from algorithms.static import (
+        average,
+        lightness,
+        luma,
+        luminance,
+        manual,
+        value,
+    )
 except ImportError:
-    from algorithms.grayscale import average, lightness, luma, luminance, manual, value
+    from algorithms.grayscale import (
+        average,
+        lightness,
+        luma,
+        luminance,
+        manual,
+        value,
+    )
 
 # try:
 #     from algorithms.static import sharpen
@@ -119,7 +133,11 @@ def worker_e(image, im_settings):
             image.shape
         )
 
-    if im_settings["bc_t"] or im_settings["blur_t"] or im_settings["unsharp_t"] > 0:
+    if (
+        im_settings["bc_t"]
+        or im_settings["blur_t"]
+        or im_settings["unsharp_t"] > 0
+    ):
         # if PIL manupulation is needed, convert to a PIL image once
         pil_needed = True
 
@@ -147,7 +165,9 @@ def worker_e(image, im_settings):
         strenght = int(im_settings["u_strenght"] * 2)
         thresh = im_settings["u_thresh"]
 
-        pil_image = pil_image.filter(ImageFilter.UnsharpMask(radius, strenght, thresh))
+        pil_image = pil_image.filter(
+            ImageFilter.UnsharpMask(radius, strenght, thresh)
+        )
         # if _sharpness > 0:
         #     converted = True
         #     if pil_needed:
@@ -231,12 +251,16 @@ def apply_algorithm(image, algorithm, settings):
         processed_image = bayer(image, settings)
 
     elif algorithm == "Floyd-Steinberg":
-        kernel = np.array([[0, 0, 0], [0, 0, 7], [3, 5, 1]], dtype=np.float64) / 16.0
+        kernel = (
+            np.array([[0, 0, 0], [0, 0, 7], [3, 5, 1]], dtype=np.float64) / 16.0
+        )
 
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "False Floyd-Steinberg":
-        kernel = np.array([[0, 0, 0], [0, 0, 3], [0, 3, 2]], dtype=np.float64) / 8.0
+        kernel = (
+            np.array([[0, 0, 0], [0, 0, 3], [0, 3, 2]], dtype=np.float64) / 8.0
+        )
 
         processed_image = error_diffusion(image, kernel, settings)
 
@@ -371,7 +395,9 @@ def apply_algorithm(image, algorithm, settings):
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Sierra2 4A":
-        kernel = np.array([[0, 0, 0], [0, 0, 2], [1, 1, 0]], dtype=np.float64) / 4.0
+        kernel = (
+            np.array([[0, 0, 0], [0, 0, 2], [1, 1, 0]], dtype=np.float64) / 4.0
+        )
         processed_image = error_diffusion(image, kernel, settings)
 
     elif algorithm == "Nakano":
@@ -453,7 +479,9 @@ class ImageProcessor(QObject):
 
         self.settings = {}
 
-        self.convert = True  # Does the image need reconversion from RGB to Grayscale
+        self.convert = (
+            True  # Does the image need reconversion from RGB to Grayscale
+        )
         self.reset = True  # Does the viewer need to be reset. Set to True when a new image is loaded.
 
     @queue

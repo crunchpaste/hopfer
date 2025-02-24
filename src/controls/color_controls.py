@@ -91,9 +91,9 @@ class ColorControl(QWidget):
         color, valid = self.is_valid_hex(text)
         if valid:
             self.previous_color = color  # Store the valid color
-            self.color = np.array([color.red(), color.green(), color.blue()]).astype(
-                np.uint8
-            )
+            self.color = np.array(
+                [color.red(), color.green(), color.blue()]
+            ).astype(np.uint8)
             self.update_button_color(color)
             self.color_changed.emit(self.color, self)
         else:
@@ -125,9 +125,9 @@ class ColorControl(QWidget):
             return
 
         if color.isValid():
-            self.color = np.array([color.red(), color.green(), color.blue()]).astype(
-                np.uint8
-            )
+            self.color = np.array(
+                [color.red(), color.green(), color.blue()]
+            ).astype(np.uint8)
             self.update_button_color(color)
             self.previous_color = color
             self.color_changed.emit(self.color, self)

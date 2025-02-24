@@ -1,5 +1,4 @@
 import numpy as np
-from numba import prange
 from numba.pycc import CC
 
 # Initialize the compiler
@@ -49,7 +48,7 @@ def style_alpha(img, alpha_img, black, white, alpha):
     return output_img
 
 
-# THESHOLDING METHODS. Should include local thresholding later.
+# THESHOLDING METHODS.
 @cc.export("thresh", "f4[:,:](f4[:,:], f4)")
 def thresh(img, threshold_value):
     # Apply thresholding
@@ -97,7 +96,6 @@ def niblack(img, n=25, k=0.2):
             )
 
     for y in range(h):
-        # There seems to be no significant improvement in perfomance if doing it in a prange.
         for x in range(w):
             # Boundary checks
             y1, x1 = max(0, y - w_half), max(0, x - w_half)
@@ -362,9 +360,9 @@ def ed(img, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            error * kernel[ky, kx]
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += error * kernel[ky, kx]
                         # actually diffuse the error maybe the index could be precomputed
 
     return img  # return the image in a dithered form
@@ -406,9 +404,9 @@ def eds(img, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            error * kernel[ky, kx]
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += error * kernel[ky, kx]
                         # actually diffuse the error. maybe the index could be precomputed
     # Flip it one last time if needed
     if h.size % 2 != 0:
@@ -556,14 +554,18 @@ def sharpen(image, str=1.0):
     kernel = np.array([[0, y, 0], [y, x, y], [0, y, 0]]).astype(np.float32)
 
     # Create a padded image to avoid out of bounds error
-    padded_image = np.zeros((image.shape[0] + 2, image.shape[1] + 2), dtype=np.float32)
+    padded_image = np.zeros(
+        (image.shape[0] + 2, image.shape[1] + 2), dtype=np.float32
+    )
     padded_image[1:-1, 1:-1] = image
 
     sharpened = np.zeros((image.shape[0], image.shape[1]), dtype=np.float32)
 
-    for i in prange(image.shape[0]):
+    for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            region = padded_image[i : i + 3, j : j + 3]  # Extract the 3x3 region
+            region = padded_image[
+                i : i + 3, j : j + 3
+            ]  # Extract the 3x3 region
             sharpened[i, j] = np.sum(region * kernel)  # Apply the kernel
 
     return sharpened

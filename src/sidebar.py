@@ -31,7 +31,9 @@ class SideBar(QWidget):
         # self.output_tab = OutputTab(self.storage)
 
         self.image_tab = ImageTab(writer=self.writer, window=self.main_window)
-        self.halftone_tab = HalftoneTab(writer=self.writer, window=self.main_window)
+        self.halftone_tab = HalftoneTab(
+            writer=self.writer, window=self.main_window
+        )
         self.output_tab = OutputTab(writer=self.writer, window=self.main_window)
 
         self.tabs.addTab(self.image_tab, "Image")

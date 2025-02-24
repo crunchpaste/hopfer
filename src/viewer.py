@@ -44,9 +44,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setTransformationAnchor(
             QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
         )
-        self.setResizeAnchor(QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setResizeAnchor(
+            QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
+        )
+        self.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.setHorizontalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35, 0)))
         self.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
 

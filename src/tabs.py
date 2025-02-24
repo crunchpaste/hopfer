@@ -39,7 +39,9 @@ class HalftoneTab(QWidget):
 
         # Add the combobox for algorithm selection
         self.combobox = HalftoneCombo()
-        self.combobox.combobox.currentTextChanged.connect(self.on_algorithm_changed)
+        self.combobox.combobox.currentTextChanged.connect(
+            self.on_algorithm_changed
+        )
         self.layout.addWidget(self.combobox)
 
         # Initialize settings widget
@@ -162,18 +164,26 @@ class ImageTab(QWidget):
 
         self.rgb_widget = QWidget()
         rgb_layout = QVBoxLayout()
-        self.red = SliderControl("Red", (0, 100), 33, 100, padding=0, stretch=True)
-        self.red.value_changed.connect(lambda: self.on_mode_changed("Manual RGB"))
+        self.red = SliderControl(
+            "Red", (0, 100), 33, 100, padding=0, stretch=True
+        )
+        self.red.value_changed.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
         self.red.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
         self.green = SliderControl("Green", (0, 100), 33, 100, stretch=True)
-        self.green.value_changed.connect(lambda: self.on_mode_changed("Manual RGB"))
+        self.green.value_changed.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
         self.green.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
         self.blue = SliderControl("Blue", (0, 100), 33, 100, stretch=True)
-        self.blue.value_changed.connect(lambda: self.on_mode_changed("Manual RGB"))
+        self.blue.value_changed.connect(
+            lambda: self.on_mode_changed("Manual RGB")
+        )
         self.blue.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
@@ -215,7 +225,9 @@ class ImageTab(QWidget):
 
         self.sliders.append(self.contrast)
 
-        self.blur = SliderControl("Gaussian filter", (0, 150), 0, 10, precision=1)
+        self.blur = SliderControl(
+            "Gaussian filter", (0, 150), 0, 10, precision=1
+        )
         self.blur.value_changed.connect(self.on_settings_changed)
 
         self.sliders.append(self.blur)
@@ -257,7 +269,9 @@ class ImageTab(QWidget):
             lambda: self.on_settings_changed(sender=self.bc_toggle)
         )
 
-        self.blur_toggle = ToggleContainer("Blur/denoise", (self.blur, self.median))
+        self.blur_toggle = ToggleContainer(
+            "Blur/denoise", (self.blur, self.median)
+        )
         self.blur_toggle.toggle.toggle_changed.connect(
             lambda: self.on_settings_changed(sender=self.blur_toggle)
         )
@@ -316,7 +330,9 @@ class ImageTab(QWidget):
         if sender is not None:  # noqa: SIM102
             # should happen only for containers. also i do prefer the loop separate
             # that's why the warning is ignored.
-            if all(item.slider.value() == item.default for item in sender.items):
+            if all(
+                item.slider.value() == item.default for item in sender.items
+            ):
                 return
         pass
         # storage = self.processor.storage

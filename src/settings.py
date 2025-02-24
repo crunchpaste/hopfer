@@ -16,7 +16,9 @@ class HalftoneSettings(QWidget):
 
     def emit_settings_changed(self):
         """Emit the current settings when any control changes."""
-        raise NotImplementedError("This method should be implemented by subclasses.")
+        raise NotImplementedError(
+            "This method should be implemented by subclasses."
+        )
 
 
 class NoneSettings(HalftoneSettings):
@@ -36,10 +38,11 @@ class ThresholdSettings(HalftoneSettings):
         super().__init__()
 
         # The slider that controls the value for thresholding
-        self.threshold_value = SliderControl("Threshold value", (0, 100), 50, 100)
+        self.threshold_value = SliderControl(
+            "Threshold value", (0, 100), 50, 100
+        )
         self.threshold_value.value_changed.connect(self.emit_settings_changed)
 
-        # Add it to the layout
         self.layout.addWidget(self.threshold_value)
         self.layout.addStretch()
 
@@ -90,7 +93,6 @@ class SauvolaSettings(HalftoneSettings):
         self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
         self.k_factor.value_changed.connect(self.emit_settings_changed)
 
-        # Add it to the layout
         self.layout.addWidget(self.block_size)
         self.layout.addWidget(self.dynamic_range)
         self.layout.addWidget(self.k_factor)
@@ -123,7 +125,9 @@ class PhansalkarSettings(HalftoneSettings):
         self.k_factor.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the p range of the local threshold
-        self.p_factor = SliderControl("Exponential influence", (1, 500), 30, 100)
+        self.p_factor = SliderControl(
+            "Exponential influence", (1, 500), 30, 100
+        )
         self.p_factor.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the q range of the local threshold
@@ -132,7 +136,6 @@ class PhansalkarSettings(HalftoneSettings):
         )
         self.q_factor.value_changed.connect(self.emit_settings_changed)
 
-        # Add it to the layout
         self.layout.addWidget(self.block_size)
         self.layout.addWidget(self.dynamic_range)
         self.layout.addWidget(self.k_factor)
@@ -262,11 +265,9 @@ class BayerSettings(HalftoneSettings):
         self.size = SliderControl("Matrix size", (1, 10), 1, False)
         self.size.value_changed.connect(self.emit_settings_changed)
 
-        #
         self.offset = SliderControl("Matrix offset", (-100, 100), 0, 100)
         self.offset.value_changed.connect(self.emit_settings_changed)
 
-        # Add widgets to layout
         self.layout.addWidget(self.size)
         self.layout.addWidget(self.offset)
         self.layout.addStretch()
@@ -286,18 +287,21 @@ class ErrorDiffusionSettings(HalftoneSettings):
         super().__init__()
 
         # Diffusion factor slider
-        self.diffusion_factor = SliderControl("Diffusion factor", (0, 100), 100, 100)
+        self.diffusion_factor = SliderControl(
+            "Diffusion factor", (0, 100), 100, 100
+        )
         self.diffusion_factor.value_changed.connect(self.emit_settings_changed)
 
         self.diffusion_factor.slider_layout.setContentsMargins(10, 10, 10, 10)
         # Serpentine toggle
         self.serpentine_toggle = ToggleWithLabel(label="Serpentine")
-        self.serpentine_toggle.toggle_changed.connect(self.emit_settings_changed)
+        self.serpentine_toggle.toggle_changed.connect(
+            self.emit_settings_changed
+        )
 
         self.noise_toggle = ToggleWithLabel(label="Prime w/ noise")
         self.noise_toggle.toggle_changed.connect(self.emit_settings_changed)
 
-        # Add widgets to layout
         self.layout.addWidget(self.diffusion_factor)
         self.layout.addWidget(self.serpentine_toggle)
         self.layout.addWidget(self.noise_toggle)
