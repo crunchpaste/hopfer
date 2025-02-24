@@ -446,6 +446,7 @@ class ImageProcessor(QObject):
 
         self.storage = storage
         self.daemon = daemon
+        self.res_queue = self.daemon.res_queue
         self.algorithm = "None"
         self.grayscale_mode = "Luminance"  # Initialize the processor with Luminance as the grayscale mode as it is the best.
         self.grayscale_settings = {}
@@ -471,12 +472,11 @@ class ImageProcessor(QObject):
     def start(self, step=0):
         """Start the image processing in a separate process."""
 
-        print("INSIDE PROCESSOR")
         if self.storage.original_image is None:
             return
 
-        # Displays the Processing... label in the viewer
-        # self.main_window.viewer.labelVisible(True)
+        message = {"type": "started_processing"}
+        self.res_queue.put(message)
 
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
         convert = not self.storage.original_grayscale and step == 0

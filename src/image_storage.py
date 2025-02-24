@@ -630,6 +630,7 @@ class ImageStorage(QObject):
             self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
             self.processed_image = np.rot90(self.processed_image, k=-1)
+            self.shm_preview = np.rot90(self.shm_preview, k=-1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=-1)
         else:
@@ -637,6 +638,7 @@ class ImageStorage(QObject):
             self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
             self.processed_image = np.rot90(self.processed_image, k=1)
+            self.shm_preview = np.rot90(self.shm_preview, k=1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=1)
 
@@ -644,7 +646,6 @@ class ImageStorage(QObject):
         # it is much faster than reprocessing the image on each transform.
         # the halftoning would be accurate again on the next reprocess.
         h, w = self.grayscale_image.shape
-        self.create_shms(h, w)
         self.result_signal.emit(True)
 
     def flip_image(self):

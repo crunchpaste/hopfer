@@ -3,7 +3,6 @@ from multiprocessing import Manager, Process, Queue, shared_memory
 from multiprocessing.managers import SharedMemoryManager
 
 import numpy as np
-import SharedArray as sa
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
@@ -22,8 +21,9 @@ from viewer import PhotoViewer
 
 
 class QueueReader(QObject):
-    received_arrays = Signal(bool)
     received_array = Signal(str, tuple)
+    rotated = Signal(tuple)
+    show_processing_label = Signal(bool)
     close_shm = Signal()
     received_processed = Signal(str, bool)
     received_notification = Signal(str, int)
@@ -40,10 +40,7 @@ class QueueReader(QObject):
         while not self.queue.empty():
             message = self.queue.get()
             print(message)
-            if message["type"] == "shared_arrays":
-                print("received arrays")
-                self.received_arrays.emit(True)
-            elif message["type"] == "shared_array":
+            if message["type"] == "shared_array":
                 name = message["name"]
                 size = message["size"]
                 self.received_array.emit(name, size)
@@ -53,6 +50,8 @@ class QueueReader(QObject):
                 array = message["array"]
                 reset = message["reset"]
                 self.received_processed.emit(array, reset)
+            elif message["type"] == "started_processing":
+                self.show_processing_label.emit(True)
             elif message["type"] == "notification":
                 notification = message["notification"]
                 duration = message["duration"]
@@ -62,6 +61,8 @@ class QueueReader(QObject):
 
 
 class QueueWriter(QObject):
+    rotate = Signal(bool)
+
     def __init__(self, queue, window=None):
         super().__init__()
         self.queue = queue
@@ -83,6 +84,7 @@ class QueueWriter(QObject):
     def send_rotate(self, cw):
         message = {"type": "rotate", "cw": cw}
         self.queue.put(message)
+        self.rotate.emit(cw)
 
     def send_flip(self):
         message = {"type": "flip"}
@@ -107,7 +109,6 @@ class QueueWriter(QObject):
             "settings": settings,
         }
         self.queue.put(message)
-        self.window.display_processing_label(True)
 
     def send_grayscale(self, mode, settings):
         message = {
@@ -116,7 +117,6 @@ class QueueWriter(QObject):
             "settings": settings,
         }
         self.queue.put(message)
-        self.window.display_processing_label(True)
 
     def send_enhance(self, settings):
         message = {
@@ -124,7 +124,6 @@ class QueueWriter(QObject):
             "settings": settings,
         }
         self.queue.put(message)
-        self.window.display_processing_label(True)
 
 
 class MainWindow(FramelessMainWindow):
@@ -159,12 +158,14 @@ class MainWindow(FramelessMainWindow):
         self.daemon_process.start()
 
         self.reader = QueueReader(self.res_queue, window=self)
-        self.reader.received_arrays.connect(self.init_arrays)
         self.reader.received_array.connect(self.init_array)
         self.reader.close_shm.connect(self.close_shm)
         self.reader.received_processed.connect(self.display_processed_image)
         self.reader.received_notification.connect(self.display_notification)
+        self.reader.show_processing_label.connect(self.display_processing_label)
+
         self.writer = QueueWriter(self.req_queue, window=self)
+        self.writer.rotate.connect(self.rotate_shm)
 
         # self.reader = QueueReader(self.res_queue)
 
@@ -236,16 +237,16 @@ class MainWindow(FramelessMainWindow):
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
         self.shm_preview = self.shm_preview.reshape(size)
         print(f"ARRAY SIZE: {size}")
-        print(self.shm_preview.shape)
+
+    def rotate_shm(self, cw):
+        if cw:
+            self.shm_preview = np.rot90(self.shm_preview, k=-1)
+        else:
+            self.shm_preview = np.rot90(self.shm_preview, k=1)
 
     def close_shm(self):
         del self.shm_preview
         self.shm.close()
-
-    def init_arrays(self, value):
-        self.shm_preview = sa.attach("shm://gray")
-        self.shm_rgb = sa.attach("shm://rgb")
-        print(f"INIT ARRAY: {self.shm_preview.shape}")
 
     def open_preferences(self):
         dialog = PreferencesDialog(self)
@@ -253,11 +254,11 @@ class MainWindow(FramelessMainWindow):
 
     def display_processed_image(self, array, reset=True):
         """Display the processed image in the photo viewer."""
-        print(f"DISPLAY IMAGE: {self.shm_preview}")
+        _img = np.ascontiguousarray(self.shm_preview)
         if array == "gray":
-            pixmap = numpy_to_pixmap(self.shm_preview[:, :, 0])
+            pixmap = numpy_to_pixmap(_img[:, :, 0])
         elif array == "rgb":
-            pixmap = numpy_to_pixmap(self.shm_preview)
+            pixmap = numpy_to_pixmap(_img)
 
         self.viewer.setPhoto(pixmap)
         if reset:
