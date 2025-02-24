@@ -377,13 +377,15 @@ class ImageStorage(QObject):
 
     def save_to_clipboard(self):
         if self.processed_image is not None:
-            clipboard = self.app.clipboard()
             styled = self.save_like_preview
 
             # TODO: I have to check how to create pixmaps directly from an array
-            clipboard.setPixmap(
-                self.get_processed_pixmap(compositing=False, styled=styled)
+            img = self.generate_processed_pixmap(
+                compositing=False, styled=styled, clipboard=True
             )
+            pickled_image = pickle.dumps(img)
+            message = {"type": "data_for_clipboard", "data": pickled_image}
+            self.res_queue.put(message)
             self.show_notification("Image stored in clipboard.")
         else:
             self.show_notification(
@@ -529,7 +531,7 @@ class ImageStorage(QObject):
 
         return self.processed_image
 
-    def generate_processed_pixmap(self, compositing=True, styled=True):
+    def generate_processed_pixmap(self, compositing=True, styled=True, clipboard=False):
         """
         Convert the processed image to a QPixmap. If no processed image exists,
         return the original pixmap.
@@ -547,6 +549,8 @@ class ImageStorage(QObject):
                 print(f"GENERATING PIXMAPS: {e}")
             message = {"type": "display_image", "array": "gray", "reset": reset}
             self.res_queue.put(message)
+            if clipboard:
+                return _img
             return
         else:
             if styled:
@@ -584,7 +588,8 @@ class ImageStorage(QObject):
                     result = np.dstack((_img, _img, _img, alpha))
                 else:
                     result = _img
-
+        if clipboard:
+            return result
         self.shm_preview[:] = result
         message = {"type": "display_image", "array": "rgb", "reset": reset}
         self.res_queue.put(message)

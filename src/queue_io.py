@@ -21,7 +21,6 @@ class QueueReader(QObject):
     def check_queue(self):
         while not self.queue.empty():
             message = self.queue.get()
-            print(message)
             if message["type"] == "shared_array":
                 name = message["name"]
                 size = message["size"]
@@ -34,6 +33,10 @@ class QueueReader(QObject):
                 array = message["array"]
                 reset = message["reset"]
                 self.received_processed.emit(array, reset)
+
+            elif message["type"] == "data_for_clipboard":
+                data = message["data"]
+                self.window.store_in_clipboard(data)
 
             elif message["type"] == "started_processing":
                 self.show_processing_label.emit(True)

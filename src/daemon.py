@@ -37,6 +37,8 @@ class Daemon:
                 self.storage.load_from_clipboard()
             elif message["type"] == "save_image":
                 self.storage.save_image()
+            elif message["type"] == "save_to_clipboard":
+                self.storage.save_to_clipboard()
             elif message["type"] == "reset_storage":
                 self.storage.reset()
             elif message["type"] == "rotate":

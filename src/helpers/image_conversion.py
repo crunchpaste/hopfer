@@ -49,7 +49,9 @@ def boolean_pixmap(img_array, light, dark):
     return pixmap
 
 
-def numpy_to_pixmap(img_array, alpha=None):
+def numpy_to_pixmap(img_array, alpha=None, qi=False):
+    # qi is a flag to return qimage instead of qpixmap
+    #
     # A bit of a spaghetti monster, but alpha is only passed when the image
     # is stored into the clipboard, if that makes sense.
 
@@ -101,6 +103,11 @@ def numpy_to_pixmap(img_array, alpha=None):
 
     bytes = c * w
     qimage = QImage(image_array, w, h, bytes, format)
+
+    # return the qimage so that it could be set to clipboard to preserve alpha
+    if qi:
+        return qimage
+
     # TODO: Should check how to create the pixmap directly from an array
     pixmap = QPixmap.fromImage(qimage)
 

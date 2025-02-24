@@ -159,7 +159,7 @@ class MainWindow(FramelessMainWindow):
     def display_processing_label(self, state=True):
         self.viewer.labelVisible(state)
 
-    def display_notification(self, notification, duration):
+    def display_notification(self, notification, duration=3000):
         self.sidebar.notifications.show_notification(notification, duration)
 
     def handle_clipboard(self):
@@ -191,6 +191,17 @@ class MainWindow(FramelessMainWindow):
 
         elif _url != "":
             self.writer.send_url(_url)
+
+    def store_in_clipboard(self, data):
+        image = pickle.loads(data)
+        qimage = numpy_to_pixmap(image, qi=True)
+
+        self.app = QApplication.instance()
+        clipboard = self.app.clipboard()
+
+        clipboard.setImage(qimage)
+
+        self.display_notification("Image stored in clipboard.")
 
     def get_focus(self):
         self.activateWindow()
