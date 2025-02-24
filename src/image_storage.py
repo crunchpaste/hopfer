@@ -564,13 +564,17 @@ class ImageStorage(QObject):
                     # alpha = np.copy(self.alpha) * 255
                     # result = np.dstack((themed_image, alpha.astype(np.uint8)))
                     if compositing:
-                        result = style_alpha(
-                            self.processed_image.astype(np.float32),
-                            self.alpha,
-                            color_dark,
-                            color_light,
-                            color_alpha,
-                        )
+                        print("COMPOSITING")
+                        try:
+                            result = style_alpha(
+                                self.processed_image.astype(np.float32),
+                                self.alpha.astype(np.float32),
+                                color_dark,
+                                color_light,
+                                color_alpha,
+                            )
+                        except Exception as e:
+                            print(e)
                     else:
                         _img = style_image(
                             self.processed_image,

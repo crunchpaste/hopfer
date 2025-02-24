@@ -21,9 +21,12 @@ def qimage_to_numpy(qimage):
 
     # we get the channels by dividing the length by the pixel count
     channels = arr.shape[0] // (width * height)
-
+    print(channels)
     # reshape it to its proper size
-    arr = arr.reshape((height, width, channels))
+    if channels == 1:
+        arr = arr.reshape(height, width)
+    else:
+        arr = arr.reshape((height, width, channels))
     return arr
 
 
