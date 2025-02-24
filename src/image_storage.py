@@ -150,11 +150,10 @@ class ImageStorage(QObject):
         except Exception as e:
             print(f"CREATING SHM: {e}")
 
-        # message = {type}
-
         message = {"type": "original_grayscale", "value": self.original_grayscale}
 
         self.res_queue.put(message)
+
         if self.original_grayscale:
             self.grayscale_image = self.original_image
         else:

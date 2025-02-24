@@ -149,7 +149,7 @@ class ImageTab(QWidget):
         super().__init__()
         self.writer = writer
         self.window = window
-        # self.processor.storage.grayscale_signal.connect(self.on_grayscale_signal)
+        self.window.reader.grayscale_signal.connect(self.on_grayscale_signal)
         self.sliders = []
 
         self._initialize_ui()
@@ -290,7 +290,6 @@ class ImageTab(QWidget):
 
         self.layout.addWidget(scroll)
 
-        # Set the layout for the widget
         self.setLayout(self.layout)
 
     @debounce(0.15)
@@ -347,9 +346,6 @@ class ImageTab(QWidget):
         }
 
         self.writer.send_enhance(settings)
-        # self.processor.image_settings = settings
-        # if storage.original_image is not None:
-        #     self.processor.start(step=1)
 
     def on_grayscale_signal(self, is_grayscale):
         if is_grayscale:
