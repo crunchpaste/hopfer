@@ -164,7 +164,7 @@ class RGBSliders(QWidget):
         self.sliders = [self.r_slider, self.g_slider, self.b_slider]
 
         for slider in self.sliders:
-            slider.slider.valueChanged.connect(self.on_rgb_change)
+            slider.value_changed.connect(self.on_rgb_change)
             layout.addWidget(slider)
 
         self.setFixedWidth(255)
