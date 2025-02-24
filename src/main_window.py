@@ -82,11 +82,14 @@ class QueueWriter(QObject):
         self.queue.put(message)
         self.window.display_processing_label(True)
 
-    #
     def send_pickled_image(self, pickled_data):
         message = {"type": "load_from_pickle", "data": pickled_data}
         self.queue.put(message)
         self.window.display_processing_label(True)
+
+    def send_url(self, url):
+        message = {"type": "load_from_url", "url": url}
+        self.queue.put(message)
 
     def save_image(self):
         message = {"type": "save_image"}
@@ -316,9 +319,8 @@ class MainWindow(FramelessMainWindow):
 
             self.writer.send_pickled_image(pickled_data)
 
-        # elif _url != "":
-
-        #     self.writer.send_url(_url)
+        elif _url != "":
+            self.writer.send_url(_url)
 
     def get_focus(self):
         self.activateWindow()

@@ -2,7 +2,6 @@ import io
 import json
 import os
 import pickle
-import sys
 from multiprocessing.managers import SharedMemoryManager
 from urllib.parse import unquote, urlparse
 
@@ -11,7 +10,7 @@ import requests
 import SharedArray as sa
 from PIL import Image, UnidentifiedImageError
 from platformdirs import user_pictures_dir
-from PySide6.QtCore import QBuffer, QObject, Signal
+from PySide6.QtCore import QObject, Signal
 from PySide6.QtGui import QPixmap
 
 from helpers.image_conversion import numpy_to_pixmap
@@ -232,30 +231,11 @@ class ImageStorage(QObject):
         pil_image = pil_image.convert("RGBA")
         self._load(pil_image)
 
-    def load_from_clipboard(self):
-        app = QApplication(sys.argv)
-        clipboard = app.clipboard()
-        print("CALLED CLIPBOARD")
-        _image = clipboard.image()
-        _url = clipboard.text()
-
-        print(_image)
-        print(_url)
-
-        if not _image.isNull():
-            # if there is any image data convert it to a pil image.
-            # solution is mostly copied from: https://stackoverflow.com/questions/47289884/how-to-convert-qimageqpixmap-to-pil-image-in-python-3
-            # seems to work perfectly well
-            buffer = QBuffer()
-            buffer.open(QBuffer.ReadWrite)
-            _image.save(buffer, "PNG")
-            pil_image = Image.open(io.BytesIO(buffer.data()))
-            self._load(pil_image)
-
-        elif _url != "":
-            print(_url)
+    def load_from_url(self, url):
+        if url != "":
+            print(url)
             try:
-                response = requests.get(_url)
+                response = requests.get(url)
                 if response.status_code == 200:
                     image_data = io.BytesIO(response.content)
                     pil_image = Image.open(image_data)
@@ -268,14 +248,14 @@ class ImageStorage(QObject):
                     return None
             except Exception as e:
                 # if this fails it is captured by the load_image method
-                print(e)
-                if _url.startswith("file:///"):
-                    parsed_url = urlparse(_url)
+                print(f"Error: {e}")
+                if url.startswith("file:///"):
+                    parsed_url = urlparse(url)
                     local_path = unquote(parsed_url.path)
                     if os.name == "nt":
                         local_path = local_path.lstrip("/")
-                    _url = local_path
-                self.load_image(_url)
+                    url = local_path
+                self.load_image(url)
         else:
             self.show_notification("Error: No image data in clipboard.", duration=10000)
 
@@ -571,7 +551,6 @@ class ImageStorage(QObject):
                 self.shm_preview[:, :, 0] = (_img * 255).astype(np.uint8)
             except Exception as e:
                 print(f"GENERATING PIXMAPS: {e}")
-            print(self.shm_preview)
             message = {"type": "display_image", "array": "gray", "reset": reset}
             self.res_queue.put(message)
             return
