@@ -56,6 +56,9 @@ class QueueReader(QObject):
                 notification = message["notification"]
                 duration = message["duration"]
                 self.received_notification.emit(notification, duration)
+            elif message["type"] == "enable_toolbox":
+                state = message["state"]
+                self.window.sidebar.toolbox.enable_buttons(state)
 
             # self.message_received.emit(message)
 
@@ -80,6 +83,11 @@ class QueueWriter(QObject):
     def save_image(self):
         message = {"type": "save_image"}
         self.queue.put(message)
+
+    def reset(self):
+        message = {"type": "reset_storage"}
+        self.queue.put(message)
+        self.window.reset_viewer()
 
     def send_rotate(self, cw):
         message = {"type": "rotate", "cw": cw}

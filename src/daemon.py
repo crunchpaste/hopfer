@@ -26,6 +26,8 @@ class Daemon:
                 self.storage.load_image(path)
             elif message["type"] == "save_image":
                 self.storage.save_image()
+            elif message["type"] == "reset_storage":
+                self.storage.reset()
             elif message["type"] == "rotate":
                 cw = message["cw"]
                 self.storage.rotate_image(cw)

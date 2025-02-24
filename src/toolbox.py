@@ -38,26 +38,26 @@ class Toolbox(QWidget):
         self.open = self._create_button("e43e", "Open image", self.open_file_dialog)
 
         self.save = self._create_button("e161", "Save image", self.writer.save_image)
-        # self.save.setEnabled(False)  # Initial state is disabled
+        self.save.setEnabled(False)  # Initial state is disabled
 
         self.saveas = self._create_button("eb60", "Save as", self.save_file_dialog)
-        # self.saveas.setEnabled(False)  # Initial state is disabled
+        self.saveas.setEnabled(False)  # Initial state is disabled
 
         # # Image buttons
 
         self.rot_cw = self._create_button("e41a", "Rotate CW", None)
-        # self.rot_cw.setEnabled(False)
+        self.rot_cw.setEnabled(False)
         self.rot_cw.clicked.connect(lambda: self._rotate(True))
 
         self.rot_ccw = self._create_button("e419", "Rotate CCW", None)
-        # self.rot_ccw.setEnabled(False)
+        self.rot_ccw.setEnabled(False)
         self.rot_ccw.clicked.connect(lambda: self._rotate(False))
 
         self.flip = self._create_button("e3e8", "Flip", self._flip)
-        # self.flip.setEnabled(False)
+        self.flip.setEnabled(False)
 
         self.invert = self._create_button("e891", "Invert colors", self._invert)
-        # self.invert.setEnabled(False)
+        self.invert.setEnabled(False)
 
         # App buttons
 
@@ -169,11 +169,11 @@ class Toolbox(QWidget):
     def _invert(self):
         self.writer.send_invert()
 
-    def enable_buttons(self):
+    def enable_buttons(self, state):
         """Enables the buttons when an image is available"""
-        self.save.setEnabled(True)
-        self.saveas.setEnabled(True)
-        self.rot_cw.setEnabled(True)
-        self.rot_ccw.setEnabled(True)
-        self.flip.setEnabled(True)
-        self.invert.setEnabled(True)
+        self.save.setEnabled(state)
+        self.saveas.setEnabled(state)
+        self.rot_cw.setEnabled(state)
+        self.rot_ccw.setEnabled(state)
+        self.flip.setEnabled(state)
+        self.invert.setEnabled(state)

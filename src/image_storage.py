@@ -139,7 +139,8 @@ class ImageStorage(QObject):
 
         self.reset_view = True
 
-        self.main_window.reset_viewer()
+        message = {"type": "enable_toolbox", "state": False}
+        self.res_queue.put(message)
 
     def _load(self, image):
         # the final procedure of loading an image. expecs a pillow image.
@@ -171,6 +172,8 @@ class ImageStorage(QObject):
         except Exception as e:
             print(e)
 
+        message = {"type": "enable_toolbox", "state": True}
+        self.res_queue.put(message)
         # self.main_window.sidebar.toolbox.enable_buttons()
 
     def load_image(self, image_path):

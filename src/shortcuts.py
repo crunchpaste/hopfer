@@ -15,7 +15,7 @@ class Shortcuts:
         self.quit_shortcut.activated.connect(self.app.quit)
 
         self.close_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Q"), self.main_window)
-        # self.close_shortcut.activated.connect(self.main_window.storage.reset)
+        self.close_shortcut.activated.connect(self.main_window.writer.reset)
 
         # File manipulation
         self.open_file_shortcut = QShortcut(QKeySequence("Ctrl+O"), self.main_window)
@@ -29,7 +29,7 @@ class Shortcuts:
         # )
 
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self.main_window)
-        # self.save_shortcut.activated.connect(self.main_window.storage.save_image)
+        self.save_shortcut.activated.connect(self.main_window.writer.save_image)
 
         self.saveas_shortcut = QShortcut(QKeySequence("Ctrl+Shift+S"), self.main_window)
         self.saveas_shortcut.activated.connect(
