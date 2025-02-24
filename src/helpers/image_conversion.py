@@ -4,6 +4,29 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
 
 
+def qimage_to_numpy(qimage):
+    # this is a very, very hacky way to get the clipboard image data
+    # without encoding it as a .png first, but its magnitudes faster
+
+    # these are simple to get
+    width, height = qimage.width(), qimage.height()
+
+    # it seems that .bits() returns a memview, which could be used to
+    # create a numpy array
+    mem_view = qimage.bits()
+
+    print(f"DEPTH: {qimage.depth()}")
+
+    arr = np.frombuffer(mem_view.tobytes(), dtype=np.uint8)
+
+    # we get the channels by dividing the length by the pixel count
+    channels = arr.shape[0] // (width * height)
+
+    # reshape it to its proper size
+    arr = arr.reshape((height, width, channels))
+    return arr
+
+
 def pixmap_to_numpy(pixmap):
     image = pixmap.toImage()
     pil_image = Image.fromqpixmap(image)

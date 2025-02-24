@@ -1,6 +1,8 @@
 import io
 import json
 import os
+import pickle
+import sys
 from multiprocessing.managers import SharedMemoryManager
 from urllib.parse import unquote, urlparse
 
@@ -11,7 +13,6 @@ from PIL import Image, UnidentifiedImageError
 from platformdirs import user_pictures_dir
 from PySide6.QtCore import QBuffer, QObject, Signal
 from PySide6.QtGui import QPixmap
-from PySide6.QtWidgets import QApplication  # used for clipboard management
 
 from helpers.image_conversion import numpy_to_pixmap
 from helpers.paths import config_path
@@ -43,7 +44,6 @@ class ImageStorage(QObject):
         :param main_window: The main window of the application, used for showing notifications.
         """
         super().__init__()
-        self.app = QApplication.instance()
         # self.main_window = main_window
 
         self.daemon = daemon
@@ -226,10 +226,21 @@ class ImageStorage(QObject):
                 f"An unexpected error occurred: {e!s}", duration=10000
             )
 
+    def load_from_pickle(self, data):
+        buffer = pickle.loads(data)
+        pil_image = Image.fromarray(buffer)
+        pil_image = pil_image.convert("RGBA")
+        self._load(pil_image)
+
     def load_from_clipboard(self):
-        clipboard = self.app.clipboard()
+        app = QApplication(sys.argv)
+        clipboard = app.clipboard()
+        print("CALLED CLIPBOARD")
         _image = clipboard.image()
         _url = clipboard.text()
+
+        print(_image)
+        print(_url)
 
         if not _image.isNull():
             # if there is any image data convert it to a pil image.
@@ -577,12 +588,14 @@ class ImageStorage(QObject):
                     # result = np.dstack((themed_image, alpha.astype(np.uint8)))
                     if compositing:
                         result = style_alpha(
-                            self.processed_image,
+                            self.processed_image.astype(np.float32),
                             self.alpha,
                             color_dark,
                             color_light,
                             color_alpha,
                         )
+                        print("FROM COMPOSITING")
+                        print(result)
                     else:
                         _img = style_image(
                             self.processed_image, color_dark, color_light

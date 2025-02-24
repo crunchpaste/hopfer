@@ -1,19 +1,16 @@
 import json
+import pickle
 from multiprocessing import Manager, Process, Queue, shared_memory
 from multiprocessing.managers import SharedMemoryManager
 
 import numpy as np
 from PySide6.QtCore import QObject, Qt, QTimer, Signal
-from PySide6.QtWidgets import (
-    QHBoxLayout,
-    QSplitter,
-    QWidget,
-)
+from PySide6.QtWidgets import QApplication, QHBoxLayout, QSplitter, QWidget
 from qframelesswindow import FramelessMainWindow
 
 from controls.titlebar import HopferTitleBar
 from daemon import Daemon
-from helpers.image_conversion import numpy_to_pixmap
+from helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
 from helpers.paths import config_path
 from preferences import PreferencesDialog
 from sidebar import SideBar
@@ -80,8 +77,23 @@ class QueueWriter(QObject):
         self.queue.put(message)
         self.window.display_processing_label(True)
 
+    def load_from_clipboard(self):
+        message = {"type": "load_from_clipboard"}
+        self.queue.put(message)
+        self.window.display_processing_label(True)
+
+    #
+    def send_pickled_image(self, pickled_data):
+        message = {"type": "load_from_pickle", "data": pickled_data}
+        self.queue.put(message)
+        self.window.display_processing_label(True)
+
     def save_image(self):
         message = {"type": "save_image"}
+        self.queue.put(message)
+
+    def save_to_clipboard(self):
+        message = {"type": "save_to_clipboard"}
         self.queue.put(message)
 
     def reset(self):
@@ -164,8 +176,10 @@ class MainWindow(FramelessMainWindow):
 
         self.daemon_process = Process(target=self.daemon.run, daemon=False)
         self.daemon_process.start()
+        self.shm_preview = None
 
         self.reader = QueueReader(self.res_queue, window=self)
+
         self.reader.received_array.connect(self.init_array)
         self.reader.close_shm.connect(self.close_shm)
         self.reader.received_processed.connect(self.display_processed_image)
@@ -174,13 +188,6 @@ class MainWindow(FramelessMainWindow):
 
         self.writer = QueueWriter(self.req_queue, window=self)
         self.writer.rotate.connect(self.rotate_shm)
-
-        # self.reader = QueueReader(self.res_queue)
-
-        # self.storage = ImageStorage(self)
-        # self.processor = ImageProcessor(self, self.storage)
-
-        # self.storage.result_signal.connect(self.display_processed_image)
 
     def _setup_ui(self):
         """Setup the main window layout and UI components."""
@@ -253,8 +260,9 @@ class MainWindow(FramelessMainWindow):
             self.shm_preview = np.rot90(self.shm_preview, k=1)
 
     def close_shm(self):
-        del self.shm_preview
-        self.shm.close()
+        if self.shm_preview is not None:
+            del self.shm_preview
+            self.shm.close()
 
     def open_preferences(self):
         dialog = PreferencesDialog(self)
@@ -280,6 +288,37 @@ class MainWindow(FramelessMainWindow):
 
     def display_notification(self, notification, duration):
         self.sidebar.notifications.show_notification(notification, duration)
+
+    def handle_clipboard(self):
+        self.app = QApplication.instance()
+        clipboard = self.app.clipboard()
+
+        # clipboard = QClipboard()
+
+        _image = clipboard.image()
+        _url = clipboard.text()
+
+        print(_image)
+        print(_url)
+
+        if not _image.isNull():
+            # A much faster way to transfer the image to the daemon
+            # than the one proposed at:
+            # https://stackoverflow.com/questions/47289884/
+            # how-to-convert-qimageqpixmap-to-pil-image-in-python-3
+            #
+            self.display_processing_label(True)
+            _image_np = qimage_to_numpy(_image)
+
+            # using pickle mostly for simplicity as I dont want to deal
+            # with shared memory for an operation that happens so rarely.
+            pickled_data = pickle.dumps(_image_np)
+
+            self.writer.send_pickled_image(pickled_data)
+
+        # elif _url != "":
+
+        #     self.writer.send_url(_url)
 
     def get_focus(self):
         self.activateWindow()

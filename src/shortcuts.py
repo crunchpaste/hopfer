@@ -24,9 +24,7 @@ class Shortcuts:
         )
 
         self.paste_shortcut = QShortcut(QKeySequence("Ctrl+Shift+V"), self.main_window)
-        # self.paste_shortcut.activated.connect(
-        #     self.main_window.storage.load_from_clipboard
-        # )
+        self.paste_shortcut.activated.connect(self.main_window.handle_clipboard)
 
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self.main_window)
         self.save_shortcut.activated.connect(self.main_window.writer.save_image)
@@ -37,7 +35,7 @@ class Shortcuts:
         )
 
         self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self.main_window)
-        # self.copy_shortcut.activated.connect(self.main_window.storage.save_to_clipboard)
+        self.copy_shortcut.activated.connect(self.main_window.writer.save_to_clipboard)
 
         # Navigation
         self.image_shortcut = QShortcut(QKeySequence("Ctrl+I"), self.main_window)

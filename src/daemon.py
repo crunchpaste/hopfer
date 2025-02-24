@@ -1,3 +1,5 @@
+from setproctitle import setproctitle
+
 from image_processor import ImageProcessor
 from image_storage import ImageStorage
 
@@ -17,13 +19,19 @@ class Daemon:
         self.processor = ImageProcessor(self, self.storage)
 
     def run(self):
+        setproctitle("hopferd")
         while True:
             message = self.req_queue.get()
             # STORAGE RELATED
             if message["type"] == "load_image":
                 path = message["path"]
-                print(f"FROM DAEMON: {path}")
                 self.storage.load_image(path)
+            elif message["type"] == "load_from_pickle":
+                data = message["data"]
+                self.storage.load_from_pickle(data)
+            elif message["type"] == "load_from_clipboard":
+                # data = message["data"]
+                self.storage.load_from_clipboard()
             elif message["type"] == "save_image":
                 self.storage.save_image()
             elif message["type"] == "reset_storage":
