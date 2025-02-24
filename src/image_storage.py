@@ -1,10 +1,12 @@
 import io
 import json
 import os
+from multiprocessing.managers import SharedMemoryManager
 from urllib.parse import unquote, urlparse
 
 import numpy as np
 import requests
+import SharedArray as sa
 from PIL import Image, UnidentifiedImageError
 from platformdirs import user_pictures_dir
 from PySide6.QtCore import QBuffer, QObject, Signal
@@ -29,13 +31,12 @@ class ImageStorage(QObject):
     # Constants for image processing and saving
     MAX_SAVE_ATTEMPTS = 100
     NORMALIZED_MAX = 255.0
-
     # Result signal to update PhotoViewer captured by the main window
     result_signal = Signal(bool)
     # Captured by the ImageTab. It is used to disable the GrayscaleCombo.
     grayscale_signal = Signal(bool)
 
-    def __init__(self, main_window):
+    def __init__(self, daemon):
         """
         Initialize the image storage with the main window context for notifications.
 
@@ -43,7 +44,20 @@ class ImageStorage(QObject):
         """
         super().__init__()
         self.app = QApplication.instance()
-        self.main_window = main_window
+        # self.main_window = main_window
+
+        self.daemon = daemon
+
+        self.paths = self.daemon.paths
+
+        self.res_queue = self.daemon.res_queue
+        self.req_queue = self.daemon.req_queue
+
+        self.smm = SharedMemoryManager()
+        self.smm.start()
+        self.shm = None
+
+        self.shm_preview = None
 
         # Defaulting the paths to the user Pictures directory and
         # hopfer.png as the filename for saving if config is not found
@@ -56,8 +70,11 @@ class ImageStorage(QObject):
             image_path = user_pictures_dir()
             save_path = os.path.join(user_pictures_dir(), "hopfer.png")
 
-        self.image_path = image_path
-        self.save_path = save_path
+        # self.image_path = image_path
+        # self.save_path = save_path
+
+        self.paths["image_path"] = image_path
+        self.paths["save_path"] = save_path
 
         self.save_path_edited = False  # Track if the save path has been altered
 
@@ -80,6 +97,34 @@ class ImageStorage(QObject):
         self.reset_view = True
         self.algorithm = "None"
 
+    def create_shm(self, height, width):
+        if self.smm is not None:
+            self.smm.shutdown()
+        # self.smm = SharedMemoryManager()
+        # self.smm.start()
+        self.shm = self.smm.SharedMemory(size=height * width * 3)
+        self.shm_preview = np.ndarray(
+            (height, width, 3), dtype=np.uint8, buffer=self.shm.buf
+        )
+        message = {
+            "type": "shared_array",
+            "name": self.shm.name,
+            "size": (height, width, 3),
+        }
+        self.res_queue.put(message)
+
+    def create_shms(self, height, width):
+        sa.delete("shm://gray")
+        sa.delete("shm://rgb")
+        # Create shared memory for the 2D grayscale array
+        self.shm_preview = sa.create("shm://gray", (height, width), dtype=np.uint8)
+
+        # Create shared memory for the 3D RGB array
+        self.shm_rgb = sa.create("shm://rgb", (height, width, 3), dtype=np.uint8)
+        message = {"type": "shared_arrays"}
+        print(f"INSIDE STORAGE: {self.shm_preview.shape}")
+        self.res_queue.put(message)
+
     def reset(self):
         # keeps the paths but discards all images
         # mostly there to make it easier to take screencaptures
@@ -100,14 +145,33 @@ class ImageStorage(QObject):
         # the final procedure of loading an image. expecs a pillow image.
 
         self.original_image, self.alpha = self.extract_alpha(image)
-        self.grayscale_signal.emit(self.original_grayscale)
+        h, w = self.original_image.shape[0], self.original_image.shape[1]
+
+        try:
+            self.create_shm(h, w)
+        except Exception as e:
+            print(f"CREATING SHM: {e}")
+
+        # message = {type}
+
+        message = {"type": "original_grayscale", "value": self.original_grayscale}
+
+        self.res_queue.put(message)
         if self.original_grayscale:
             self.grayscale_image = self.original_image
-        self.enhanced_image = self.grayscale_image
-        self.processed_image = self.enhanced_image
-        self.main_window.processor.reset = True
-        self.main_window.processor.start()
-        self.main_window.sidebar.toolbox.enable_buttons()
+        else:
+            self.grayscale_image = None
+
+        self.enhanced_image = None
+        self.processed_image = None
+        self.daemon.processor.reset = True
+
+        try:
+            self.daemon.processor.start(step=0)
+        except Exception as e:
+            print(e)
+
+        # self.main_window.sidebar.toolbox.enable_buttons()
 
     def load_image(self, image_path):
         """
@@ -115,8 +179,9 @@ class ImageStorage(QObject):
 
         :param image_path: Path to the image file to load.
         """
+
         try:
-            self.image_path = image_path
+            self.paths["image_path"] = image_path
 
             with open(config_path(), "r") as f:
                 config = json.load(f)
@@ -137,8 +202,10 @@ class ImageStorage(QObject):
             else:
                 #
                 name_wo_ext = os.path.splitext(os.path.basename(image_path))[0]
-                old_image = os.path.basename(self.save_path)
-                self.save_path = self.save_path.replace(old_image, f"{name_wo_ext}.png")
+                old_image = os.path.basename(self.paths["save_path"])
+                self.paths["save_path"] = self.paths["save_path"].replace(
+                    old_image, f"{name_wo_ext}.png"
+                )
 
             with open(config_path(), "w") as f:
                 json.dump(config, f, indent=2)
@@ -210,7 +277,7 @@ class ImageStorage(QObject):
     def extract_alpha(self, image):
         if image.mode == "LA":
             np_image = (np.array(image) / self.NORMALIZED_MAX).astype(np.float16)
-            L = np.image[:, :, 0]
+            L = np_image[:, :, 0]
             A = self.discard_alpha(np_image[:, :, 1])
 
             self.original_grayscale = True
@@ -270,19 +337,21 @@ class ImageStorage(QObject):
             )
             return
 
-        if not self.save_path:
+        save_path = self.paths["save_path"]
+
+        if not save_path:
             # If there is no save path, and this happens when an image is pasted from
             # clipboard, save it to the user Pictures directory as hopfer.png and
             # set the Pictures directory as the save path so that the user can
             # find it if they miss the notification.
             base_path = user_pictures_dir()
             save_path = os.path.join(base_path, "hopfer.png")
-            self.save_path = save_path
+            self.paths["save_path"] = save_path
 
         # only if the path was actually edited save it to the confing
         # so that next time it should be the default with a hopfer.png
         if self.save_path_edited:
-            base_path = os.path.dirname(self.save_path)
+            base_path = os.path.dirname(save_path)
             with open(config_path(), "r") as f:
                 config = json.load(f)
 
@@ -291,11 +360,11 @@ class ImageStorage(QObject):
             with open(config_path(), "w") as f:
                 json.dump(config, f, indent=2)
 
-        base_path = os.path.dirname(self.save_path)
-        base_name = os.path.basename(self.save_path)
+        base_path = os.path.dirname(save_path)
+        base_name = os.path.basename(save_path)
         save_path = self.generate_unique_save_path(base_path, base_name)
 
-        if self.save_like_preview and self.main_window.processor.algorithm != "None":
+        if self.save_like_preview and self.daemon.processor.algorithm != "None":
             image = style_image(self.processed_image, self.color_dark, self.color_light)
         else:
             image = (self.processed_image * 255).astype(np.uint8)
@@ -414,7 +483,7 @@ class ImageStorage(QObject):
         :return: Original image array.
         """
         if self._enhanced_image is not None:
-            return self.f32(self._grayscale_image)
+            return self.f32(self._enhanced_image)
         return self.grayscale_image
 
     @enhanced_image.setter
@@ -472,17 +541,26 @@ class ImageStorage(QObject):
 
         return self.processed_image
 
-    def get_processed_pixmap(self, compositing=True, styled=True):
+    def generate_processed_pixmap(self, compositing=True, styled=True):
         """
         Convert the processed image to a QPixmap. If no processed image exists,
         return the original pixmap.
 
         :return: QPixmap of the processed image (or original if not processed).
         """
-        if self.main_window.processor.algorithm == "None":
+        reset = self.reset_view
+        if self.daemon.processor.algorithm == "None":
             # needed to avoid not C contiguous error
             _img = np.ascontiguousarray(self.processed_image)
-            return self._get_image_pixmap(_img) or self.get_original_pixmap()
+
+            try:
+                self.shm_preview[:, :, 0] = (_img * 255).astype(np.uint8)
+            except Exception as e:
+                print(f"GENERATING PIXMAPS: {e}")
+            print(self.shm_preview)
+            message = {"type": "display_image", "array": "gray", "reset": reset}
+            self.res_queue.put(message)
+            return
         else:
             if styled:
                 color_dark = self.color_dark
@@ -518,7 +596,9 @@ class ImageStorage(QObject):
                 else:
                     result = _img
 
-            return self._get_image_pixmap(result) or self.get_original_pixmap()
+        self.shm_preview[:] = result
+        message = {"type": "display_image", "array": "rgb", "reset": reset}
+        self.res_queue.put(message)
 
     def _get_image_pixmap(self, image_array):
         """
@@ -542,7 +622,7 @@ class ImageStorage(QObject):
         self.processed_image = processed_image
 
         # Sending the signal to main_window
-        self.result_signal.emit(reset)
+        # self.result_signal.emit(reset)
 
     def rotate_image(self, cw=True):
         if cw:
@@ -563,6 +643,8 @@ class ImageStorage(QObject):
         # while this does not produce accurate results for the dithering
         # it is much faster than reprocessing the image on each transform.
         # the halftoning would be accurate again on the next reprocess.
+        h, w = self.grayscale_image.shape
+        self.create_shms(h, w)
         self.result_signal.emit(True)
 
     def flip_image(self):
@@ -588,11 +670,17 @@ class ImageStorage(QObject):
         # the view should be reset after inverting the colors.
         self.result_signal.emit(False)
 
-    def show_notification(self, message, duration=3000):
+    def show_notification(self, notification, duration=3000):
         """
         Show a notification in the main window's sidebar.
 
         :param message: The message to display.
         :param duration: Duration in milliseconds for how long the notification lasts.
         """
-        self.main_window.sidebar.notifications.show_notification(message, duration)
+        message = {
+            "type": "notification",
+            "notification": notification,
+            "duration": duration,
+        }
+        self.res_queue.put(message)
+        # self.main_window.sidebar.notifications.show_notification(message, duration)

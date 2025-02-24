@@ -118,7 +118,10 @@ class SliderControl(QWidget):
     def on_slider_pressed(self):
         """Called when the slider starts being dragged."""
         self.is_dragging = True
+        # self.slider.blockSignals(True)
 
     def on_slider_released(self):
         """Called when the slider is released after dragging."""
         self.is_dragging = False
+        # self.slider.blockSignals(False)
+        # self.slider.valueChanged.emit(self.slider.value())

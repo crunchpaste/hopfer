@@ -1,8 +1,8 @@
-import concurrent.futures
+import time
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
-from PySide6.QtCore import QCoreApplication, QObject, Signal
+from PySide6.QtCore import QObject, Signal
 
 from helpers.decorators import queue
 
@@ -47,22 +47,52 @@ except ImportError:
 #     pass
 
 
-def worker(image, mode, im_settings, algorithm, settings, step=0):
+def worker(image, mode, g_settings, im_settings, algorithm, settings, step=0):
+    # initialize as None so that the processor know what to send to the storage
+
+    # flags if an image has changed
+
+    ge, ee = False, False
+
+    grayscale_image = image
+
     if step == 0:
-        image = worker_g(image, mode)
+        ge = True
+        grayscale_image = worker_g(image, mode, g_settings)
 
-    if step <= 1:
-        image = worker_e(image, im_settings)
+    enhanced_image = grayscale_image
 
-    processed_image = worker_h(image, algorithm, settings)
-    return processed_image
+    if step <= 1 and (
+        im_settings["normalize"]
+        or im_settings["equalize"]
+        or im_settings["normalize"]
+        or im_settings["bc_t"]
+        or im_settings["blur_t"]
+        or im_settings["unsharp_t"]
+    ):
+        ee = True
+        image = grayscale_image.copy()
+        enhanced_image = worker_e(image, im_settings)
+
+    if algorithm != "None":
+        image = enhanced_image.copy()
+        processed_image = worker_h(image, algorithm, settings)
+    else:
+        processed_image = enhanced_image
+
+    if not ge:
+        grayscale_image = None
+
+    if not ee:
+        enhanced_image = None
+
+    return grayscale_image, enhanced_image, processed_image, ge, ee
 
 
 def worker_g(image, mode, settings):
     """
     This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
     """
-
     return convert_to_grayscale(image, mode, settings)
 
 
@@ -399,9 +429,9 @@ class ImageProcessor(QObject):
     result_signal = Signal(bool)
 
     # The ProcessPoolExecutor for all worker processes
-    executor = concurrent.futures.ProcessPoolExecutor(max_workers=1)
+    # executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
-    def __init__(self, main_window, storage, parent=None):
+    def __init__(self, daemon, storage, parent=None):
         """
         Initialize the ImageProcessor with the selected algorithm, settings, and storage instance.
 
@@ -415,7 +445,7 @@ class ImageProcessor(QObject):
         self.queued_call = None
 
         self.storage = storage
-        self.main_window = main_window
+        self.daemon = daemon
         self.algorithm = "None"
         self.grayscale_mode = "Luminance"  # Initialize the processor with Luminance as the grayscale mode as it is the best.
         self.grayscale_settings = {}
@@ -441,62 +471,60 @@ class ImageProcessor(QObject):
     def start(self, step=0):
         """Start the image processing in a separate process."""
 
+        print("INSIDE PROCESSOR")
         if self.storage.original_image is None:
             return
 
         # Displays the Processing... label in the viewer
-        self.main_window.viewer.labelVisible(True)
+        # self.main_window.viewer.labelVisible(True)
 
         # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
         convert = not self.storage.original_grayscale and step == 0
         enhance = step <= 1
 
         if convert:
-            original_image = self.storage.original_image
-            future = self.executor.submit(
-                worker_g,
-                original_image,
-                self.grayscale_mode,
-                self.grayscale_settings,
-            )
+            step = 0
+            image = self.storage.original_image
 
-            grayscale_image = future.result()
-            self.storage.grayscale_image = grayscale_image
+        elif enhance:
+            step = 1
+            image = self.storage.grayscale_image
 
-        if enhance:
-            if not convert:
-                grayscale_image = self.storage.grayscale_image
-            future = self.executor.submit(
-                worker_e,
-                grayscale_image,
-                self.image_settings,
-            )
-            enhanced_image = future.result()
-            self.storage.enhanced_image = enhanced_image
+        else:
+            image = self.storage.enhanced_image
 
-        if not enhance:
-            enhanced_image = self.storage.enhanced_image
-        future = self.executor.submit(
-            worker_h,
-            enhanced_image,
+        start = time.perf_counter()
+
+        g, e, p, ge, ee = worker(
+            image,
+            self.grayscale_mode,
+            self.grayscale_settings,
+            self.image_settings,
             self.algorithm,
             self.settings,
+            step,
         )
-        processed_image = future.result()
 
-        try:
-            self.send_result(processed_image)
-        except Exception as e:
-            print(e)
+        end = time.perf_counter()
+        print(f"PROCESSING: {end - start:.6f} seconds")
 
-    def wait_for_result(self, future):
-        while not future.done():
-            QCoreApplication.processEvents()
+        if ge and g is not None:
+            self.storage.grayscale_image = g
+
+        if ee and e is not None:
+            self.storage.enhanced_image = e
+
+        self.send_result(p)
 
     def send_result(self, image):
         self.storage.reset_view = self.reset
         self.storage.algorithm = self.algorithm
         self.storage.processed_image = image
+
+        try:
+            self.storage.generate_processed_pixmap()
+        except Exception as e:
+            print(e)
 
         # Go back to default behavior
         if self.reset:

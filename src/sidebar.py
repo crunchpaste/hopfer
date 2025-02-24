@@ -7,22 +7,32 @@ from toolbox import Toolbox
 
 
 class SideBar(QWidget):
-    def __init__(self, processor, storage):
+    def __init__(self, main_window, writer=None):
         super().__init__()
-        self.storage = storage
-        self.processor = processor
+
+        self.main_window = main_window
+
+        self.writer = writer
+
         self.layout = QHBoxLayout()
         self.secondary_layout = QVBoxLayout()
 
-        self.toolbox = Toolbox(storage)
+        self.toolbox = Toolbox(
+            main_window=self.main_window,
+            writer=self.writer,
+        )
         self.tabs = QTabWidget()
 
         self.notifications = NotificationPane(self)
 
         # Add individual tabs
-        self.image_tab = ImageTab(self.processor)
-        self.halftone_tab = HalftoneTab(self.processor)
-        self.output_tab = OutputTab(self.storage)
+        # self.image_tab = ImageTab(self.processor)
+        # self.halftone_tab = HalftoneTab(self.processor)
+        # self.output_tab = OutputTab(self.storage)
+
+        self.image_tab = ImageTab(writer=self.writer, window=self.main_window)
+        self.halftone_tab = HalftoneTab(writer=self.writer, window=self.main_window)
+        self.output_tab = OutputTab(writer=self.writer, window=self.main_window)
 
         self.tabs.addTab(self.image_tab, "Image")
         self.tabs.addTab(self.halftone_tab, "Halftone")

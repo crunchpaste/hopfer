@@ -17,8 +17,6 @@ def boolean_pixmap(img_array, light, dark):
     h, w = img_array.shape
     img = img_array.astype(np.uint8) * 255
 
-    stride = w // 8
-
     qimage = QImage(img, w, h, w, QImage.Format_Grayscale8)
     print(qimage.bytesPerLine())
     qimage.convertToFormat_inplace(QImage.Format_Mono, Qt.AutoColor)
