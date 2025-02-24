@@ -31,8 +31,7 @@ class ImageStorage(QObject):
     # Constants for image processing and saving
     MAX_SAVE_ATTEMPTS = 100
     NORMALIZED_MAX = 255.0
-    # Result signal to update PhotoViewer captured by the main window
-    result_signal = Signal(bool)
+
     # Captured by the ImageTab. It is used to disable the GrayscaleCombo.
     grayscale_signal = Signal(bool)
 
@@ -121,7 +120,6 @@ class ImageStorage(QObject):
         # Create shared memory for the 3D RGB array
         self.shm_rgb = sa.create("shm://rgb", (height, width, 3), dtype=np.uint8)
         message = {"type": "shared_arrays"}
-        print(f"INSIDE STORAGE: {self.shm_preview.shape}")
         self.res_queue.put(message)
 
     def reset(self):
@@ -233,7 +231,6 @@ class ImageStorage(QObject):
 
     def load_from_url(self, url):
         if url != "":
-            print(url)
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
@@ -507,8 +504,6 @@ class ImageStorage(QObject):
             else:
                 self._processed_image = self.f16(image)
 
-        self.result_signal.emit(self.reset_view)
-
     def get_original_pixmap(self):
         """
         Convert the original image to a QPixmap.
@@ -573,11 +568,11 @@ class ImageStorage(QObject):
                             color_light,
                             color_alpha,
                         )
-                        print("FROM COMPOSITING")
-                        print(result)
                     else:
                         _img = style_image(
-                            self.processed_image, color_dark, color_light
+                            self.processed_image,
+                            color_dark,
+                            color_light,
                         )
                         alpha = (self.alpha * 255).astype(np.uint8)
                         result = np.dstack((_img, alpha))
@@ -616,9 +611,6 @@ class ImageStorage(QObject):
 
         self.processed_image = processed_image
 
-        # Sending the signal to main_window
-        # self.result_signal.emit(reset)
-
     def rotate_image(self, cw=True):
         if cw:
             self.original_image = np.rot90(self.original_image, k=-1)
@@ -641,7 +633,7 @@ class ImageStorage(QObject):
         # it is much faster than reprocessing the image on each transform.
         # the halftoning would be accurate again on the next reprocess.
         h, w = self.grayscale_image.shape
-        self.result_signal.emit(True)
+        self.reset_view = True
 
     def flip_image(self):
         self.original_image = np.fliplr(self.original_image)
@@ -654,7 +646,6 @@ class ImageStorage(QObject):
         # while this does not produce accurate results for the dithering
         # it is much faster than reprocessing the image on each transform.
         # the halftoning would be accurate again on the next reprocess.
-        self.result_signal.emit(True)
 
     def invert_image(self):
         self.original_image = 1 - self.original_image
@@ -664,7 +655,6 @@ class ImageStorage(QObject):
 
         # It may be a bit of a personal preference, but i don't believe
         # the view should be reset after inverting the colors.
-        self.result_signal.emit(False)
 
     def show_notification(self, notification, duration=3000):
         """

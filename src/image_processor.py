@@ -50,14 +50,9 @@ except ImportError:
 def worker(image, mode, g_settings, im_settings, algorithm, settings, step=0):
     # initialize as None so that the processor know what to send to the storage
 
-    # flags if an image has changed
-
-    ge, ee = False, False
-
     grayscale_image = image
 
     if step == 0:
-        ge = True
         grayscale_image = worker_g(image, mode, g_settings)
 
     enhanced_image = grayscale_image
@@ -70,7 +65,6 @@ def worker(image, mode, g_settings, im_settings, algorithm, settings, step=0):
         or im_settings["blur_t"]
         or im_settings["unsharp_t"]
     ):
-        ee = True
         image = grayscale_image.copy()
         enhanced_image = worker_e(image, im_settings)
 
@@ -80,13 +74,7 @@ def worker(image, mode, g_settings, im_settings, algorithm, settings, step=0):
     else:
         processed_image = enhanced_image
 
-    if not ge:
-        grayscale_image = None
-
-    if not ee:
-        enhanced_image = None
-
-    return grayscale_image, enhanced_image, processed_image, ge, ee
+    return grayscale_image, enhanced_image, processed_image
 
 
 def worker_g(image, mode, settings):
@@ -495,7 +483,7 @@ class ImageProcessor(QObject):
 
         start = time.perf_counter()
 
-        g, e, p, ge, ee = worker(
+        g, e, p = worker(
             image,
             self.grayscale_mode,
             self.grayscale_settings,
@@ -508,10 +496,10 @@ class ImageProcessor(QObject):
         end = time.perf_counter()
         print(f"PROCESSING: {end - start:.6f} seconds")
 
-        if ge and g is not None:
+        if g is not None:
             self.storage.grayscale_image = g
 
-        if ee and e is not None:
+        if e is not None:
             self.storage.enhanced_image = e
 
         self.send_result(p)
