@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QFileDialog,
     QPushButton,
@@ -9,12 +9,14 @@ from PySide6.QtWidgets import (
 
 
 class Toolbox(QWidget):
-    file_opened_signal = Signal()
-
-    def __init__(self, storage):
+    def __init__(self, writer=None, main_window=None):
         super().__init__()
 
-        self.storage = storage
+        # self.storage = ImageStorage(self)
+        self.writer = writer
+
+        self.main_window = main_window
+        self.paths = self.main_window.paths
 
         self.setObjectName("toolbox")  # For QSS styling
 
@@ -35,13 +37,13 @@ class Toolbox(QWidget):
         # File buttons
         self.open = self._create_button("e43e", "Open image", self.open_file_dialog)
 
-        self.save = self._create_button("e161", "Save image", self.storage.save_image)
+        self.save = self._create_button("e161", "Save image", self.writer.save_image)
         self.save.setEnabled(False)  # Initial state is disabled
 
         self.saveas = self._create_button("eb60", "Save as", self.save_file_dialog)
         self.saveas.setEnabled(False)  # Initial state is disabled
 
-        # Image buttons
+        # # Image buttons
 
         self.rot_cw = self._create_button("e41a", "Rotate CW", None)
         self.rot_cw.setEnabled(False)
@@ -108,31 +110,32 @@ class Toolbox(QWidget):
             "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
         )
 
-        if self.storage.image_path is None:
+        image_path = self.main_window.paths["image_path"]
+        print(image_path)
+
+        if image_path is None:
             origin = ""
         else:
-            origin = self.storage.image_path
+            origin = image_path
 
         file_path, _ = file_dialog.getOpenFileName(
             None, "Open File", origin, file_filter
         )
 
         if file_path:
-            self.storage.load_image(file_path)
-            print(f"Selected file: {file_path}")
-            self.file_opened_signal.emit()
+            self.writer.load_image(file_path)
 
     def save_file_dialog(self):
         """This method is called when the button is clicked to open a file dialog."""
-        if self.storage.image_path is not None:
+        if self.paths["image_path"] is not None:
             file_dialog = QFileDialog(self)
             options = QFileDialog.Options()
             options |= QFileDialog.DontConfirmOverwrite
 
-            if self.storage.save_path is None:
+            if self.paths["save_path"] is None:
                 origin = ""
             else:
-                origin = self.storage.save_path
+                origin = self.paths["save_path"]
 
             file_filter = (
                 "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
@@ -144,32 +147,33 @@ class Toolbox(QWidget):
             )
 
             if file_path:
-                self.storage.save_path = file_path
+                self.paths["save_path"] = file_path
 
-                if self.storage.image_path != file_path:
-                    self.storage.save_path_edited = True
+                if self.paths["image_path"] != file_path:
+                    self.paths["save_path_edited"] = True
                 else:
-                    self.storage.save_path_edited = False
+                    self.paths["save_path_edited"] = False
 
-                self.storage.save_image()
+                self.writer.save_image()
         else:
             # This is just so that an error pops in the notification pane.
-            self.storage.save_image()
+            # self.storage.save_image()
+            self.writer.save_image()
 
     def _rotate(self, cw):
-        self.storage.rotate_image(cw)
+        self.writer.send_rotate(cw)
 
     def _flip(self):
-        self.storage.flip_image()
+        self.writer.send_flip()
 
     def _invert(self):
-        self.storage.invert_image()
+        self.writer.send_invert()
 
-    def enable_buttons(self):
+    def enable_buttons(self, state):
         """Enables the buttons when an image is available"""
-        self.save.setEnabled(True)
-        self.saveas.setEnabled(True)
-        self.rot_cw.setEnabled(True)
-        self.rot_ccw.setEnabled(True)
-        self.flip.setEnabled(True)
-        self.invert.setEnabled(True)
+        self.save.setEnabled(state)
+        self.saveas.setEnabled(state)
+        self.rot_cw.setEnabled(state)
+        self.rot_ccw.setEnabled(state)
+        self.flip.setEnabled(state)
+        self.invert.setEnabled(state)

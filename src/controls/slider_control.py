@@ -1,4 +1,4 @@
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
@@ -13,6 +13,8 @@ from helpers.decorators import debounce_alt
 
 
 class SliderControl(QWidget):
+    value_changed = Signal(int)
+
     def __init__(
         self,
         label,
@@ -68,6 +70,7 @@ class SliderControl(QWidget):
                 self.right_label = QLabel(f"{self.slider.value()}")
 
         self.slider.valueChanged.connect(self.update_value)
+        self.slider.valueChanged.connect(self.on_value_changed)
         self.slider.sliderPressed.connect(self.on_slider_pressed)
         self.slider.sliderReleased.connect(self.on_slider_released)
 
@@ -84,6 +87,12 @@ class SliderControl(QWidget):
             self.slider_layout.setContentsMargins(0, padding, 0, padding)
 
         self.setLayout(self.slider_layout)
+
+    def on_value_changed(self, value):
+        if self.is_dragging:
+            return
+        else:
+            self.value_changed.emit(value)
 
     def update_value(self, value):
         """Update the right label with the current slider value."""
@@ -122,3 +131,4 @@ class SliderControl(QWidget):
     def on_slider_released(self):
         """Called when the slider is released after dragging."""
         self.is_dragging = False
+        self.value_changed.emit(self.slider.value())

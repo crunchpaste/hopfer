@@ -37,8 +37,7 @@ class ThresholdSettings(HalftoneSettings):
 
         # The slider that controls the value for thresholding
         self.threshold_value = SliderControl("Threshold value", (0, 100), 50, 100)
-        self.threshold_value.slider.valueChanged.connect(self.emit_settings_changed)
-        self.threshold_value.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.threshold_value.value_changed.connect(self.emit_settings_changed)
 
         # Add it to the layout
         self.layout.addWidget(self.threshold_value)
@@ -56,14 +55,11 @@ class NiblackSettings(HalftoneSettings):
 
         # The slider that controls the k range of the local threshold
         self.block_size = SliderControl("Block size", (2, 500), 25, False)
-        self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
-        self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.block_size.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the k range of the local threshold
         self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
-        self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
-        self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
-
+        self.k_factor.value_changed.connect(self.emit_settings_changed)
         # Add it to the layout
         self.layout.addWidget(self.block_size)
         self.layout.addWidget(self.k_factor)
@@ -84,18 +80,15 @@ class SauvolaSettings(HalftoneSettings):
 
         # The slider that controls the k range of the local threshold
         self.block_size = SliderControl("Block size", (2, 500), 25, False)
-        self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
-        self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.block_size.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the dynamic range of the local threshold
         self.dynamic_range = SliderControl("Dynamic range", (1, 100), 50, 100)
-        self.dynamic_range.slider.valueChanged.connect(self.emit_settings_changed)
-        self.dynamic_range.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.dynamic_range.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the k range of the local threshold
         self.k_factor = SliderControl("Local threshold", (1, 100), 10, 100)
-        self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
-        self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.k_factor.value_changed.connect(self.emit_settings_changed)
 
         # Add it to the layout
         self.layout.addWidget(self.block_size)
@@ -119,30 +112,25 @@ class PhansalkarSettings(HalftoneSettings):
 
         # The slider that controls the k range of the local threshold
         self.block_size = SliderControl("Block size", (2, 500), 25, False)
-        self.block_size.slider.valueChanged.connect(self.emit_settings_changed)
-        self.block_size.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.block_size.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the dynamic range of the local threshold
         self.dynamic_range = SliderControl("Dynamic range", (1, 100), 50, 100)
-        self.dynamic_range.slider.valueChanged.connect(self.emit_settings_changed)
-        self.dynamic_range.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.dynamic_range.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the k range of the local threshold
         self.k_factor = SliderControl("Local threshold", (1, 100), 25, 100)
-        self.k_factor.slider.valueChanged.connect(self.emit_settings_changed)
-        self.k_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.k_factor.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the p range of the local threshold
         self.p_factor = SliderControl("Exponential influence", (1, 500), 30, 100)
-        self.p_factor.slider.valueChanged.connect(self.emit_settings_changed)
-        self.p_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.p_factor.value_changed.connect(self.emit_settings_changed)
 
         # The slider that controls the q range of the local threshold
         self.q_factor = SliderControl(
             "Exponential decay", (1, 100), 10, 10, precision=1
         )
-        self.q_factor.slider.valueChanged.connect(self.emit_settings_changed)
-        self.q_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.q_factor.value_changed.connect(self.emit_settings_changed)
 
         # Add it to the layout
         self.layout.addWidget(self.block_size)
@@ -178,8 +166,7 @@ class MezzoSettings(HalftoneSettings):
         self.range_slider = SliderControl(
             "Uniform range", (0, 100), (0, 100), 100, True
         )
-        self.range_slider.slider.valueChanged.connect(self.emit_settings_changed)
-        self.range_slider.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.range_slider.value_changed.connect(self.emit_settings_changed)
 
         self.spin = SeedSpinBox("Random number seed")
         self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
@@ -205,11 +192,10 @@ class GaussSettings(HalftoneSettings):
         self.spin.spinbox.valueChanged.connect(self.emit_settings_changed)
 
         self.location = SliderControl("Peak location", (0, 100), 50, 100)
-        self.location.slider.valueChanged.connect(self.emit_settings_changed)
-        self.location.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.location.value_changed.connect(self.emit_settings_changed)
+
         self.std = SliderControl("Starndard deviation", (0, 100), 50, 100)
-        self.std.slider.valueChanged.connect(self.emit_settings_changed)
-        self.std.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.std.value_changed.connect(self.emit_settings_changed)
 
         self.layout.addWidget(self.location)
         self.layout.addWidget(self.std)
@@ -237,12 +223,12 @@ class BetaSettings(HalftoneSettings):
         self.lock_toggle.set_toggle_checked(True)
 
         self.alpha = SliderControl("Alpha", (1, 100), 5, 10, precision=1)
-        self.alpha.slider.valueChanged.connect(self.emit_settings_changed)
-        self.alpha.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.alpha.value_changed.connect(self.emit_settings_changed)
+        self.alpha.slider.valueChanged.connect(self.update_both)
 
         self.beta = SliderControl("Beta", (1, 100), 5, 10, precision=1)
-        self.beta.slider.valueChanged.connect(self.emit_settings_changed)
-        self.beta.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.beta.value_changed.connect(self.emit_settings_changed)
+        self.beta.slider.valueChanged.connect(self.update_both)
 
         self.layout.addWidget(self.lock_toggle)
         self.layout.addWidget(self.alpha)
@@ -250,14 +236,15 @@ class BetaSettings(HalftoneSettings):
         self.layout.addWidget(self.spin)
         self.layout.addStretch()
 
-    def emit_settings_changed(self):
-        sender = self.sender()
+    def update_both(self, value):
         if self.lock_toggle.is_toggle_checked():
+            sender = self.sender()
             if sender == self.alpha.slider:
                 self.beta.slider.setValue(self.alpha.slider.value())
             elif sender == self.beta.slider:
                 self.alpha.slider.setValue(self.beta.slider.value())
 
+    def emit_settings_changed(self):
         self.settingsChanged.emit(
             {
                 "seed": self.spin.spinbox.value(),
@@ -273,13 +260,11 @@ class BayerSettings(HalftoneSettings):
 
         # The size of the Bayer matrix. Converted to the proper power of 2 in bayer.py and bayerc.py
         self.size = SliderControl("Matrix size", (1, 10), 1, False)
-        self.size.slider.valueChanged.connect(self.emit_settings_changed)
-        self.size.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.size.value_changed.connect(self.emit_settings_changed)
 
         #
         self.offset = SliderControl("Matrix offset", (-100, 100), 0, 100)
-        self.offset.slider.valueChanged.connect(self.emit_settings_changed)
-        self.offset.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.offset.value_changed.connect(self.emit_settings_changed)
 
         # Add widgets to layout
         self.layout.addWidget(self.size)
@@ -302,8 +287,7 @@ class ErrorDiffusionSettings(HalftoneSettings):
 
         # Diffusion factor slider
         self.diffusion_factor = SliderControl("Diffusion factor", (0, 100), 100, 100)
-        self.diffusion_factor.slider.valueChanged.connect(self.emit_settings_changed)
-        self.diffusion_factor.slider.sliderReleased.connect(self.emit_settings_changed)
+        self.diffusion_factor.value_changed.connect(self.emit_settings_changed)
 
         self.diffusion_factor.slider_layout.setContentsMargins(10, 10, 10, 10)
         # Serpentine toggle

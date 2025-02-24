@@ -4,6 +4,32 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
 
 
+def qimage_to_numpy(qimage):
+    # this is a very, very hacky way to get the clipboard image data
+    # without encoding it as a .png first, but its magnitudes faster
+
+    # these are simple to get
+    width, height = qimage.width(), qimage.height()
+
+    # it seems that .bits() returns a memview, which could be used to
+    # create a numpy array
+    mem_view = qimage.bits()
+
+    print(f"DEPTH: {qimage.depth()}")
+
+    arr = np.frombuffer(mem_view.tobytes(), dtype=np.uint8)
+
+    # we get the channels by dividing the length by the pixel count
+    channels = arr.shape[0] // (width * height)
+    print(channels)
+    # reshape it to its proper size
+    if channels == 1:
+        arr = arr.reshape(height, width)
+    else:
+        arr = arr.reshape((height, width, channels))
+    return arr
+
+
 def pixmap_to_numpy(pixmap):
     image = pixmap.toImage()
     pil_image = Image.fromqpixmap(image)
@@ -17,8 +43,6 @@ def boolean_pixmap(img_array, light, dark):
     h, w = img_array.shape
     img = img_array.astype(np.uint8) * 255
 
-    stride = w // 8
-
     qimage = QImage(img, w, h, w, QImage.Format_Grayscale8)
     print(qimage.bytesPerLine())
     qimage.convertToFormat_inplace(QImage.Format_Mono, Qt.AutoColor)
@@ -28,7 +52,9 @@ def boolean_pixmap(img_array, light, dark):
     return pixmap
 
 
-def numpy_to_pixmap(img_array, alpha=None):
+def numpy_to_pixmap(img_array, alpha=None, qi=False):
+    # qi is a flag to return qimage instead of qpixmap
+    #
     # A bit of a spaghetti monster, but alpha is only passed when the image
     # is stored into the clipboard, if that makes sense.
 
@@ -80,6 +106,11 @@ def numpy_to_pixmap(img_array, alpha=None):
 
     bytes = c * w
     qimage = QImage(image_array, w, h, bytes, format)
+
+    # return the qimage so that it could be set to clipboard to preserve alpha
+    if qi:
+        return qimage
+
     # TODO: Should check how to create the pixmap directly from an array
     pixmap = QPixmap.fromImage(qimage)
 

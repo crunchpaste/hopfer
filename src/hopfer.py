@@ -7,6 +7,7 @@ import time
 from platformdirs import user_config_dir, user_pictures_dir
 from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtWidgets import QApplication
+from setproctitle import setproctitle
 
 from controls.focus_widget import FocusDebugger
 from helpers.load_stylesheet import load_qss
@@ -134,4 +135,5 @@ def main():
 
 
 if __name__ == "__main__":
+    setproctitle("hopfer")
     main()

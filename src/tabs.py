@@ -22,13 +22,14 @@ from settings import (
 
 
 class HalftoneTab(QWidget):
-    def __init__(self, processor):
+    def __init__(self, writer=None, window=None):
         """
         Initialize the HalftoneTab widget, which allows users to select halftoning algorithms
         and configure related settings.
         """
         super().__init__()
-        self.processor = processor
+        self.writer = writer
+        self.window = window
         self.current_algorithm = "None"
 
         self._initialize_ui()
@@ -133,21 +134,22 @@ class HalftoneTab(QWidget):
         print(f"Settings changed: {settings}")
 
         # Update processor settings and algorithm, then start processing
-        self.processor.settings = settings
-        self.processor.algorithm = self.current_algorithm
-        self.processor.start(step=2)
+        algorithm = self.current_algorithm
+        # self.processor.start(step=2)
+        self.writer.send_halftone(algorithm, settings)
 
 
 class ImageTab(QWidget):
     file_opened_signal = Signal()
 
-    def __init__(self, processor):
+    def __init__(self, writer=None, window=None):
         """
         Initialize the ImageTab widget, which would offer some basic image adjustments in the future.
         """
         super().__init__()
-        self.processor = processor
-        self.processor.storage.grayscale_signal.connect(self.on_grayscale_signal)
+        self.writer = writer
+        self.window = window
+        self.window.reader.grayscale_signal.connect(self.on_grayscale_signal)
         self.sliders = []
 
         self._initialize_ui()
@@ -161,21 +163,17 @@ class ImageTab(QWidget):
         self.rgb_widget = QWidget()
         rgb_layout = QVBoxLayout()
         self.red = SliderControl("Red", (0, 100), 33, 100, padding=0, stretch=True)
-        self.red.slider.valueChanged.connect(lambda: self.on_mode_changed("Manual RGB"))
+        self.red.value_changed.connect(lambda: self.on_mode_changed("Manual RGB"))
         self.red.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
         self.green = SliderControl("Green", (0, 100), 33, 100, stretch=True)
-        self.green.slider.valueChanged.connect(
-            lambda: self.on_mode_changed("Manual RGB")
-        )
+        self.green.value_changed.connect(lambda: self.on_mode_changed("Manual RGB"))
         self.green.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
         self.blue = SliderControl("Blue", (0, 100), 33, 100, stretch=True)
-        self.blue.slider.valueChanged.connect(
-            lambda: self.on_mode_changed("Manual RGB")
-        )
+        self.blue.value_changed.connect(lambda: self.on_mode_changed("Manual RGB"))
         self.blue.slider.sliderReleased.connect(
             lambda: self.on_mode_changed("Manual RGB")
         )
@@ -208,51 +206,48 @@ class ImageTab(QWidget):
 
         # pillow related sliders
         self.brightness = SliderControl("Brightness", (-100, 100), 0, 100)
-        self.brightness.slider.valueChanged.connect(self.on_settings_changed)
-        self.brightness.slider.sliderReleased.connect(self.on_settings_changed)
+        self.brightness.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.brightness)
 
         self.contrast = SliderControl("Contrast", (-100, 100), 0, 100)
-        self.contrast.slider.valueChanged.connect(self.on_settings_changed)
-        self.contrast.slider.sliderReleased.connect(self.on_settings_changed)
+        self.contrast.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.contrast)
 
         self.blur = SliderControl("Gaussian filter", (0, 150), 0, 10, precision=1)
-        self.blur.slider.valueChanged.connect(self.on_settings_changed)
-        self.blur.slider.sliderReleased.connect(self.on_settings_changed)
+        self.blur.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.blur)
 
         self.median = SliderControl("Median filter", (1, 5), 1, 1, precision=1)
-        self.median.slider.valueChanged.connect(self.on_settings_changed)
-        self.median.slider.sliderReleased.connect(self.on_settings_changed)
+        self.median.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.median)
 
         self.wl = SliderControl("Wavelet levels", (0, 10), 0, 1, precision=1)
-        self.wl.slider.valueChanged.connect(self.on_settings_changed)
-        self.wl.slider.sliderReleased.connect(self.on_settings_changed)
+        self.wl.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.wl)
 
         self.wt = SliderControl("Wavelet threshold", (0, 50), 0, 1, precision=1)
-        self.wt.slider.valueChanged.connect(self.on_settings_changed)
-        self.wt.slider.sliderReleased.connect(self.on_settings_changed)
+        self.wt.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.wt)
 
         self.sharpness = SliderControl("Sharpen", (0, 100), 0, 1)
-        self.sharpness.slider.valueChanged.connect(self.on_settings_changed)
-        self.sharpness.slider.sliderReleased.connect(self.on_settings_changed)
+        self.sharpness.value_changed.connect(self.on_settings_changed)
+
         self.sliders.append(self.sharpness)
 
         self.u_radius = SliderControl("Radius", (0, 100), 30, 10, precision=1)
-        self.u_radius.slider.valueChanged.connect(self.on_settings_changed)
-        self.u_radius.slider.sliderReleased.connect(self.on_settings_changed)
+        self.u_radius.value_changed.connect(self.on_settings_changed)
 
         self.u_strenght = SliderControl("Strength", (0, 100), 25, 100)
-        self.u_strenght.slider.valueChanged.connect(self.on_settings_changed)
-        self.u_strenght.slider.sliderReleased.connect(self.on_settings_changed)
+        self.u_strenght.value_changed.connect(self.on_settings_changed)
 
         self.u_thresh = SliderControl("Threshold", (0, 20), 3, 1, precision=1)
-        self.u_thresh.slider.valueChanged.connect(self.on_settings_changed)
-        self.u_thresh.slider.sliderReleased.connect(self.on_settings_changed)
+        self.u_thresh.value_changed.connect(self.on_settings_changed)
 
         # Toggle containers
         self.bc_toggle = ToggleContainer(
@@ -288,7 +283,6 @@ class ImageTab(QWidget):
 
         self.layout.addWidget(scroll)
 
-        # Set the layout for the widget
         self.setLayout(self.layout)
 
     @debounce(0.15)
@@ -299,21 +293,19 @@ class ImageTab(QWidget):
         Args:
             mode_name (str): The selected grayscaling mode.
         """
-
+        pass
         if mode_name == "Manual RGB":
             self.rgb_widget.setVisible(True)
-            self.processor.grayscale_settings = {
+            grayscale_settings = {
                 "r": self.red.slider.value(),
                 "g": self.green.slider.value(),
                 "b": self.blue.slider.value(),
             }
         else:
             self.rgb_widget.setVisible(False)
-            self.processor.grayscale_settings = {}
+            grayscale_settings = {}
 
-        self.processor.grayscale_mode = mode_name
-        self.processor.convert = True
-        self.processor.start(step=0)
+        self.writer.send_grayscale(mode_name, grayscale_settings)
 
     @debounce(0.15)
     def on_settings_changed(self, value=None, sender=None):
@@ -326,8 +318,8 @@ class ImageTab(QWidget):
             # that's why the warning is ignored.
             if all(item.slider.value() == item.default for item in sender.items):
                 return
-
-        storage = self.processor.storage
+        pass
+        # storage = self.processor.storage
         settings = {
             "normalize": self.normalize.is_toggle_checked(),
             "equalize": self.equalize.is_toggle_checked(),
@@ -345,9 +337,8 @@ class ImageTab(QWidget):
             "u_thresh": self.u_thresh.slider.value(),
             # "sharpness": self.sharpness.slider.value(),
         }
-        self.processor.image_settings = settings
-        if storage.original_image is not None:
-            self.processor.start(step=1)
+
+        self.writer.send_enhance(settings)
 
     def on_grayscale_signal(self, is_grayscale):
         if is_grayscale:
@@ -358,14 +349,15 @@ class ImageTab(QWidget):
 
 
 class OutputTab(QWidget):
-    def __init__(self, storage):
+    def __init__(self, writer=None, window=None):
         """
         Initialize the HalftoneTab widget, which allows users to select halftoning algorithms
         and configure related settings.
         """
         super().__init__()
 
-        self.storage = storage
+        self.writer = writer
+        self.window = window
 
         self._initialize_ui()
 
@@ -393,13 +385,13 @@ class OutputTab(QWidget):
         """
         # Check which ColorControl emitted the signal
         if sender == self.colors.dark:
-            self.storage.color_dark = color
+            swatch = "dark"
         elif sender == self.colors.light:
-            self.storage.color_light = color
+            swatch = "light"
         elif sender == self.colors.alpha:
-            self.storage.color_alpha = color
+            swatch = "alpha"
 
-        self.storage.result_signal.emit(False)
+        self.writer.send_color(color, swatch)
 
     def on_preview_change(self, value):
-        self.storage.save_like_preview = value
+        self.writer.save_like_preview(value)
