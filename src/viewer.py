@@ -261,7 +261,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         urls = event.mimeData().urls()
         if urls:
             file_path = urls[0].toLocalFile()
-            # self.storage.load_image(file_path)
+            self.window.writer.load_image(file_path)
             self.window.get_focus()
             return
 
