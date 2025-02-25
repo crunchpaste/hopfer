@@ -539,18 +539,19 @@ class ImageStorage(QObject):
         reset = self.reset_view
         processor = self.daemon.processor
 
-        if processor.algorithm == "None":
-            return self._handle_no_algorithm(reset, clipboard)
+        if self.original_image is not None:
+            if processor.algorithm == "None":
+                return self._handle_no_algorithm(reset, clipboard)
 
-        result = self._process_image(compositing, styled)
+            result = self._process_image(compositing, styled)
 
-        if clipboard:
-            return result
+            if clipboard:
+                return result
 
-        self.shm_preview[:] = result
-        self.res_queue.put(
-            {"type": "display_image", "array": "rgb", "reset": reset}
-        )
+            self.shm_preview[:] = result
+            self.res_queue.put(
+                {"type": "display_image", "array": "rgb", "reset": reset}
+            )
 
     def _handle_no_algorithm(self, reset, clipboard):
         # Handles the case when "None" is the algo
