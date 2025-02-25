@@ -63,7 +63,7 @@ class ColorControl(QWidget):
         self.hex = QLineEdit()
         self.hex.setAlignment(Qt.AlignCenter)
 
-        suggestions = self.extract_colors()
+        suggestions, self.color_dict = self.extract_colors()
         if suggestions is not False:
             # suggestions should be False if something went wrong
             # with parsing the json file
@@ -103,7 +103,7 @@ class ColorControl(QWidget):
             with open(get_path("res/css_colors.json")) as f:
                 data = json.load(f)
             keys = sorted(list(data.keys()))
-            return keys
+            return keys, data
         except Exception:
             return False
 
@@ -114,6 +114,11 @@ class ColorControl(QWidget):
 
     def validate_and_update_color(self, text):
         """Validate the hex color format and update the color button if valid."""
+        color_value = self.color_dict.get(text.lower())
+
+        if color_value:
+            text = color_value
+
         color, valid = self.is_valid_hex(text)
         if valid:
             self.previous_color = color  # Store the valid color

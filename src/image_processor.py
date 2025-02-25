@@ -2,9 +2,10 @@ import time
 
 import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
-from PySide6.QtCore import QObject, Signal
+from PySide6.QtCore import QObject
 
-from helpers.decorators import queue
+from helpers.decorators import debounce, queue
+from helpers.kernels import get_kernel
 
 try:
     from algorithms.thresholdc import (
@@ -55,416 +56,33 @@ except ImportError:
         value,
     )
 
-# try:
-#     from algorithms.static import sharpen
-# except ImportError:
-#     pass
-
-
-def worker(image, mode, g_settings, im_settings, algorithm, settings, step=0):
-    # initialize as None so that the processor know what to send to the storage
-
-    grayscale_image = image
-
-    if step == 0:
-        grayscale_image = worker_g(image, mode, g_settings)
-
-    enhanced_image = grayscale_image
-
-    if step <= 1 and (
-        im_settings["normalize"]
-        or im_settings["equalize"]
-        or im_settings["normalize"]
-        or im_settings["bc_t"]
-        or im_settings["blur_t"]
-        or im_settings["unsharp_t"]
-    ):
-        image = grayscale_image.copy()
-        enhanced_image = worker_e(image, im_settings)
-
-    if algorithm != "None":
-        image = enhanced_image.copy()
-        processed_image = worker_h(image, algorithm, settings)
-    else:
-        processed_image = enhanced_image
-
-    return grayscale_image, enhanced_image, processed_image
-
-
-def worker_g(image, mode, settings):
-    """
-    This is the worker for grayscale conversion. Currently it is just being terminated not quite gracefully, though it seems to not be a problem. This is the only way I've found for the GUI to not freeze while processing.
-    """
-    return convert_to_grayscale(image, mode, settings)
-
-
-def worker_e(image, im_settings):
-    """
-    This is the worker for image enchancements e.g. blurs. As with worker_g and worker_h it is just being terminated.
-    """
-    _brightness = im_settings["brightness"] / 100
-
-    if _brightness > 0:
-        # using a log function makes the adjustment feel a bit more natural
-        _brightness = 5 * (np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01))
-    _brightness += 1
-    _contrast = im_settings["contrast"] / 100
-    if _contrast > 0:
-        # using a log function makes the adjustment feel a bit more natural
-        _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
-    _contrast += 1
-    # _sharpness = im_settings["sharpness"]
-
-    pil_needed = False
-    converted = False  # if the image has already been converted back
-
-    if im_settings["normalize"]:
-        min_val = np.min(image)
-        max_val = np.max(image)
-        image = (image - min_val) / (max_val - min_val)
-
-    if im_settings["equalize"]:
-        hist, bins = np.histogram(image.flatten(), bins=256, range=[0, 1])
-
-        cdf = hist.cumsum()
-        cdf_normalized = cdf / cdf[-1]
-
-        image = np.interp(image.flatten(), bins[:-1], cdf_normalized).reshape(
-            image.shape
-        )
-
-    if (
-        im_settings["bc_t"]
-        or im_settings["blur_t"]
-        or im_settings["unsharp_t"] > 0
-    ):
-        # if PIL manupulation is needed, convert to a PIL image once
-        pil_needed = True
-
-        _image = (image * 255).astype(np.uint8)
-        pil_image = Image.fromarray(_image)
-
-    if im_settings["bc_t"]:
-        if _brightness != 1.0:
-            # if PIL manupulation is needed, convert to a PIL image once
-            pil_needed = True
-            enhancer = ImageEnhance.Brightness(pil_image)
-            pil_image = enhancer.enhance(_brightness)
-        if _contrast != 1.0:
-            enhancer = ImageEnhance.Contrast(pil_image)
-            pil_image = enhancer.enhance(_contrast)
-    if im_settings["blur_t"]:
-        _blur = im_settings["blur"] / 10
-        _median = int(im_settings["median"] * 2 - 1)
-        if _blur > 0:
-            pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
-        if _median > 1:
-            pil_image = pil_image.filter(ImageFilter.MedianFilter(_median))
-    if im_settings["unsharp_t"]:
-        radius = im_settings["u_radius"] / 10
-        strenght = int(im_settings["u_strenght"] * 2)
-        thresh = im_settings["u_thresh"]
-
-        pil_image = pil_image.filter(
-            ImageFilter.UnsharpMask(radius, strenght, thresh)
-        )
-        # if _sharpness > 0:
-        #     converted = True
-        #     if pil_needed:
-        #         _image = (np.array(pil_image) / 255).astype(np.float32)
-        #     else:
-        #         _image = image
-        #     image = sharpen(_image, _sharpness)
-
-    if not converted and pil_needed:
-        # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
-        image = (np.array(pil_image) / 255).astype(np.float32)
-    return image
-
-
-def worker_h(image, algorithm, settings):
-    """
-    This is the worker for halftoning. As with worker_g and worker_e it is just being terminated.
-    """
-    # There is no need for a copy as it seems that multiprocessing
-    # is copying the image anyway when it's transferring it to the newly
-    # spawned process
-    # image = np.copy(image).astype(np.float32)
-    processed_image = apply_algorithm(image, algorithm, settings)
-    return processed_image
-
-
-def convert_to_grayscale(image, mode, settings):
-    """
-    The function responsible for the grayscale conversion in the main worker_p.
-    """
-    if mode == "Luminance":
-        return luminance(image)
-    if mode == "Luma":
-        return luma(image)
-    elif mode == "Average":
-        return average(image)
-    elif mode == "Value":
-        return value(image)
-    elif mode == "Lightness":
-        return lightness(image)
-    elif mode == "Manual RGB":
-        r = settings["r"] / 100
-        g = settings["g"] / 100
-        b = settings["b"] / 100
-        return manual(image, r, g, b)
-    else:
-        return luminance(image)
-
-
-def apply_algorithm(image, algorithm, settings):
-    """
-    Apply the selected halftoning algorithm to the image via worker_p.
-
-    :param image: The original image as a NumPy array.
-    :param settings: Settings for the algorithm (like threshold, dither levels).
-    :return: The processed image as a NumPy array.
-    """
-    # Apply the chosen halftoning algorithm using the respective kernel
-    if algorithm == "Fixed threshold":
-        processed_image = threshold(image, settings)
-
-    elif algorithm == "Niblack threshold":
-        processed_image = niblack_threshold(image, settings)
-
-    elif algorithm == "Sauvola threshold":
-        processed_image = sauvola_threshold(image, settings)
-
-    elif algorithm == "Phansalkar threshold":
-        processed_image = phansalkar_threshold(image, settings)
-
-    elif algorithm == "Mezzotint uniform":
-        processed_image = mezzo(image, settings, mode="uniform")
-
-    elif algorithm == "Mezzotint normal":
-        processed_image = mezzo(image, settings, mode="gauss")
-
-    elif algorithm == "Mezzotint beta":
-        processed_image = mezzo(image, settings, mode="beta")
-
-    elif algorithm == "Bayer":
-        processed_image = bayer(image, settings)
-
-    elif algorithm == "Floyd-Steinberg":
-        kernel = (
-            np.array([[0, 0, 0], [0, 0, 7], [3, 5, 1]], dtype=np.float64) / 16.0
-        )
-
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "False Floyd-Steinberg":
-        kernel = (
-            np.array([[0, 0, 0], [0, 0, 3], [0, 3, 2]], dtype=np.float64) / 8.0
-        )
-
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Jarvis":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 7, 5],
-                    [3, 5, 7, 5, 3],
-                    [1, 3, 5, 3, 1],
-                ],
-                dtype=np.float64,
-            )
-            / 48.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Stucki":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 8, 4],
-                    [2, 4, 8, 4, 2],
-                    [1, 2, 4, 2, 1],
-                ],
-                dtype=np.float64,
-            )
-            / 42.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Stucki small":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 8, 2],
-                    [0, 2, 8, 2, 0],
-                    [0, 0, 2, 0, 0],
-                ],
-                dtype=np.float64,
-            )
-            / 24.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Stucki large":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 8, 4, 2],
-                    [2, 4, 8, 8, 8, 4, 2],
-                    [2, 4, 4, 4, 4, 4, 2],
-                    [2, 2, 2, 2, 2, 2, 2],
-                ],
-                dtype=np.float64,
-            )
-            / 88.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Atkinson":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 1, 1],
-                    [0, 1, 1, 1, 0],
-                    [0, 0, 1, 0, 0],
-                ],
-                dtype=np.float64,
-            )
-            / 8
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Burkes":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 8, 4],
-                    [2, 4, 8, 4, 2],
-                    [0, 0, 0, 0, 0],
-                ],
-                dtype=np.float64,
-            )
-            / 32.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Sierra":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 5, 3],
-                    [2, 4, 5, 4, 2],
-                    [0, 2, 3, 2, 0],
-                ],
-                dtype=np.float64,
-            )
-            / 32.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Sierra2":
-        kernel = (
-            np.array(
-                [
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 0, 0],
-                    [0, 0, 0, 4, 3],
-                    [1, 2, 3, 2, 1],
-                    [0, 0, 0, 0, 0],
-                ],
-                dtype=np.float64,
-            )
-            / 16.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Sierra2 4A":
-        kernel = (
-            np.array([[0, 0, 0], [0, 0, 2], [1, 1, 0]], dtype=np.float64) / 4.0
-        )
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "Nakano":
-        kernel = np.array(
-            [
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 6, 4],
-                [0, 1, 6, 0, 0, 5, 3],
-                [0, 0, 4, 7, 3, 5, 3],
-                [0, 0, 3, 5, 3, 4, 2],
-            ],
-            dtype=np.float64,
-        )
-        kernel /= float(np.sum(kernel))  # Normalize the kernel
-        processed_image = error_diffusion(image, kernel, settings)
-
-    elif algorithm == "None":
-        # No processing, return the original image
-        processed_image = image
-
-    else:
-        # Default case: No processing applied if algorithm is unknown
-        print(f"Algorithm {algorithm} not recognized, no processing applied.")
-        processed_image = image
-
-    return processed_image
-
 
 class ImageProcessor(QObject):
     """
-    This class processes images using various halftoning algorithms in a separate thread.
-    It emits progress updates and processed images back to the main thread.
-
-    Attributes:
-        result_signal: Signal to send the processed image to the main thread.
-        algorithm: The halftoning algorithm to apply.
-        settings: Settings for the algorithm, such as error diffusion parameters.
-        storage: The ImageStorage instance to access the image data.
+    This class processes images using various halftoning algorithms and is part of the daemon.
+    It takes images from ImageStorage and sends the processed images back to storage which sends them to the GUI.
     """
 
-    result_signal = Signal(bool)
-
-    # The ProcessPoolExecutor for all worker processes
-    # executor = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-
-    def __init__(self, daemon, storage, parent=None):
+    def __init__(self, daemon, storage):
         """
-        Initialize the ImageProcessor with the selected algorithm, settings, and storage instance.
-
-        :param algorithm: The halftoning algorithm to apply.
-        :param settings: The settings for the algorithm.
-        :param storage: The ImageStorage instance for accessing image data.
+        Initialize the ImageProcessor with the daemon and an ImageStorage instance.
         """
-        super().__init__(parent)
+        super().__init__()
 
         self.processing = False
         self.queued_call = None
 
-        self.storage = storage
+        # The Daemon instance.
         self.daemon = daemon
+        # The ImageStorage instance. Used for getting and storing images.
+        self.storage = storage
+        # This is the response multiprocessing Queue, used to communicate back to the GUI
         self.res_queue = self.daemon.res_queue
-        self.algorithm = "None"
-        self.grayscale_mode = "Luminance"  # Initialize the processor with Luminance as the grayscale mode as it is the best.
+        # Initialize the processor with Luminance as the grayscale mode as it is the the most acurate.
+        self.grayscale_mode = "Luminance"
+        # Grayscale settings left blank as Luminance does not need any
         self.grayscale_settings = {}
-
+        # Image adjustments settings initialized as all disabled
         self.image_settings = {
             "normalize": False,
             "equalize": False,
@@ -476,81 +94,251 @@ class ImageProcessor(QObject):
             "sharpness": 0.0,
             "blur": 0.0,
         }
-
+        # Algorithm is initialized to None - just returning the original image
+        self.algorithm = "None"
+        # These are the halftoning settings. Initialized as empty as none does not need any.
         self.settings = {}
-
-        self.convert = (
-            True  # Does the image need reconversion from RGB to Grayscale
-        )
-        self.reset = True  # Does the viewer need to be reset. Set to True when a new image is loaded.
+        # Convert is used as a flag to indicate that the image is RGB and needs conversion
+        self.convert = True
+        # Reset is used a flag for the viewer to be reset. Set to True when a new image is loaded.
+        self.reset = True
 
     @queue
     def start(self, step=0):
-        """Start the image processing in a separate process."""
+        """
+        The main method of the processor. It processes the image in a sequential manner
+        then stores the result in the ImageStorage instance.
+        """
+        self.processing = True
 
         if self.storage.original_image is None:
+            self.processing = False
             return
 
-        message = {"type": "started_processing"}
-        self.res_queue.put(message)
+        try:
+            self.res_queue.put({"type": "started_processing"})
 
-        # The conversion step should only happen if the original image is not actually grayscale, and the grayscale mode has changed when start() was called.
+            # Determine the processing step based on grayscale mode and enhancement settings.
+            step = self._determine_processing_step(step)
+
+            start_time = time.perf_counter()
+
+            # Perform processing steps sequentially.
+            self._process_grayscale(step)
+            self._process_enhancement(step)
+
+            processed_image = self._process_algorithm()
+
+        except Exception:
+            self._handle_processing_error()
+            processed_image = self.storage.processed_image
+
+        print(f"PROCESSING: {time.perf_counter() - start_time:.6f} seconds")
+
+        self._send_result(processed_image)
+
+    # --- Helper Methods ---
+
+    def _determine_processing_step(self, step):
+        """ Determines whether conversion or enhancement should be performed. """
         convert = not self.storage.original_grayscale and step == 0
         enhance = step <= 1
+        return 0 if convert else (1 if enhance else step)
 
-        if convert:
-            step = 0
-
-        elif enhance:
-            step = 1
-
-        start = time.perf_counter()
-
-        image = self.storage.original_image
-
+    def _process_grayscale(self, step):
+        """ Converts the image to grayscale if necessary. """
         if step == 0:
-            grayscale_image = worker_g(
-                image, self.grayscale_mode, self.grayscale_settings
+            self.storage.grayscale_image = self._convert_to_grayscale(
+                self.storage.original_image, self.grayscale_mode, self.grayscale_settings
             )
-            self.storage.grayscale_image = grayscale_image
 
+    def _process_enhancement(self, step):
+        """ Enhances the image based on the provided settings. """
         im_settings = self.image_settings
-        if step <= 1 and (
-            im_settings["normalize"]
-            or im_settings["equalize"]
-            or im_settings["normalize"]
-            or im_settings["bc_t"]
-            or im_settings["blur_t"]
-            or im_settings["unsharp_t"]
+        if step <= 1 and any(
+            im_settings[key] for key in ["normalize", "equalize", "bc_t", "blur_t", "unsharp_t"]
         ):
-            image = self.storage.grayscale_image
-            enhanced_image = worker_e(image, im_settings)
-            self.storage.enhanced_image = enhanced_image
+            self.storage.enhanced_image = self._enhance_image(self.storage.grayscale_image, im_settings)
         elif step <= 1:
             self.storage.enhanced_image = self.storage.grayscale_image
 
-        image = self.storage.enhanced_image
+    def _process_algorithm(self):
+        """ Applies the processing algorithm if selected. """
         if self.algorithm != "None":
-            processed_image = worker_h(image, self.algorithm, self.settings)
+            return self._apply_algorithm(self.storage.enhanced_image, self.algorithm, self.settings)
+        return self.storage.enhanced_image
+
+    def _handle_processing_error(self):
+        """ Handles exceptions during processing. """
+        self.res_queue.put({
+            "type": "notification",
+            "notification": "Something went wrong while processing. Returning last good processed image.",
+            "duration": 7000,
+        })
+
+    @staticmethod
+    def _convert_to_grayscale(image, mode, settings):
+        """
+        The function responsible for the grayscale conversion in the main worker_p.
+        """
+        if mode == "Luminance":
+            return luminance(image)
+        if mode == "Luma":
+            return luma(image)
+        elif mode == "Average":
+            return average(image)
+        elif mode == "Value":
+            return value(image)
+        elif mode == "Lightness":
+            return lightness(image)
+        elif mode == "Manual RGB":
+            r = settings["r"] / 100
+            g = settings["g"] / 100
+            b = settings["b"] / 100
+            return manual(image, r, g, b)
         else:
-            processed_image = self.storage.enhanced_image
+            return luminance(image)
 
-        # g, e, p = worker(
-        #     image,
-        #     self.grayscale_mode,
-        #     self.grayscale_settings,
-        #     self.image_settings,
-        #     self.algorithm,
-        #     self.settings,
-        #     step,
-        # )
+    @staticmethod
+    def _enhance_image(image, im_settings):
+        """
+        This is the method for image enchancements e.g. blurs.
+        """
+        _brightness = im_settings["brightness"] / 100
 
-        end = time.perf_counter()
-        print(f"PROCESSING: {end - start:.6f} seconds")
+        if _brightness > 0:
+            # using a log function makes the adjustment feel a bit more natural
+            _brightness = 5 * (
+                np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01)
+            )
+        _brightness += 1
+        _contrast = im_settings["contrast"] / 100
+        if _contrast > 0:
+            # using a log function makes the adjustment feel a bit more natural
+            _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
+        _contrast += 1
+        # _sharpness = im_settings["sharpness"]
 
-        self.send_result(processed_image)
+        pil_needed = False
+        # if the image has already been converted back
+        converted = False
 
-    def send_result(self, image):
+        if im_settings["normalize"]:
+            min_val = np.min(image)
+            max_val = np.max(image)
+            image = (image - min_val) / (max_val - min_val)
+
+        if im_settings["equalize"]:
+            hist, bins = np.histogram(image.flatten(), bins=256, range=[0, 1])
+
+            cdf = hist.cumsum()
+            cdf_normalized = cdf / cdf[-1]
+
+            image = np.interp(
+                image.flatten(), bins[:-1], cdf_normalized
+            ).reshape(image.shape)
+
+        if (
+            im_settings["bc_t"]
+            or im_settings["blur_t"]
+            or im_settings["unsharp_t"] > 0
+        ):
+            # if PIL manupulation is needed, convert to a PIL image once
+            pil_needed = True
+
+            _image = (image * 255).astype(np.uint8)
+            pil_image = Image.fromarray(_image)
+
+        if im_settings["bc_t"]:
+            if _brightness != 1.0:
+                # if PIL manupulation is needed, convert to a PIL image once
+                pil_needed = True
+                enhancer = ImageEnhance.Brightness(pil_image)
+                pil_image = enhancer.enhance(_brightness)
+            if _contrast != 1.0:
+                enhancer = ImageEnhance.Contrast(pil_image)
+                pil_image = enhancer.enhance(_contrast)
+        if im_settings["blur_t"]:
+            _blur = im_settings["blur"] / 10
+            _median = int(im_settings["median"] * 2 - 1)
+            if _blur > 0:
+                pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
+            if _median > 1:
+                pil_image = pil_image.filter(ImageFilter.MedianFilter(_median))
+        if im_settings["unsharp_t"]:
+            radius = im_settings["u_radius"] / 10
+            strenght = int(im_settings["u_strenght"] * 2)
+            thresh = im_settings["u_thresh"]
+
+            pil_image = pil_image.filter(
+                ImageFilter.UnsharpMask(radius, strenght, thresh)
+            )
+
+        if not converted and pil_needed:
+            # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
+            image = (np.array(pil_image) / 255).astype(np.float32)
+        return image
+
+    @staticmethod
+    def _apply_algorithm(image, algorithm, settings):
+        """Apply the selected halftoning algorithm to the image via worker_h."""
+
+        if algorithm == "Fixed threshold":
+            processed_image = threshold(image, settings)
+
+        elif algorithm == "Niblack threshold":
+            processed_image = niblack_threshold(image, settings)
+
+        elif algorithm == "Sauvola threshold":
+            processed_image = sauvola_threshold(image, settings)
+
+        elif algorithm == "Phansalkar threshold":
+            processed_image = phansalkar_threshold(image, settings)
+
+        elif algorithm == "Mezzotint uniform":
+            processed_image = mezzo(image, settings, mode="uniform")
+
+        elif algorithm == "Mezzotint normal":
+            processed_image = mezzo(image, settings, mode="gauss")
+
+        elif algorithm == "Mezzotint beta":
+            processed_image = mezzo(image, settings, mode="beta")
+
+        elif algorithm == "Bayer":
+            processed_image = bayer(image, settings)
+
+        elif algorithm in [
+            "Floyd-Steinberg",
+            "False Floyd-Steinberg",
+            "Jarvis",
+            "Stucki",
+            "Stucki small",
+            "Stucki large",
+            "Atkinson",
+            "Burkes",
+            "Sierra",
+            "Sierra2",
+            "Sierra2 4A",
+            "Nakano",
+        ]:
+            kernel = get_kernel(algorithm)
+
+            processed_image = error_diffusion(image, kernel, settings)
+
+        elif algorithm == "None":
+            # No processing, return the original image
+            processed_image = image
+
+        else:
+            # Default case: No processing applied if algorithm is unknown
+            print(
+                f"Algorithm {algorithm} not recognized, no processing applied."
+            )
+            processed_image = image
+
+        return processed_image
+
+    def _send_result(self, image):
         self.storage.reset_view = self.reset
         self.storage.algorithm = self.algorithm
         self.storage.processed_image = image
@@ -566,7 +354,3 @@ class ImageProcessor(QObject):
 
     def _delayed_method_call(self, method, args, kwargs):
         method(self, *args, **kwargs)
-
-    def handle_error(self, error_message):
-        """Handle any errors during processing."""
-        print(f"Error during processing: {error_message}")

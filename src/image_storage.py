@@ -544,7 +544,6 @@ class ImageStorage(QObject):
                 return self._handle_no_algorithm(reset, clipboard)
 
             result = self._process_image(compositing, styled)
-
             if clipboard:
                 return result
 
@@ -552,6 +551,8 @@ class ImageStorage(QObject):
             self.res_queue.put(
                 {"type": "display_image", "array": "rgb", "reset": reset}
             )
+
+            processor.processing = False
 
     def _handle_no_algorithm(self, reset, clipboard):
         # Handles the case when "None" is the algo
@@ -677,9 +678,6 @@ class ImageStorage(QObject):
     def show_notification(self, notification, duration=3000):
         """
         Show a notification in the main window's sidebar.
-
-        :param message: The message to display.
-        :param duration: Duration in milliseconds for how long the notification lasts.
         """
         message = {
             "type": "notification",
@@ -687,4 +685,3 @@ class ImageStorage(QObject):
             "duration": duration,
         }
         self.res_queue.put(message)
-        # self.main_window.sidebar.notifications.show_notification(message, duration)

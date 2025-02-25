@@ -18,14 +18,16 @@ from viewer import PhotoViewer
 
 
 class MainWindow(FramelessMainWindow):
+    """
+    Inherits from FramelessMainWindow and is used for the custom toolbar capabilities.
+    """
+
     def __init__(self):
         super().__init__()
         self._initialize_components()
         self._setup_ui()
 
     def _initialize_components(self):
-        """Initialize the storage and processor module."""
-
         # the request queue
         self.req_queue = Queue()
         # the response queue
