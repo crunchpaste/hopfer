@@ -247,6 +247,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.updateCoordinates(event.position().toPoint())
         super().mouseMoveEvent(event)
 
+    def mousePressEvent(self, event):
+        self.window.titleBar.focus.setFocus()
+        self.clearFocus()
+        super().mousePressEvent(event)
+
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls() or event.mimeData().hasText():
             event.acceptProposedAction()

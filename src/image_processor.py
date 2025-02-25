@@ -500,37 +500,55 @@ class ImageProcessor(QObject):
 
         if convert:
             step = 0
-            image = self.storage.original_image
 
         elif enhance:
             step = 1
-            image = self.storage.grayscale_image
-
-        else:
-            image = self.storage.enhanced_image
 
         start = time.perf_counter()
 
-        g, e, p = worker(
-            image,
-            self.grayscale_mode,
-            self.grayscale_settings,
-            self.image_settings,
-            self.algorithm,
-            self.settings,
-            step,
-        )
+        image = self.storage.original_image
+
+        if step == 0:
+            grayscale_image = worker_g(
+                image, self.grayscale_mode, self.grayscale_settings
+            )
+            self.storage.grayscale_image = grayscale_image
+
+        im_settings = self.image_settings
+        if step <= 1 and (
+            im_settings["normalize"]
+            or im_settings["equalize"]
+            or im_settings["normalize"]
+            or im_settings["bc_t"]
+            or im_settings["blur_t"]
+            or im_settings["unsharp_t"]
+        ):
+            image = self.storage.grayscale_image
+            enhanced_image = worker_e(image, im_settings)
+            self.storage.enhanced_image = enhanced_image
+        elif step <= 1:
+            self.storage.enhanced_image = self.storage.grayscale_image
+
+        image = self.storage.enhanced_image
+        if self.algorithm != "None":
+            processed_image = worker_h(image, self.algorithm, self.settings)
+        else:
+            processed_image = self.storage.enhanced_image
+
+        # g, e, p = worker(
+        #     image,
+        #     self.grayscale_mode,
+        #     self.grayscale_settings,
+        #     self.image_settings,
+        #     self.algorithm,
+        #     self.settings,
+        #     step,
+        # )
 
         end = time.perf_counter()
         print(f"PROCESSING: {end - start:.6f} seconds")
 
-        if g is not None:
-            self.storage.grayscale_image = g
-
-        if e is not None:
-            self.storage.enhanced_image = e
-
-        self.send_result(p)
+        self.send_result(processed_image)
 
     def send_result(self, image):
         self.storage.reset_view = self.reset
