@@ -9,7 +9,6 @@ from PySide6.QtGui import QFont, QFontDatabase, QIcon
 from PySide6.QtWidgets import QApplication
 from setproctitle import setproctitle
 
-from controls.focus_widget import FocusDebugger
 from helpers.load_stylesheet import load_qss
 from helpers.no_outline import NoFocusProxyStyle
 from main_window import MainWindow
@@ -116,9 +115,6 @@ def main():
     window = MainWindow()
     window.setWindowIcon(QIcon(get_path("res/hopfer.png")))
     window.show()
-
-    focus_debugger = FocusDebugger()
-    app.installEventFilter(focus_debugger)
 
     Shortcuts(app, window)
 
