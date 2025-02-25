@@ -1,8 +1,11 @@
+import json
+
 import numpy as np
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import (
     QApplication,
+    QCompleter,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -16,6 +19,7 @@ from PySide6.QtWidgets import (
 
 from color_picker import ColorPicker
 from controls.toggle import ToggleWithLabel
+from res_loader import get_path
 
 
 class ColorGroup(QGroupBox):
@@ -58,9 +62,20 @@ class ColorControl(QWidget):
         )
         self.hex = QLineEdit()
         self.hex.setAlignment(Qt.AlignCenter)
+
+        suggestions, self.color_dict = self.extract_colors()
+        if suggestions is not False:
+            # suggestions should be False if something went wrong
+            # with parsing the json file
+            completer = QCompleter(suggestions)
+            completer.setCaseSensitivity(Qt.CaseInsensitive)
+            completer.setCompletionMode(QCompleter.InlineCompletion)
+            self.hex.setCompleter(completer)
+
         # could be used to limit the colors to hexes
         # but i've found it useful to insert css colors too
         # self.hex.setMaxLength(7)
+        #
         self.swatch = QPushButton()
         self.swatch.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
@@ -81,6 +96,17 @@ class ColorControl(QWidget):
 
         self.hex.editingFinished.connect(self.on_text_edit_finished)
 
+    @staticmethod
+    def extract_colors():
+        """Imports a json file with css colors for suggestions"""
+        try:
+            with open(get_path("res/css_colors.json")) as f:
+                data = json.load(f)
+            keys = sorted(list(data.keys()))
+            return keys, data
+        except Exception:
+            return False
+
     def on_text_edit_finished(self):
         """Handle the validation when editing is finished."""
         text = self.hex.text().strip()
@@ -88,12 +114,17 @@ class ColorControl(QWidget):
 
     def validate_and_update_color(self, text):
         """Validate the hex color format and update the color button if valid."""
+        color_value = self.color_dict.get(text.lower())
+
+        if color_value:
+            text = color_value
+
         color, valid = self.is_valid_hex(text)
         if valid:
             self.previous_color = color  # Store the valid color
-            self.color = np.array([color.red(), color.green(), color.blue()]).astype(
-                np.uint8
-            )
+            self.color = np.array(
+                [color.red(), color.green(), color.blue()]
+            ).astype(np.uint8)
             self.update_button_color(color)
             self.color_changed.emit(self.color, self)
         else:
@@ -125,9 +156,9 @@ class ColorControl(QWidget):
             return
 
         if color.isValid():
-            self.color = np.array([color.red(), color.green(), color.blue()]).astype(
-                np.uint8
-            )
+            self.color = np.array(
+                [color.red(), color.green(), color.blue()]
+            ).astype(np.uint8)
             self.update_button_color(color)
             self.previous_color = color
             self.color_changed.emit(self.color, self)

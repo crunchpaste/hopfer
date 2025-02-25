@@ -14,57 +14,81 @@ class Shortcuts:
         self.quit_shortcut = QShortcut(QKeySequence("Ctrl+Q"), self.main_window)
         self.quit_shortcut.activated.connect(self.app.quit)
 
-        self.close_shortcut = QShortcut(QKeySequence("Ctrl+Shift+Q"), self.main_window)
+        self.close_shortcut = QShortcut(
+            QKeySequence("Ctrl+Shift+Q"), self.main_window
+        )
         self.close_shortcut.activated.connect(self.main_window.writer.reset)
 
         # File manipulation
-        self.open_file_shortcut = QShortcut(QKeySequence("Ctrl+O"), self.main_window)
+        self.open_file_shortcut = QShortcut(
+            QKeySequence("Ctrl+O"), self.main_window
+        )
         self.open_file_shortcut.activated.connect(
             self.main_window.sidebar.toolbox.open_file_dialog
         )
 
-        self.paste_shortcut = QShortcut(QKeySequence("Ctrl+Shift+V"), self.main_window)
+        self.paste_shortcut = QShortcut(
+            QKeySequence("Ctrl+Shift+V"), self.main_window
+        )
         self.paste_shortcut.activated.connect(self.main_window.handle_clipboard)
 
         self.save_shortcut = QShortcut(QKeySequence("Ctrl+S"), self.main_window)
         self.save_shortcut.activated.connect(self.main_window.writer.save_image)
 
-        self.saveas_shortcut = QShortcut(QKeySequence("Ctrl+Shift+S"), self.main_window)
+        self.saveas_shortcut = QShortcut(
+            QKeySequence("Ctrl+Shift+S"), self.main_window
+        )
         self.saveas_shortcut.activated.connect(
             self.main_window.sidebar.toolbox.save_file_dialog
         )
 
         self.copy_shortcut = QShortcut(QKeySequence("Ctrl+C"), self.main_window)
-        self.copy_shortcut.activated.connect(self.main_window.writer.save_to_clipboard)
+        self.copy_shortcut.activated.connect(
+            self.main_window.writer.save_to_clipboard
+        )
 
         # Navigation
-        self.image_shortcut = QShortcut(QKeySequence("Ctrl+I"), self.main_window)
+        self.image_shortcut = QShortcut(
+            QKeySequence("Ctrl+I"), self.main_window
+        )
         self.image_shortcut.activated.connect(
             lambda: self.main_window.sidebar.activateTab(0)
         )
 
-        self.halftone_shortcut = QShortcut(QKeySequence("Ctrl+H"), self.main_window)
+        self.halftone_shortcut = QShortcut(
+            QKeySequence("Ctrl+H"), self.main_window
+        )
         self.halftone_shortcut.activated.connect(
             lambda: self.main_window.sidebar.activateTab(1)
         )
 
         # Image manipulation
         # Inverts the colors of the image
-        self.invert_shortcut = QShortcut(QKeySequence("Ctrl+Shift+I"), self.main_window)
-        self.invert_shortcut.activated.connect(self.main_window.sidebar.toolbox._invert)
+        self.invert_shortcut = QShortcut(
+            QKeySequence("Ctrl+Shift+I"), self.main_window
+        )
+        self.invert_shortcut.activated.connect(
+            self.main_window.sidebar.toolbox._invert
+        )
         # Rotates the image CW
-        self.rotcw_shortcut = QShortcut(QKeySequence("Ctrl+R"), self.main_window)
+        self.rotcw_shortcut = QShortcut(
+            QKeySequence("Ctrl+R"), self.main_window
+        )
         self.rotcw_shortcut.activated.connect(
             lambda: self.main_window.sidebar.toolbox._rotate(True)
         )
         # Rotates the image CCW
-        self.rotccw_shortcut = QShortcut(QKeySequence("Ctrl+Shift+R"), self.main_window)
+        self.rotccw_shortcut = QShortcut(
+            QKeySequence("Ctrl+Shift+R"), self.main_window
+        )
         self.rotccw_shortcut.activated.connect(
             lambda: self.main_window.sidebar.toolbox._rotate(False)
         )
         # Flips the image LR
         self.flip_shortcut = QShortcut(QKeySequence("Ctrl+F"), self.main_window)
-        self.flip_shortcut.activated.connect(self.main_window.sidebar.toolbox._flip)
+        self.flip_shortcut.activated.connect(
+            self.main_window.sidebar.toolbox._flip
+        )
 
         # Image viewer shortcuts
         # Toggles the preview blurring
@@ -77,7 +101,9 @@ class Shortcuts:
         # Preview the image in its original size
         self.x1_shortcut = QShortcut(self.main_window)
         self.x1_shortcut.setKeys([QKeySequence("Ctrl+1"), QKeySequence("1")])
-        self.x1_shortcut.activated.connect(self.main_window.viewer.resetOriginal)
+        self.x1_shortcut.activated.connect(
+            self.main_window.viewer.resetOriginal
+        )
         # All the rest of the sizes
         self.x2_shortcut = QShortcut(self.main_window)
         self.x2_shortcut.setKeys([QKeySequence("Ctrl+2"), QKeySequence("2")])

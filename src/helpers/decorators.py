@@ -70,7 +70,9 @@ def queue(method):
         if self.processing:
             if self.queued_call:
                 _, prev_args, prev_kwargs = self.queued_call
-                prev_step = prev_kwargs.get("step", prev_args[0] if prev_args else 0)
+                prev_step = prev_kwargs.get(
+                    "step", prev_args[0] if prev_args else 0
+                )
                 step = min(step, prev_step)
             self.queued_call = (method, (step,), {})
             return

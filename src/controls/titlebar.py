@@ -68,7 +68,9 @@ class HopferTitleBar(TitleBar):
             self.hBoxLayout.addWidget(button, 0, Qt.AlignRight)
 
             self.hBoxLayout.addSpacerItem(
-                QSpacerItem(10, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum)
+                QSpacerItem(
+                    10, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Minimum
+                )
             )
 
         # Connect buttons to window actions
@@ -179,7 +181,9 @@ class HSvgTitleBarButton(SvgTitleBarButton):
 
     def paintEvent(self, e):
         painter = QPainter(self)
-        painter.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
+        painter.setRenderHints(
+            QPainter.Antialiasing | QPainter.SmoothPixmapTransform
+        )
         color, bgColor = self._getColors()
 
         painter.setBrush(bgColor)
@@ -190,7 +194,9 @@ class HSvgTitleBarButton(SvgTitleBarButton):
         center = self.rect().center()
         radius = size // 2
 
-        painter.drawEllipse(center.x() - radius, center.y() - radius, size, size)
+        painter.drawEllipse(
+            center.x() - radius, center.y() - radius, size, size
+        )
 
         # draw icon
         color = color.name()

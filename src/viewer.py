@@ -44,9 +44,15 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.setTransformationAnchor(
             QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
         )
-        self.setResizeAnchor(QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse)
-        self.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
-        self.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.setResizeAnchor(
+            QtWidgets.QGraphicsView.ViewportAnchor.AnchorUnderMouse
+        )
+        self.setVerticalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
+        self.setHorizontalScrollBarPolicy(
+            QtCore.Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35, 0)))
         self.setFrameShape(QtWidgets.QFrame.Shape.NoFrame)
 
@@ -240,6 +246,11 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         """Track mouse movement for coordinate updates."""
         self.updateCoordinates(event.position().toPoint())
         super().mouseMoveEvent(event)
+
+    def mousePressEvent(self, event):
+        self.window.titleBar.focus.setFocus()
+        self.clearFocus()
+        super().mousePressEvent(event)
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls() or event.mimeData().hasText():

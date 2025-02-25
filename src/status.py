@@ -35,7 +35,9 @@ class NotificationPane(QFrame):
         """
         )
         self.close_button.clicked.connect(self.fade_out)
-        self.layout.addWidget(self.close_button, alignment=Qt.AlignmentFlag.AlignTop)
+        self.layout.addWidget(
+            self.close_button, alignment=Qt.AlignmentFlag.AlignTop
+        )
 
         # Initially hidden
         self.setVisible(False)

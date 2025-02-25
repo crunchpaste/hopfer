@@ -133,7 +133,9 @@ class PreferencesDialog(FramelessDialog):
         layout = QVBoxLayout()
 
         layout.addSpacerItem(
-            QSpacerItem(0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed)
+            QSpacerItem(
+                0, 45, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Fixed
+            )
         )
 
         self.logotype = QSvgWidget(get_path("res/type.svg"))

@@ -1,5 +1,11 @@
 from PySide6.QtGui import QPainter
-from PySide6.QtWidgets import QApplication, QProxyStyle, QStyle, QStyleOption, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QProxyStyle,
+    QStyle,
+    QStyleOption,
+    QWidget,
+)
 
 
 class NoFocusProxyStyle(QProxyStyle):

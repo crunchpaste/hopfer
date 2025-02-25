@@ -61,9 +61,9 @@ def ed(img, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            error * kernel[ky, kx]
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += error * kernel[ky, kx]
                         # actually diffuse the error maybe the index could be precomputed
 
     return img  # return the image in a dithered form
@@ -104,9 +104,9 @@ def eds(img, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            error * kernel[ky, kx]
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += error * kernel[ky, kx]
                         # actually diffuse the error maybe the index could be precomputed
     if h.size % 2 != 0:
         img = np.fliplr(img)
