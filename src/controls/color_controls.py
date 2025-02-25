@@ -1,8 +1,11 @@
+import json
+
 import numpy as np
 from PySide6.QtCore import Signal
 from PySide6.QtGui import QColor, Qt
 from PySide6.QtWidgets import (
     QApplication,
+    QCompleter,
     QGroupBox,
     QHBoxLayout,
     QLabel,
@@ -16,6 +19,7 @@ from PySide6.QtWidgets import (
 
 from color_picker import ColorPicker
 from controls.toggle import ToggleWithLabel
+from res_loader import get_path
 
 
 class ColorGroup(QGroupBox):
@@ -58,9 +62,20 @@ class ColorControl(QWidget):
         )
         self.hex = QLineEdit()
         self.hex.setAlignment(Qt.AlignCenter)
+
+        suggestions = self.extract_colors()
+        if suggestions is not False:
+            # suggestions should be False if something went wrong
+            # with parsing the json file
+            completer = QCompleter(suggestions)
+            completer.setCaseSensitivity(Qt.CaseInsensitive)
+            completer.setCompletionMode(QCompleter.InlineCompletion)
+            self.hex.setCompleter(completer)
+
         # could be used to limit the colors to hexes
         # but i've found it useful to insert css colors too
         # self.hex.setMaxLength(7)
+        #
         self.swatch = QPushButton()
         self.swatch.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
@@ -80,6 +95,17 @@ class ColorControl(QWidget):
         self.swatch.clicked.connect(self.open_color_chooser)
 
         self.hex.editingFinished.connect(self.on_text_edit_finished)
+
+    @staticmethod
+    def extract_colors():
+        """Imports a json file with css colors for suggestions"""
+        try:
+            with open(get_path("res/css_colors.json")) as f:
+                data = json.load(f)
+            keys = sorted(list(data.keys()))
+            return keys
+        except Exception:
+            return False
 
     def on_text_edit_finished(self):
         """Handle the validation when editing is finished."""
