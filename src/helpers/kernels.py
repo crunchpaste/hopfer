@@ -3,14 +3,20 @@ import numpy as np
 
 def get_kernel(algorithm):
     if algorithm == "Floyd-Steinberg":
+        # fmt: off
         kernel = (
-            np.array([[0, 0, 0], [0, 0, 7], [3, 5, 1]], dtype=np.float64) / 16.0
-        )
+            np.array([[0, 0, 0],
+                      [0, 0, 7],
+                      [3, 5, 1]], dtype=np.float64) / 16.0)
+        # fmt: on
     elif algorithm == "False Floyd-Steinberg":
+        # fmt: off
         kernel = (
-            np.array([[0, 0, 0], [0, 0, 3], [0, 3, 2]], dtype=np.float64) / 8.0
+            np.array([[0, 0, 0],
+                      [0, 0, 3],
+                      [0, 3, 2]], dtype=np.float64) / 8.0
         )
-
+        # fmt: on
     elif algorithm == "Jarvis":
         kernel = (
             np.array(
@@ -134,10 +140,12 @@ def get_kernel(algorithm):
         )
 
     elif algorithm == "Sierra2 4A":
+        # fmt: off
         kernel = (
-            np.array([[0, 0, 0], [0, 0, 2], [1, 1, 0]], dtype=np.float64) / 4.0
-        )
-
+            np.array([[0, 0, 0],
+                      [0, 0, 2],
+                      [1, 1, 0]], dtype=np.float64) / 4.0)
+        # fmt: on
     elif algorithm == "Nakano":
         kernel = np.array(
             [
@@ -153,5 +161,13 @@ def get_kernel(algorithm):
         )
         # Normalize the kernel as im too lazy to count the values
         kernel /= float(np.sum(kernel))
+    else:
+        # in case something goes wrong return the Sierra2 4A
+        # fmt: off
+        kernel = (
+            np.array([[0, 0, 0],
+                      [0, 0, 2],
+                      [1, 1, 0]], dtype=np.float64) / 4.0)
+        # fmt: on
 
     return kernel

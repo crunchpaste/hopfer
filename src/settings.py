@@ -282,6 +282,31 @@ class BayerSettings(HalftoneSettings):
         self.settingsChanged.emit(settings)
 
 
+class ClusteredSettings(HalftoneSettings):
+    def __init__(self):
+        super().__init__()
+
+        # The size of the Bayer matrix. Converted to the proper power of 2 in bayer.py and bayerc.py
+        self.size = SliderControl("Dot size", (1, 100), 5, False)
+        self.size.value_changed.connect(self.emit_settings_changed)
+
+        self.angle = SliderControl("Dot angle", (0, 359), 90, False)
+        self.angle.value_changed.connect(self.emit_settings_changed)
+
+        self.layout.addWidget(self.size)
+        # self.layout.addWidget(self.angle)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when any control changes."""
+
+        settings = {
+            "size": self.size.slider.value(),
+            "angle": self.angle.slider.value(),
+        }
+        self.settingsChanged.emit(settings)
+
+
 class ErrorDiffusionSettings(HalftoneSettings):
     def __init__(self):
         super().__init__()

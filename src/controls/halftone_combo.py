@@ -87,6 +87,7 @@ class HalftoneCombo(QWidget):
             "Mezzotint normal",
             "Mezzotint beta",
             # Ordered dithers
+            "Clustered dot",
             "Bayer",
             # Error diffusions
             "Floyd-Steinberg",
@@ -121,9 +122,9 @@ class HalftoneCombo(QWidget):
         combobox.setItemData(10, 0, Qt.UserRole - 1)  # non-selectable
 
         # separator after the ordered dithers
-        combobox.insertItem(12, "")
-        combobox.setItemData(12, "separator", Qt.UserRole)
-        combobox.setItemData(12, 0, Qt.UserRole - 1)  # non-selectable
+        combobox.insertItem(13, "")
+        combobox.setItemData(13, "separator", Qt.UserRole)
+        combobox.setItemData(13, 0, Qt.UserRole - 1)  # non-selectable
 
         return combobox
 

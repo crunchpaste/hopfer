@@ -310,8 +310,8 @@ def compare(img, noise, h, w):
     return img
 
 
-@cc.export("bayer_dither", "f4[:,:](f4[:,:], f8[:,:])")
-def bayer_dither(img, matrix):
+@cc.export("ordered_dither", "f4[:,:](f4[:,:], f8[:,:])")
+def ordered_dither(img, matrix):
     n = matrix.shape[0]
     for y in range(img.shape[0]):
         for x in range(img.shape[1]):
