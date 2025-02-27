@@ -1,6 +1,35 @@
 import numpy as np
 
-from .static import bayer_dither
+from .static import ordered_dither
+
+
+def generate_halftone_matrix(size):
+    matrix = np.zeros((size, size), dtype=int)
+    center = (size - 1) / 2
+
+    # the distance map
+    distances = np.zeros((size, size))
+
+    for i in range(size):
+        for j in range(size):
+            distances[i, j] = (i - center) ** 2 + (j - center) ** 2
+
+    # sort the indices by distance from the center
+    sorted_indices = np.argsort(distances, axis=None)
+
+    # Assign values 0 to (size² - 1) based on distance ordering
+    matrix.flat[sorted_indices] = np.arange(size**2)
+
+    matrix = (matrix / np.max(matrix)) * 0.5
+
+    # Generate negative version and stack into a 2x2 grid
+    negative = np.fliplr(1 - matrix)
+
+    # fmt: off
+    stacked_matrix = np.block([[negative, matrix],
+                               [matrix, negative]]).astype(np.float64)
+    # fmt: on
+    return stacked_matrix / np.max(stacked_matrix)
 
 
 def generate_bayer_matrix(power, offset=0):
@@ -25,5 +54,15 @@ def bayer(img, settings):
     size = settings["size"]
     offset = settings["offset"] / 100
     matrix = generate_bayer_matrix(size, offset)
-    img = bayer_dither(img, matrix)
+    img = ordered_dither(img, matrix)
+    return img
+
+
+def clustered(img, settings):
+    size = settings["size"] + 1
+    # it proved massively hard to rotate a matrix by an arbitrary angle
+    # and keep it tileable.
+    # angle = settings["angle"]
+    matrix = generate_halftone_matrix(size)
+    img = ordered_dither(img, matrix)
     return img

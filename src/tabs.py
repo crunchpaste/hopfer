@@ -10,6 +10,7 @@ from helpers.decorators import debounce
 from settings import (
     BayerSettings,
     BetaSettings,
+    ClusteredSettings,
     ErrorDiffusionSettings,
     GaussSettings,
     MezzoSettings,
@@ -74,6 +75,8 @@ class HalftoneTab(QWidget):
             return GaussSettings()
         elif algorithm_name == "Mezzotint beta":
             return BetaSettings()
+        elif algorithm_name == "Clustered dot":
+            return ClusteredSettings()
         elif algorithm_name == "Bayer":
             return BayerSettings()
         elif algorithm_name in [
@@ -88,9 +91,12 @@ class HalftoneTab(QWidget):
             "Sierra",
             "Sierra2",
             "Sierra2 4A",
-            "Nakano",
         ]:
             return ErrorDiffusionSettings()
+
+        elif algorithm_name in ["Nakano", "Ostromoukhov", "Zhou-Fang"]:
+            return ErrorDiffusionSettings(serpentine=True)
+
         return NoneSettings()
 
     def on_algorithm_changed(self, algorithm_name):

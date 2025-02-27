@@ -4,7 +4,7 @@ import numpy as np
 from PIL import Image, ImageEnhance, ImageFilter
 from PySide6.QtCore import QObject
 
-from helpers.decorators import debounce, queue
+from helpers.decorators import queue
 from helpers.kernels import get_kernel
 
 try:
@@ -28,14 +28,19 @@ except ImportError:
     from algorithms.mezzo import mezzo
 
 try:
-    from algorithms.bayerc import bayer
+    from algorithms.bayerc import bayer, clustered
 except ImportError:
-    from algorithms.bayer import bayer
+    from algorithms.bayer import bayer, clustered
 
 try:
     from algorithms.error_diffusionc import error_diffusion
 except ImportError:
     from algorithms.error_diffusion import error_diffusion
+
+try:
+    from algorithms.variable_edc import variable_ed
+except ImportError:
+    from algorithms.variable_edc import variable_ed
 
 try:
     from algorithms.static import (
@@ -129,7 +134,8 @@ class ImageProcessor(QObject):
 
             processed_image = self._process_algorithm()
 
-        except Exception:
+        except Exception as e:
+            print(e)
             self._handle_processing_error()
             processed_image = self.storage.processed_image
 
@@ -140,41 +146,50 @@ class ImageProcessor(QObject):
     # --- Helper Methods ---
 
     def _determine_processing_step(self, step):
-        """ Determines whether conversion or enhancement should be performed. """
+        """Determines whether conversion or enhancement should be performed."""
         convert = not self.storage.original_grayscale and step == 0
         enhance = step <= 1
         return 0 if convert else (1 if enhance else step)
 
     def _process_grayscale(self, step):
-        """ Converts the image to grayscale if necessary. """
+        """Converts the image to grayscale if necessary."""
         if step == 0:
             self.storage.grayscale_image = self._convert_to_grayscale(
-                self.storage.original_image, self.grayscale_mode, self.grayscale_settings
+                self.storage.original_image,
+                self.grayscale_mode,
+                self.grayscale_settings,
             )
 
     def _process_enhancement(self, step):
-        """ Enhances the image based on the provided settings. """
+        """Enhances the image based on the provided settings."""
         im_settings = self.image_settings
         if step <= 1 and any(
-            im_settings[key] for key in ["normalize", "equalize", "bc_t", "blur_t", "unsharp_t"]
+            im_settings[key]
+            for key in ["normalize", "equalize", "bc_t", "blur_t", "unsharp_t"]
         ):
-            self.storage.enhanced_image = self._enhance_image(self.storage.grayscale_image, im_settings)
+            self.storage.enhanced_image = self._enhance_image(
+                self.storage.grayscale_image, im_settings
+            )
         elif step <= 1:
             self.storage.enhanced_image = self.storage.grayscale_image
 
     def _process_algorithm(self):
-        """ Applies the processing algorithm if selected. """
+        """Applies the processing algorithm if selected."""
         if self.algorithm != "None":
-            return self._apply_algorithm(self.storage.enhanced_image, self.algorithm, self.settings)
+            return self._apply_algorithm(
+                self.storage.enhanced_image, self.algorithm, self.settings
+            )
         return self.storage.enhanced_image
 
     def _handle_processing_error(self):
-        """ Handles exceptions during processing. """
-        self.res_queue.put({
-            "type": "notification",
-            "notification": "Something went wrong while processing. Returning last good processed image.",
-            "duration": 7000,
-        })
+        """Handles exceptions during processing."""
+        self.res_queue.put(
+            {
+                "type": "notification",
+                "notification": "Something went wrong while processing. Returning last good processed image.",
+                "duration": 7000,
+            }
+        )
 
     @staticmethod
     def _convert_to_grayscale(image, mode, settings):
@@ -304,6 +319,9 @@ class ImageProcessor(QObject):
         elif algorithm == "Mezzotint beta":
             processed_image = mezzo(image, settings, mode="beta")
 
+        elif algorithm == "Clustered dot":
+            processed_image = clustered(image, settings)
+
         elif algorithm == "Bayer":
             processed_image = bayer(image, settings)
 
@@ -324,6 +342,9 @@ class ImageProcessor(QObject):
             kernel = get_kernel(algorithm)
 
             processed_image = error_diffusion(image, kernel, settings)
+
+        elif algorithm == "Ostromoukhov" or algorithm == "Zhou-Fang":
+            processed_image = variable_ed(image, algorithm, settings)
 
         elif algorithm == "None":
             # No processing, return the original image
