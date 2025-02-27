@@ -35,12 +35,15 @@ At present, **hopfer** does not support palette-based halftoning or multi-level 
   - Fixed threshold
   - Local thresholds
   - Random dithering
-  - Ordered dithering
+  - Bayer dithering
+  - Clustered dot halftoning
   - Error diffusion dithering
-- **Basic image editing tools**, such as:
+  - Variable error diffusion dithering
+- **Basic non-destructive image editing tools**, such as:
   - Rotation
-  - Brightness & contrast adjustments
+  - Brightness & contrast
   - Gaussian blurring
+  - Denoising
   - Sharpening
 - **Support for a wide range of image formats**, including:
   - PNG, JPEG, BMP, GIF, TIFF, WebP and more (anything supported by [Pillow](https://pillow.readthedocs.io/en/stable/))
@@ -63,7 +66,7 @@ git clone https://github.com/crunchpaste/hopfer
 cd hopfer
 ```
 
-### 3. Install the dependencies
+### 3. Install the dependencies (preferably in a venv)
 
 ```bash
 pip install -r requirements.txt
@@ -85,7 +88,7 @@ Despite depending on *numba* you can still compile **hopfer** to a single static
 python src/algorithm_compiler.py
 ```
 
-#### Install *nuitka*
+#### Install *nuitka* (preferably in a venv)
 
 ```bash
 pip install nuitka
