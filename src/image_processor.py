@@ -37,7 +37,10 @@ try:
 except ImportError:
     from algorithms.error_diffusion import error_diffusion
 
-from algorithms.variable_ed import variable_ed
+try:
+    from algorithms.variable_edc import variable_ed
+except ImportError:
+    from algorithms.variable_edc import variable_ed
 
 try:
     from algorithms.static import (

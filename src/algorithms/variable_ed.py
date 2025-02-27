@@ -23,7 +23,8 @@ def variable_ed(img, algorithm, settings):
         else:
             output_img = zhou_fang(img, ZF_COEFFN, ZF_PERT, str)
     else:
-        pass
+        # Default to Zhou-Fang serpentine
+        output_img = zhou_fang_s(img, ZF_COEFFN, ZF_PERT, str)
 
     if noise:
         output_img = output_img[20:, :]
@@ -90,7 +91,7 @@ def zhou_fang(img, coeff_array, pert_array, str):
             old_value = img[y, x]
             coeff_idx = min(int(old_value * 255), 255)
             pert = np.random.uniform(0, 0.5)
-            pert_mod = pert * pert_array[coeff_idx][0]
+            pert_mod = pert * pert_array[coeff_idx]
             coeff_values = coeff_array[coeff_idx]
             new_value = np.round(old_value + pert_mod)
             img[y, x] = new_value
@@ -113,7 +114,7 @@ def zhou_fang_s(img, coeff_array, pert_array, str):
             old_value = img[y, x]
             coeff_idx = min(int(old_value * 255), 255)
             pert = np.random.uniform(0, 0.5)
-            pert_mod = pert * pert_array[coeff_idx][0]
+            pert_mod = pert * pert_array[coeff_idx]
             coeff_values = coeff_array[coeff_idx]
             new_value = np.round(old_value + pert_mod)
             img[y, x] = new_value

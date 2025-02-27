@@ -415,6 +415,106 @@ def eds(img, kernel, str_value):
     return img  # return the image in a dithered form
 
 
+@cc.export("ostromoukhov", "f4[:,:](f4[:,:], f8[:,:], f8)")
+def ostromoukhov(img, coeff_array, str):
+    h, w = img.shape
+
+    for y in range(h):
+        for x in range(w):
+            old_value = img[y, x]
+            coeff_idx = min(int(old_value * 255), 255)
+            coeff_values = coeff_array[coeff_idx]
+            new_value = np.round(old_value)
+            img[y, x] = new_value
+            error = (old_value - new_value) * str
+
+            if x + 1 < w:
+                img[y, x + 1] += error * coeff_values[0]
+            if (x - 1 >= 0) and (y + 1 < h):
+                img[y + 1, x - 1] += error * coeff_values[1]
+            if y + 1 < h:
+                img[y + 1, x] += error * coeff_values[2]
+
+    return img
+
+
+@cc.export("ostromoukhov_s", "f4[:,:](f4[:,:], f8[:,:], f8)")
+def ostromoukhov_s(img, coeff_array, str):
+    h, w = img.shape
+
+    for y in range(h):
+        for x in range(w):
+            old_value = img[y, x]
+            coeff_idx = min(int(old_value * 255), 255)
+            coeff_values = coeff_array[coeff_idx]
+            new_value = np.round(old_value)
+            img[y, x] = new_value
+            error = (old_value - new_value) * str
+
+            if x + 1 < w:
+                img[y, x + 1] += error * coeff_values[0]
+            if (x - 1 >= 0) and (y + 1 < h):
+                img[y + 1, x - 1] += error * coeff_values[1]
+            if y + 1 < h:
+                img[y + 1, x] += error * coeff_values[2]
+
+        img = np.fliplr(img)
+
+    if h % 2 != 0:
+        img = np.fliplr(img)
+    return img
+
+
+@cc.export("zhou_fang", "f4[:,:](f4[:,:], f8[:,:], f8[:], f8)")
+def zhou_fang(img, coeff_array, pert_array, str):
+    h, w = img.shape
+
+    for y in range(h):
+        for x in range(w):
+            old_value = img[y, x]
+            coeff_idx = min(int(old_value * 255), 255)
+            pert = np.float64(np.random.uniform(0, 0.5))
+            pert_mod = pert * pert_array[coeff_idx]
+            coeff_values = coeff_array[coeff_idx]
+            new_value = np.round(old_value + pert_mod)
+            img[y, x] = new_value
+            error = (old_value - new_value) * str
+            if x + 1 < w:
+                img[y, x + 1] += error * coeff_values[0]
+            if (x - 1 >= 0) and (y + 1 < h):
+                img[y + 1, x - 1] += error * coeff_values[1]
+            if y + 1 < h:
+                img[y + 1, x] += error * coeff_values[2]
+    return img
+
+
+@cc.export("zhou_fang_s", "f4[:,:](f4[:,:], f8[:,:], f8[:], f8)")
+def zhou_fang_s(img, coeff_array, pert_array, str):
+    h, w = img.shape
+
+    for y in range(h):
+        for x in range(w):
+            old_value = img[y, x]
+            coeff_idx = min(int(old_value * 255), 255)
+            pert = np.float64(np.random.uniform(0, 0.5))
+            pert_mod = pert * pert_array[coeff_idx]
+            coeff_values = coeff_array[coeff_idx]
+            new_value = np.round(old_value + pert_mod)
+            img[y, x] = new_value
+            error = (old_value - new_value) * str
+            if x + 1 < w:
+                img[y, x + 1] += error * coeff_values[0]
+            if (x - 1 >= 0) and (y + 1 < h):
+                img[y + 1, x - 1] += error * coeff_values[1]
+            if y + 1 < h:
+                img[y + 1, x] += error * coeff_values[2]
+        img = np.fliplr(img)
+
+    if h % 2 != 0:
+        img = np.fliplr(img)
+    return img
+
+
 # GRAYSCALE CONVERSION functions follow.
 @cc.export("luminance", "f4[:,:](f4[:,:,:])")
 def luminance(img):

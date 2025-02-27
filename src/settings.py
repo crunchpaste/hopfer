@@ -308,7 +308,7 @@ class ClusteredSettings(HalftoneSettings):
 
 
 class ErrorDiffusionSettings(HalftoneSettings):
-    def __init__(self):
+    def __init__(self, serpentine=False):
         super().__init__()
 
         # Diffusion factor slider
@@ -320,6 +320,8 @@ class ErrorDiffusionSettings(HalftoneSettings):
         self.diffusion_factor.slider_layout.setContentsMargins(10, 10, 10, 10)
         # Serpentine toggle
         self.serpentine_toggle = ToggleWithLabel(label="Serpentine")
+        if serpentine:
+            self.serpentine_toggle.set_toggle_checked(True)
         self.serpentine_toggle.toggle_changed.connect(
             self.emit_settings_changed
         )
