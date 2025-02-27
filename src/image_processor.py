@@ -37,6 +37,8 @@ try:
 except ImportError:
     from algorithms.error_diffusion import error_diffusion
 
+from algorithms.variable_ed import variable_ed
+
 try:
     from algorithms.static import (
         average,
@@ -337,6 +339,9 @@ class ImageProcessor(QObject):
             kernel = get_kernel(algorithm)
 
             processed_image = error_diffusion(image, kernel, settings)
+
+        elif algorithm == "Ostromoukhov" or algorithm == "Zhou-Fang":
+            processed_image = variable_ed(image, algorithm, settings)
 
         elif algorithm == "None":
             # No processing, return the original image

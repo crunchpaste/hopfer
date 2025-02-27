@@ -92,6 +92,8 @@ class HalftoneTab(QWidget):
             "Sierra2",
             "Sierra2 4A",
             "Nakano",
+            "Ostromoukhov",
+            "Zhou-Fang",
         ]:
             return ErrorDiffusionSettings()
         return NoneSettings()
