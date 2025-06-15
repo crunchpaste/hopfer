@@ -7,6 +7,7 @@ class QueueReader(QObject):
     show_processing_label = Signal(bool)
     close_shm = Signal()
     received_processed = Signal(str, bool)
+    received_processed_nt = Signal(bytes, bool)
     received_notification = Signal(str, int)
     grayscale_signal = Signal(bool)
 
@@ -33,6 +34,11 @@ class QueueReader(QObject):
                 array = message["array"]
                 reset = message["reset"]
                 self.received_processed.emit(array, reset)
+
+            elif message["type"] == "display_image_nt":
+                array = message["array"]
+                reset = message["reset"]
+                self.received_processed_nt.emit(array, reset)
 
             elif message["type"] == "data_for_clipboard":
                 data = message["data"]

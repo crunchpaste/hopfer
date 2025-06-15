@@ -1,3 +1,5 @@
+import os
+
 from setproctitle import setproctitle
 
 from image_processor import ImageProcessor
@@ -15,11 +17,20 @@ class Daemon:
         # shared memory manager
         self.smm = None
 
-        self.storage = ImageStorage(self)
-        self.processor = ImageProcessor(self, self.storage)
+        # in case of linux, possibly mac too initialize here.
+        if os.name != "nt":
+            self.storage = ImageStorage(self)
+            self.processor = ImageProcessor(self, self.storage)
 
     def run(self):
-        setproctitle("hopferd")
+        # initializing processor and storage as windows uses spawn
+        # instead of fork, and these classes cant be serialized
+        if os.name == "nt":
+            self.storage = ImageStorage(self)
+            self.processor = ImageProcessor(self, self.storage)
+        else:
+            # setproctitle seems to not work on windows too
+            setproctitle("hopferd")
         while True:
             message = self.req_queue.get()
             # STORAGE RELATED

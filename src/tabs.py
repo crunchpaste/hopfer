@@ -90,11 +90,15 @@ class HalftoneTab(QWidget):
             "Burkes",
             "Sierra",
             "Sierra2",
-            "Sierra2 4A",
         ]:
             return ErrorDiffusionSettings()
 
-        elif algorithm_name in ["Nakano", "Ostromoukhov", "Zhou-Fang"]:
+        elif algorithm_name in [
+            "Sierra2 4A",
+            "Nakano",
+            "Ostromoukhov",
+            "Zhou-Fang",
+        ]:
             return ErrorDiffusionSettings(serpentine=True)
 
         return NoneSettings()

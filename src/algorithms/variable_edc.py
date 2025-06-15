@@ -1,4 +1,5 @@
 import numpy as np
+
 from .static import ostromoukhov, ostromoukhov_s, zhou_fang, zhou_fang_s
 from .ved_data import OSTROMOUKHOV_COEFFN, ZF_COEFFN, ZF_PERT
 

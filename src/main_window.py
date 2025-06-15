@@ -16,6 +16,9 @@ from queue_io import QueueReader, QueueWriter
 from sidebar import SideBar
 from viewer import PhotoViewer
 
+# this is here for debugging windows multiprocessing issues from linux
+# multiprocessing.set_start_method("spawn", force=True)
+
 
 class MainWindow(FramelessMainWindow):
     """
@@ -56,6 +59,10 @@ class MainWindow(FramelessMainWindow):
         self.reader.received_array.connect(self.init_array)
         self.reader.close_shm.connect(self.close_shm)
         self.reader.received_processed.connect(self.display_processed_image)
+        # windows specific signal as it can't properly deal with shared memory
+        self.reader.received_processed_nt.connect(
+            self.display_processed_image_nt
+        )
         self.reader.received_notification.connect(self.display_notification)
         self.reader.show_processing_label.connect(self.display_processing_label)
 
@@ -158,6 +165,19 @@ class MainWindow(FramelessMainWindow):
 
         self.display_processing_label(False)
 
+    def display_processed_image_nt(self, array, reset=True):
+        """Display the processed image in the photo viewer on windows."""
+        _img = pickle.loads(array)
+
+        pixmap = numpy_to_pixmap(_img)
+
+        self.viewer.setPhoto(pixmap)
+        if reset:
+            self.viewer.resetView()
+            self.viewer._zoom = 0
+
+        self.display_processing_label(False)
+
     def display_processing_label(self, state=True):
         self.viewer.labelVisible(state)
 
@@ -167,8 +187,6 @@ class MainWindow(FramelessMainWindow):
     def handle_clipboard(self):
         self.app = QApplication.instance()
         clipboard = self.app.clipboard()
-
-        # clipboard = QClipboard()
 
         _image = clipboard.image()
         _url = clipboard.text()
@@ -181,7 +199,7 @@ class MainWindow(FramelessMainWindow):
             # than the one proposed at:
             # https://stackoverflow.com/questions/47289884/
             # how-to-convert-qimageqpixmap-to-pil-image-in-python-3
-            #
+
             self.display_processing_label(True)
             _image_np = qimage_to_numpy(_image)
 

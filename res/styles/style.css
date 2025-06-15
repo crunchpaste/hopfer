@@ -3,7 +3,9 @@
     font-weight: bold;
     font-size: 14px;
 }
-
+QListView {
+    background: transparent;
+}
 QWidget {
     background-color: @secondary;
     color: @primary;

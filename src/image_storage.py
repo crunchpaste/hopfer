@@ -49,7 +49,6 @@ class ImageStorage(QObject):
         self.smm = SharedMemoryManager()
         self.smm.start()
         self.shm = None
-
         self.shm_preview = None
 
         # Defaulting the paths to the user Pictures directory and
@@ -124,10 +123,14 @@ class ImageStorage(QObject):
         self.original_image, self.alpha = self.extract_alpha(image)
         h, w = self.original_image.shape[0], self.original_image.shape[1]
 
-        try:
-            self.create_shm(h, w)
-        except Exception as e:
-            print(f"CREATING SHM: {e}")
+        # shared memory seems to be a mess on windows, therefore just avoiding
+        # it by serializing the arrays and sending them over a queue. its slow,
+        # its ugly, but it is what it is.
+        if os.name != "nt":
+            try:
+                self.create_shm(h, w)
+            except Exception as e:
+                print(f"CREATING SHM: {e}")
 
         message = {
             "type": "original_grayscale",
@@ -547,23 +550,45 @@ class ImageStorage(QObject):
             if clipboard:
                 return result
 
-            self.shm_preview[:] = result
-            self.res_queue.put(
-                {"type": "display_image", "array": "rgb", "reset": reset}
-            )
+            if os.name == "nt":
+                pickled_array = pickle.dumps(result)
+                self.res_queue.put(
+                    {
+                        "type": "display_image_nt",
+                        "reset": reset,
+                        "array": pickled_array,
+                    }
+                )
+            else:
+                self.shm_preview[:] = result
+                self.res_queue.put(
+                    {"type": "display_image", "array": "rgb", "reset": reset}
+                )
 
             processor.processing = False
 
     def _handle_no_algorithm(self, reset, clipboard):
         # Handles the case when "None" is the algo
-        try:
-            processed_img = np.ascontiguousarray(self.processed_image)
-            self.shm_preview[:, :, 0] = (processed_img * 255).astype(np.uint8)
+        if os.name == "nt":
+            pickled_array = pickle.dumps(self.processed_image)
             self.res_queue.put(
-                {"type": "display_image", "array": "gray", "reset": reset}
+                {
+                    "type": "display_image_nt",
+                    "reset": reset,
+                    "array": pickled_array,
+                }
             )
-        except Exception as e:
-            print(f"GENERATING PIXMAPS: {e}")
+        else:
+            try:
+                processed_img = np.ascontiguousarray(self.processed_image)
+                self.shm_preview[:, :, 0] = (processed_img * 255).astype(
+                    np.uint8
+                )
+                self.res_queue.put(
+                    {"type": "display_image", "array": "gray", "reset": reset}
+                )
+            except Exception as e:
+                print(f"GENERATING PIXMAPS: {e}")
 
         return processed_img if clipboard else None
 
@@ -636,17 +661,19 @@ class ImageStorage(QObject):
             self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
             self.processed_image = np.rot90(self.processed_image, k=-1)
-            self.shm_preview = np.rot90(self.shm_preview, k=-1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=-1)
+            if os.name != "nt":
+                self.shm_preview = np.rot90(self.shm_preview, k=-1)
         else:
             self.original_image = np.rot90(self.original_image, k=1)
             self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
             self.processed_image = np.rot90(self.processed_image, k=1)
-            self.shm_preview = np.rot90(self.shm_preview, k=1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=1)
+            if os.name != "nt":
+                self.shm_preview = np.rot90(self.shm_preview, k=1)
 
         # while this does not produce accurate results for the dithering
         # it is much faster than reprocessing the image on each transform.
