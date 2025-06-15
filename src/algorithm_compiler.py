@@ -327,6 +327,23 @@ def ordered_dither(img, matrix):
     return img
 
 
+@cc.export("ordered_dither_p", "f4[:,:](f4[:,:], f8, f8[:,:])")
+def ordered_dither_p(img, pert, matrix):
+    n = matrix.shape[0]
+    for y in range(img.shape[0]):
+        for x in range(img.shape[1]):
+            pixel = img[y, x]
+            j = y % n
+            if not (pixel == 0 or pixel == 1):
+                i = x % n
+                if matrix[j, i] + np.random.normal(0, pert) > img[y, x]:
+                    img[y, x] = 0
+                else:
+                    img[y, x] = 1
+
+    return img
+
+
 # ERROR DIFFUSION FUNCTIONS. At some point EDOFDs should be added
 @cc.export("ed", "f4[:,:](f4[:,:], f8[:,:], f4)")
 def ed(img, kernel, str_value):

@@ -64,11 +64,31 @@ def ordered_dither(img, matrix):
     return img
 
 
+@njit(parallel=True)
+def ordered_dither_p(img, pert, matrix):
+    n = matrix.shape[0]
+    for y in prange(img.shape[0]):
+        for x in range(img.shape[1]):
+            pixel = img[y, x]
+            if not (pixel == 0 or pixel == 1):
+                i = x % n
+                j = y % n
+                if img[y, x] <= matrix[i, j] + np.random.normal(0, pert):
+                    img[y, x] = 0
+                else:
+                    img[y, x] = 1
+    return img
+
+
 def bayer(img, settings):
     size = settings["size"]
+    perturbation = settings["perturbation"] / 200
     offset = settings["offset"] / 100
     matrix = generate_bayer_matrix(size, offset)
-    img = ordered_dither(img, matrix)
+    if perturbation == 0:
+        img = ordered_dither(img, matrix)
+    else:
+        img = ordered_dither_p(img, perturbation, matrix)
     return img
 
 

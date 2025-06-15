@@ -268,8 +268,15 @@ class BayerSettings(HalftoneSettings):
         self.offset = SliderControl("Matrix offset", (-100, 100), 0, 100)
         self.offset.value_changed.connect(self.emit_settings_changed)
 
+        self.perturbation = SliderControl(
+            "Perturbation strength", (0, 100), 0, 100
+        )
+        self.perturbation.value_changed.connect(self.emit_settings_changed)
+
         self.layout.addWidget(self.size)
+        self.layout.addWidget(self.perturbation)
         self.layout.addWidget(self.offset)
+
         self.layout.addStretch()
 
     def emit_settings_changed(self):
@@ -278,6 +285,7 @@ class BayerSettings(HalftoneSettings):
         settings = {
             "size": self.size.slider.value(),
             "offset": self.offset.slider.value(),
+            "perturbation": self.perturbation.slider.value(),
         }
         self.settingsChanged.emit(settings)
 

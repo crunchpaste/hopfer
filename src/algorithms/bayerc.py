@@ -1,6 +1,6 @@
 import numpy as np
 
-from .static import ordered_dither
+from .static import ordered_dither, ordered_dither_p
 
 
 def generate_halftone_matrix(size):
@@ -52,9 +52,13 @@ def generate_bayer_matrix(power, offset=0):
 
 def bayer(img, settings):
     size = settings["size"]
+    perturbation = settings["perturbation"] / 200
     offset = settings["offset"] / 100
     matrix = generate_bayer_matrix(size, offset)
-    img = ordered_dither(img, matrix)
+    if perturbation == 0:
+        img = ordered_dither(img, matrix)
+    else:
+        img = ordered_dither_p(img, perturbation, matrix)
     return img
 
 
