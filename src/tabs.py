@@ -13,6 +13,7 @@ from settings import (
     ClusteredSettings,
     ErrorDiffusionSettings,
     GaussSettings,
+    LevienSettings,
     MezzoSettings,
     NiblackSettings,
     NoneSettings,
@@ -100,6 +101,9 @@ class HalftoneTab(QWidget):
             "Zhou-Fang",
         ]:
             return ErrorDiffusionSettings(serpentine=True)
+
+        elif algorithm_name == "Levien":
+            return LevienSettings()
 
         return NoneSettings()
 

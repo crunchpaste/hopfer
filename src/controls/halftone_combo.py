@@ -105,6 +105,8 @@ class HalftoneCombo(QWidget):
             # Variable error diffusion
             "Ostromoukhov",
             "Zhou-Fang",
+            # EDODF
+            "Levien",
         ]
         combobox.addItems(algorithms)
 
@@ -133,6 +135,11 @@ class HalftoneCombo(QWidget):
         combobox.insertItem(26, "")
         combobox.setItemData(26, "separator", Qt.UserRole)
         combobox.setItemData(26, 0, Qt.UserRole - 1)  # non-selectable
+
+        # separator after the VEDs
+        combobox.insertItem(29, "")
+        combobox.setItemData(29, "separator", Qt.UserRole)
+        combobox.setItemData(29, 0, Qt.UserRole - 1)  # non-selectable
 
         return combobox
 

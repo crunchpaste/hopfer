@@ -40,8 +40,12 @@ except ImportError:
 try:
     from algorithms.variable_edc import variable_ed
 except ImportError:
-    from algorithms.variable_edc import variable_ed
+    from algorithms.variable_ed import variable_ed
 
+try:
+    from algorithms.edodfc import edodf
+except ImportError:
+    from algorithms.edodf import edodf
 try:
     from algorithms.static import (
         average,
@@ -345,6 +349,9 @@ class ImageProcessor(QObject):
 
         elif algorithm == "Ostromoukhov" or algorithm == "Zhou-Fang":
             processed_image = variable_ed(image, algorithm, settings)
+
+        elif algorithm == "Levien":
+            processed_image = edodf(image, algorithm, settings)
 
         elif algorithm == "None":
             # No processing, return the original image

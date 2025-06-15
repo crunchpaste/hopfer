@@ -515,6 +515,70 @@ def zhou_fang_s(img, coeff_array, pert_array, str):
     return img
 
 
+@cc.export("levien", "f4[:,:](f4[:,:], f8, f8)")
+def levien(img, hysteresis_c, str):
+    h, w = img.shape
+
+    for y in range(h):
+        for x in range(w):
+            old_value = img[y, x]
+            hysteresis = 0
+
+            if x - 1 >= 0:
+                hysteresis += img[y, x - 1] * 0.5 * hysteresis_c
+            if y - 1 >= 0:
+                hysteresis += img[y - 1, x] * 0.5 * hysteresis_c
+
+            if old_value + hysteresis > 0.5:
+                new_value = 1
+            else:
+                new_value = 0
+
+            img[y, x] = new_value
+            error = (old_value - new_value) * str
+
+            if x + 1 < w:
+                img[y, x + 1] += error * 0.5
+            if y + 1 < h:
+                img[y + 1, x] += error * 0.5
+
+    return img
+
+
+@cc.export("levien_s", "f4[:,:](f4[:,:], f8, f8)")
+def levien_s(img, hysteresis_c, str):
+    h, w = img.shape
+
+    for y in range(h):
+        for x in range(w):
+            old_value = img[y, x]
+            hysteresis = 0
+
+            if x - 1 >= 0:
+                hysteresis += img[y, x - 1] * 0.5 * hysteresis_c
+            if y - 1 >= 0:
+                hysteresis += img[y - 1, x] * 0.5 * hysteresis_c
+
+            if old_value + hysteresis > 0.5:
+                new_value = 1
+            else:
+                new_value = 0
+
+            img[y, x] = new_value
+            error = (old_value - new_value) * str
+
+            if x + 1 < w:
+                img[y, x + 1] += error * 0.5
+            if y + 1 < h:
+                img[y + 1, x] += error * 0.5
+
+        img = np.fliplr(img)
+
+    if h % 2 != 0:
+        img = np.fliplr(img)
+    return img
+
+
 # GRAYSCALE CONVERSION functions follow.
 @cc.export("luminance", "f4[:,:](f4[:,:,:])")
 def luminance(img):

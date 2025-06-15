@@ -343,3 +343,51 @@ class ErrorDiffusionSettings(HalftoneSettings):
             "noise": self.noise_toggle.is_toggle_checked(),
         }
         self.settingsChanged.emit(settings)
+
+
+class LevienSettings(HalftoneSettings):
+    def __init__(self, serpentine=False):
+        super().__init__()
+
+        # Diffusion factor slider
+        self.diffusion_factor = SliderControl(
+            "Diffusion factor", (0, 100), 100, 100
+        )
+        self.diffusion_factor.value_changed.connect(self.emit_settings_changed)
+
+        self.diffusion_factor.slider_layout.setContentsMargins(10, 10, 10, 10)
+
+        # Hysteresis slider
+
+        self.hysteresis = SliderControl("Hysteresis", (0, 500), 50, 100)
+        self.hysteresis.value_changed.connect(self.emit_settings_changed)
+
+        self.hysteresis.slider_layout.setContentsMargins(10, 10, 10, 10)
+
+        # Serpentine toggle
+        self.serpentine_toggle = ToggleWithLabel(label="Serpentine")
+        if serpentine:
+            self.serpentine_toggle.set_toggle_checked(True)
+        self.serpentine_toggle.toggle_changed.connect(
+            self.emit_settings_changed
+        )
+
+        self.noise_toggle = ToggleWithLabel(label="Prime w/ noise")
+        self.noise_toggle.toggle_changed.connect(self.emit_settings_changed)
+
+        self.layout.addWidget(self.diffusion_factor)
+        self.layout.addWidget(self.hysteresis)
+        self.layout.addWidget(self.serpentine_toggle)
+        self.layout.addWidget(self.noise_toggle)
+        self.layout.addStretch()
+
+    def emit_settings_changed(self):
+        """Emit the current settings when any control changes."""
+
+        settings = {
+            "diffusion_factor": self.diffusion_factor.slider.value(),
+            "hysteresis": self.hysteresis.slider.value(),
+            "serpentine": self.serpentine_toggle.is_toggle_checked(),
+            "noise": self.noise_toggle.is_toggle_checked(),
+        }
+        self.settingsChanged.emit(settings)
