@@ -4,6 +4,7 @@ from multiprocessing import Manager, Process, Queue, shared_memory
 
 import numpy as np
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QCursor
 from PySide6.QtWidgets import QApplication, QHBoxLayout, QSplitter, QWidget
 from qframelesswindow import FramelessMainWindow
 
@@ -180,6 +181,12 @@ class MainWindow(FramelessMainWindow):
 
     def display_processing_label(self, state=True):
         self.viewer.labelVisible(state)
+
+        if state:
+            QApplication.setOverrideCursor(QCursor(Qt.WaitCursor))
+        else:
+            while QApplication.overrideCursor() is not None:
+                QApplication.restoreOverrideCursor()
 
     def display_notification(self, notification, duration=3000):
         self.sidebar.notifications.show_notification(notification, duration)
