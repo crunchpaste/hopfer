@@ -1,9 +1,11 @@
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtCore import QEvent, QRect, Qt, Signal
 from PySide6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QPushButton,
     QSlider,
+    QStyle,
+    QStyleOptionSlider,
     QVBoxLayout,
     QWidget,
 )
@@ -43,6 +45,9 @@ class SliderControl(QWidget):
         self.slider.setRange(min_value, max_value)
         self.slider.setValue(value)
         self.slider.setFocusPolicy(Qt.FocusPolicy.TabFocus)
+        # to change the cursor when hovering over the handle
+        # self.slider.setCursor(Qt.CursorShape.OpenHandCursor)
+        self.slider.installEventFilter(self)
 
         self.left_label = QLabel(label)
 
@@ -68,7 +73,9 @@ class SliderControl(QWidget):
                 )
             else:
                 self.right_label = QLabel(f"{self.slider.value()}")
+                self.right_label.setAlignment(Qt.AlignmentFlag.AlignRight)
 
+        self.slider.setMouseTracking(True)
         self.slider.valueChanged.connect(self.update_value)
         self.slider.valueChanged.connect(self.on_value_changed)
         self.slider.sliderPressed.connect(self.on_slider_pressed)
@@ -127,8 +134,39 @@ class SliderControl(QWidget):
     def on_slider_pressed(self):
         """Called when the slider starts being dragged."""
         self.is_dragging = True
+        self.slider.setCursor(Qt.CursorShape.ClosedHandCursor)
 
     def on_slider_released(self):
         """Called when the slider is released after dragging."""
         self.is_dragging = False
         self.value_changed.emit(self.slider.value())
+        if not self._is_mouse_over_handle:
+            self.slider.setCursor(Qt.CursorShape.ArrowCursor)
+        else:
+            self.slider.setCursor(Qt.CursorShape.OpenHandCursor)
+
+    def eventFilter(self, source, event):
+        if (
+            source == self.slider
+            and event.type() == QEvent.Type.MouseMove
+            and not self.is_dragging
+        ):
+            if self._is_mouse_over_handle(event.pos()):
+                self.slider.setCursor(Qt.CursorShape.OpenHandCursor)
+            else:
+                self.slider.setCursor(Qt.CursorShape.ArrowCursor)
+        return super().eventFilter(source, event)
+
+    def _is_mouse_over_handle(self, pos) -> bool:
+        opt = QStyleOptionSlider()
+        self.slider.initStyleOption(opt)
+
+        # This is the correct usage for QSlider handle rect
+        handle_rect: QRect = self.slider.style().subControlRect(
+            QStyle.ComplexControl.CC_Slider,  # ✅ Complex control, not CE_*
+            opt,
+            QStyle.SubControl.SC_SliderHandle,  # ✅ Correct subcontrol
+            self.slider,
+        )
+
+        return handle_rect.contains(pos)
