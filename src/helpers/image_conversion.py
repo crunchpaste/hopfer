@@ -1,5 +1,4 @@
 import numpy as np
-from PIL import Image
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
 
@@ -27,13 +26,26 @@ def qimage_to_numpy(qimage):
     return arr
 
 
-def pixmap_to_numpy(pixmap):
-    image = pixmap.toImage()
-    pil_image = Image.fromqpixmap(image)
-    pil_image.convert("L")
-    image_array = np.array(pil_image) / 255
+# def pixmap_to_numpy(pixmap):
+#     image = pixmap.toImage()
+#     pil_image = Image.fromqpixmap(image)
+#     pil_image.convert("L")
+#     image_array = np.array(pil_image) / 255
+#
+#     return image_array
 
-    return image_array
+# def pixmap_to_numpy(pixmap):
+#     qimage = pixmap.toImage().convertToFormat(QtGui.QImage.Format_Grayscale8)
+#
+#     width  = qimage.width()
+#     height = qimage.height()
+#
+#     ptr = qimage.bits()
+#     ptr.setsize(height * width)
+#
+#     image_array = np.frombuffer(ptr, np.uint8).reshape((height, width))
+#
+#     return image_array.astype(np.float32) / 255.0
 
 
 def boolean_pixmap(img_array, light, dark):

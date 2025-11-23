@@ -416,7 +416,6 @@ class ImageStorage(QObject):
         else:
             image = (self.processed_image * 255).astype(np.uint8)
 
-        # Convert processed image to PIL format and save
         if self.ignore_alpha or self.alpha is None:
             output_image = image
         else:
