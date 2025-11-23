@@ -122,6 +122,16 @@ def main():
 
     print(f"Boot time: {end - start} seconds")
 
+    if len(sys.argv) > 1:
+        # sys.argv[0] is the script/executable path, sys.argv[1] is the first argument
+        path = sys.argv[1]
+        window.writer.load_image(path)
+        print(f"File passed via CLI/File Manager: {path}")
+    else:
+        print("No file passed")
+
+
+
     sys.exit(app.exec())
     # pass
     #     # Delete the .desktop file. Suitable only for portable versions and should be improved.
