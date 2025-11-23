@@ -1,13 +1,13 @@
-import io
 import json
 import os
 import pickle
 from multiprocessing.managers import SharedMemoryManager
 from urllib.parse import unquote, urlparse
 
+import cv2
 import numpy as np
 import requests
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 from platformdirs import user_pictures_dir
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QPixmap
@@ -120,7 +120,7 @@ class ImageStorage(QObject):
     def _load(self, image):
         # the final procedure of loading an image. expecs a pillow image.
 
-        self.original_image, self.alpha = self.extract_alpha(image)
+        self.original_image, self.alpha = self.extract_alpha_cv(image)
         h, w = self.original_image.shape[0], self.original_image.shape[1]
 
         # shared memory seems to be a mess on windows, therefore just avoiding
@@ -179,7 +179,7 @@ class ImageStorage(QObject):
             ):
                 # this should only happen if the user has not set a different folder
                 # for saving this time, or the peviouslt in the config. I may be a
-                # personal opinion but I quite prer havin independent input/output
+                # personal opinion but I quite prefer having independent input/output
                 # folders.
                 config["paths"]["save_path"] = os.path.join(
                     base_path, "hopfer.png"
@@ -196,11 +196,11 @@ class ImageStorage(QObject):
             with open(config_path(), "w") as f:
                 json.dump(config, f, indent=2)
 
-            pil_image = Image.open(image_path)
+            cv_image = cv2.imread(image_path)
 
-            self._load(pil_image)
+            self._load(cv_image)
 
-        except (FileNotFoundError, UnidentifiedImageError) as e:
+        except (FileNotFoundError) as e:
             self.show_notification(
                 f"Error: Unable to open image.\n{e!s}", duration=10000
             )
@@ -211,18 +211,22 @@ class ImageStorage(QObject):
 
     def load_from_pickle(self, data):
         buffer = pickle.loads(data)
-        pil_image = Image.fromarray(buffer)
-        pil_image = pil_image.convert("RGBA")
-        self._load(pil_image)
+        if not isinstance(buffer, np.ndarray):
+            image = np.array(buffer)
+        else:
+            image = buffer
+
+        self._load(image)
 
     def load_from_url(self, url):
         if url != "":
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
-                    image_data = io.BytesIO(response.content)
-                    pil_image = Image.open(image_data)
-                    self._load(pil_image)
+                    image_data = np.frombuffer(response.content, np.uint8)
+                    cv_image = cv2.imdecode(image_data, cv2.IMREAD_UNCHANGED)
+                    self._load(cv_image)
+
                 else:
                     self.show_notification(
                         f"Failed to retrieve image. Status code: {response.status_code}",
@@ -299,6 +303,59 @@ class ImageStorage(QObject):
             A = None
             self.original_grayscale = is_gray
             return RGB, A
+
+    def extract_alpha_cv(self, image):
+        """
+        Extracts alpha and color/grayscale channels from an OpenCV image based on its channels.
+        Assumes image was loaded with cv2.IMREAD_UNCHANGED.
+        """
+
+        np_image_float = (image / self.NORMALIZED_MAX).astype(np.float16)
+        num_channels = np_image_float.shape[-1]
+
+        if num_channels == 1:
+            L = np_image_float
+            A = None
+            self.original_grayscale = True
+            return L, A
+
+        elif num_channels == 2:
+            L = np_image_float[:, :, 0]
+            A = self.discard_alpha(np_image_float[:, :, 1])
+
+            self.original_grayscale = True
+            return L, A
+
+        elif num_channels == 3:
+            BGR = np_image_float
+            RGB = self.bgr_to_rgb(BGR)
+            A = None
+
+            # Check for grayscale conversion and status update
+            RGB, is_gray = self.check_grayscale(RGB)
+
+            self.original_grayscale = is_gray
+            return RGB, A  # Color_BGR is (H, W, 3), A is None
+
+        elif num_channels == 4:
+            BGR = np_image_float[:, :, :3]
+            RGB = self.bgr_to_rgb(BGR)
+            A = self.discard_alpha(np_image_float[:, :, 3])
+
+            # Check for grayscale conversion and status update
+            RGB, is_gray = self.check_grayscale(RGB)
+
+            self.original_grayscale = is_gray
+            return RGB, A  # Color_BGR is (H, W, 3), A is (H, W)
+
+        else:
+            # raise ValueError(f"Unsupported number of channels: {num_channels}. Image cannot be processed.")
+            self.show_notification("Unsupported number of channels")
+
+    @staticmethod
+    def bgr_to_rgb(image):
+        RGB = image[:, :, ::-1]
+        return RGB
 
     def check_grayscale(self, rgb):
         """This is just a small function to check if an RGB image is actually grayscale. It saves time and resources on converting it to grayscale later on. Turns out using numpy's array_equal is much faster."""

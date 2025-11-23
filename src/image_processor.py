@@ -243,14 +243,19 @@ class ImageProcessor(QObject):
             image = (image - min_val) / (max_val - min_val)
 
         if im_settings["equalize"]:
-            hist, bins = np.histogram(image.flatten(), bins=256, range=[0, 1])
+            # hist, bins = np.histogram(image.flatten(), bins=256, range=[0, 1])
+            #
+            # cdf = hist.cumsum()
+            # cdf_normalized = cdf / cdf[-1]
+            #
+            # image = np.interp(
+            #     image.flatten(), bins[:-1], cdf_normalized
+            # ).reshape(image.shape)
 
-            cdf = hist.cumsum()
-            cdf_normalized = cdf / cdf[-1]
-
-            image = np.interp(
-                image.flatten(), bins[:-1], cdf_normalized
-            ).reshape(image.shape)
+            # cv wants the image to be uint8 for histogram
+            # equalization
+            _image = (image * 255).astype(np.uint8)
+            image = (cv2.equalizeHist(_image) / 255).astype(np.float32)
 
         if im_settings["bc_t"]:
             if _brightness != 1.0:
@@ -269,6 +274,8 @@ class ImageProcessor(QObject):
             if _blur > 0:
                 image = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=_blur)
             if _median > 1:
+                # cv wants the image to be uint8 for median
+                # blurring
                 _image = (image * 255).astype(np.uint8)
                 image = (cv2.medianBlur(_image, ksize=_median) / 255).astype(
                     np.float32
