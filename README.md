@@ -46,7 +46,7 @@ At present, **hopfer** does not support palette-based halftoning or multi-level 
   - Denoising
   - Sharpening
 - **Support for a wide range of image formats**, including:
-  - PNG, JPEG, BMP, GIF, TIFF, WebP and more (anything supported by [Pillow](https://pillow.readthedocs.io/en/stable/))
+  - PNG, JPEG, BMP, TIFF, WebP and more (anything supported by [OpenCV](https://docs.opencv.org/3.4/d4/da8/group__imgcodecs.html))
 
 ## Requirements
 
