@@ -7,7 +7,6 @@ from urllib.parse import unquote, urlparse
 import cv2
 import numpy as np
 import requests
-from PIL import Image
 from platformdirs import user_pictures_dir
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QPixmap
@@ -196,11 +195,11 @@ class ImageStorage(QObject):
             with open(config_path(), "w") as f:
                 json.dump(config, f, indent=2)
 
-            cv_image = cv2.imread(image_path)
+            cv_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
             self._load(cv_image)
 
-        except (FileNotFoundError) as e:
+        except FileNotFoundError as e:
             self.show_notification(
                 f"Error: Unable to open image.\n{e!s}", duration=10000
             )
@@ -419,14 +418,44 @@ class ImageStorage(QObject):
 
         # Convert processed image to PIL format and save
         if self.ignore_alpha or self.alpha is None:
-            pil_image = Image.fromarray(image)
+            output_image = image
         else:
             alpha = (self.alpha * 255).astype(np.uint8)
-            image_w_alpha = np.dstack((image, alpha))
-            pil_image = Image.fromarray(image_w_alpha)
+            output_image = np.dstack((image, alpha))
+
+        # this parthandles the RGB to BGR conversion needed for cv2.
+        if output_image.ndim == 3:
+            num_channels = output_image.shape[-1]
+
+            # HACK: cv2 can't handle grayscale with alpha so this is needed
+            if num_channels == 2:
+                gray = output_image[:, :, 0]
+                alpha = output_image[:, :, 1]
+
+                # Convert grayscale → BGR
+                bgr = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+
+                # Rebuild BGRA
+                output_image = np.dstack((bgr, alpha))
+
+            if num_channels == 3:
+                output_image = output_image[:, :, ::-1]
+
+            elif num_channels == 4:
+                # RGBA -> BGRA conversion (swap R and B, leave G and A in place)
+                # We index the channels specifically: [R, G, B, A] -> [B, G, R, A]
+                output_image = output_image[:, :, [2, 1, 0, 3]]
 
         try:
-            pil_image.save(save_path)
+            success = cv2.imwrite(save_path, output_image)
+            if not success:
+                self.show_notification(
+                    f"Failed to save image to {save_path}. "
+                    "Check directory permissions or invalid image format.",
+                    duration=6000,
+                )
+                print("cv2.imwrite failed!", save_path)
+                return
         except Exception as e:
             self.show_notification(f"Error: {e}", duration=10000)
 
