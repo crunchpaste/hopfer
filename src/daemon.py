@@ -74,6 +74,9 @@ class Daemon:
             elif message["type"] == "save_like_preview":
                 value = message["value"]
                 self.storage.save_like_preview = value
+            elif message["type"] == "ignore_alpha":
+                value = message["value"]
+                self.storage.ignore_alpha = value
             # PROCESSOR RELATED
             elif (
                 message["type"] == "grayscale_settings"

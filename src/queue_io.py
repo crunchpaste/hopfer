@@ -126,6 +126,10 @@ class QueueWriter(QObject):
         message = {"type": "save_like_preview", "value": value}
         self.queue.put(message)
 
+    def ignore_alpha(self, value):
+        message = {"type": "ignore_alpha", "value": value}
+        self.queue.put(message)
+
     def send_halftone(self, algorithm, settings):
         message = {
             "type": "halftone_settings",

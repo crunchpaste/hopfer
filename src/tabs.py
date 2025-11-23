@@ -381,8 +381,7 @@ class ImageTab(QWidget):
 class OutputTab(QWidget):
     def __init__(self, writer=None, window=None):
         """
-        Initialize the HalftoneTab widget, which allows users to select halftoning algorithms
-        and configure related settings.
+        Initialize the OutputTab widget, which allows basic configuration of the saved file and preview colors.
         """
         super().__init__()
 
@@ -403,6 +402,7 @@ class OutputTab(QWidget):
         self.colors.light.color_changed.connect(self.on_color_change)
         self.colors.alpha.color_changed.connect(self.on_color_change)
         self.colors.output.toggle_changed.connect(self.on_preview_change)
+        self.colors.ignore.toggle_changed.connect(self.on_ignore_change)
 
         self.layout.addStretch()
 
@@ -425,3 +425,6 @@ class OutputTab(QWidget):
 
     def on_preview_change(self, value):
         self.writer.save_like_preview(value)
+
+    def on_ignore_change(self, value):
+        self.writer.ignore_alpha(value)

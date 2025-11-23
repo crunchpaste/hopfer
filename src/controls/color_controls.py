@@ -35,11 +35,14 @@ class ColorGroup(QGroupBox):
 
         self.output = ToggleWithLabel(label="Output like preview")
         self.output.layout.setContentsMargins(0, 15, 0, 0)
+        self.ignore = ToggleWithLabel(label="Ignore alpha")
+        self.ignore.layout.setContentsMargins(0, 15, 0, 0)
 
         self.layout.addWidget(self.dark)
         self.layout.addWidget(self.light)
         self.layout.addWidget(self.alpha)
         self.layout.addWidget(self.output)
+        self.layout.addWidget(self.ignore)
 
         self.setLayout(self.layout)
 
