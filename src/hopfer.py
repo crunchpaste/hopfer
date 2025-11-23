@@ -130,8 +130,6 @@ def main():
     else:
         print("No file passed")
 
-
-
     sys.exit(app.exec())
     # pass
     #     # Delete the .desktop file. Suitable only for portable versions and should be improved.

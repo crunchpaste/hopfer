@@ -240,13 +240,13 @@ class ImageTab(QWidget):
         self.sliders.append(self.contrast)
 
         self.blur = SliderControl(
-            "Gaussian filter", (0, 150), 0, 10, precision=1
+            "Gaussian filter", (0, 250), 0, 10, precision=1
         )
         self.blur.value_changed.connect(self.on_settings_changed)
 
         self.sliders.append(self.blur)
 
-        self.median = SliderControl("Median filter", (1, 5), 1, 1, precision=1)
+        self.median = SliderControl("Median filter", (1, 50), 1, 1, precision=1)
         self.median.value_changed.connect(self.on_settings_changed)
 
         self.sliders.append(self.median)

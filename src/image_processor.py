@@ -1,7 +1,7 @@
 import time
 
+import cv2
 import numpy as np
-from PIL import Image, ImageEnhance, ImageFilter
 from PySide6.QtCore import QObject
 
 from helpers.decorators import queue
@@ -236,11 +236,6 @@ class ImageProcessor(QObject):
             # using a log function makes the adjustment feel a bit more natural
             _contrast = 5 * (np.log(1 + (0.01 - 1) * _contrast) / np.log(0.01))
         _contrast += 1
-        # _sharpness = im_settings["sharpness"]
-
-        pil_needed = False
-        # if the image has already been converted back
-        converted = False
 
         if im_settings["normalize"]:
             min_val = np.min(image)
@@ -257,45 +252,44 @@ class ImageProcessor(QObject):
                 image.flatten(), bins[:-1], cdf_normalized
             ).reshape(image.shape)
 
-        if (
-            im_settings["bc_t"]
-            or im_settings["blur_t"]
-            or im_settings["unsharp_t"] > 0
-        ):
-            # if PIL manupulation is needed, convert to a PIL image once
-            pil_needed = True
-
-            _image = (image * 255).astype(np.uint8)
-            pil_image = Image.fromarray(_image)
-
         if im_settings["bc_t"]:
             if _brightness != 1.0:
-                # if PIL manupulation is needed, convert to a PIL image once
-                pil_needed = True
-                enhancer = ImageEnhance.Brightness(pil_image)
-                pil_image = enhancer.enhance(_brightness)
+                image = image * _brightness
+
             if _contrast != 1.0:
-                enhancer = ImageEnhance.Contrast(pil_image)
-                pil_image = enhancer.enhance(_contrast)
+                alpha = float(_contrast)
+                beta = 0.5 * (1.0 - alpha)
+                image = alpha * image + beta
+
+            image = np.clip(image, 0.0, 1.0)
+
         if im_settings["blur_t"]:
             _blur = im_settings["blur"] / 10
             _median = int(im_settings["median"] * 2 - 1)
             if _blur > 0:
-                pil_image = pil_image.filter(ImageFilter.GaussianBlur(_blur))
+                image = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=_blur)
             if _median > 1:
-                pil_image = pil_image.filter(ImageFilter.MedianFilter(_median))
+                _image = (image * 255).astype(np.uint8)
+                image = (cv2.medianBlur(_image, ksize=_median) / 255).astype(
+                    np.float32
+                )
         if im_settings["unsharp_t"]:
             radius = im_settings["u_radius"] / 10
-            strenght = int(im_settings["u_strenght"] * 2)
-            thresh = im_settings["u_thresh"]
+            strength = int(im_settings["u_strenght"] / 25)
+            thresh = im_settings["u_thresh"] / 100
 
-            pil_image = pil_image.filter(
-                ImageFilter.UnsharpMask(radius, strenght, thresh)
-            )
+            blurred = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=radius)
 
-        if not converted and pil_needed:
-            # this will get the image back to a numpy array if it is not done already by the sharpness filter. should be removed when unsharp is implemented.
-            image = (np.array(pil_image) / 255).astype(np.float32)
+            unsharp_mask = image - blurred
+
+            if thresh > 0:
+                bool_mask = np.abs(unsharp_mask) >= thresh
+                unsharp_mask[~bool_mask] = 0
+
+            image = cv2.addWeighted(image, 1.0, unsharp_mask, strength, 0)
+
+            image = np.clip(image, 0.0, 1.0)
+
         return image
 
     @staticmethod
