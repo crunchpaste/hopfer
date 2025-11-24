@@ -98,6 +98,7 @@ class ImageProcessor(QObject):
             "bc_t": False,
             "blur_t": False,
             "unsharp_t": False,
+            "laplacian_t": False,
             "brightness": 0.0,
             "contrast": 0.0,
             "sharpness": 0.0,
@@ -169,7 +170,14 @@ class ImageProcessor(QObject):
         im_settings = self.image_settings
         if step <= 1 and any(
             im_settings[key]
-            for key in ["normalize", "equalize", "bc_t", "blur_t", "unsharp_t"]
+            for key in [
+                "normalize",
+                "equalize",
+                "bc_t",
+                "blur_t",
+                "unsharp_t",
+                "laplacian_t",
+            ]
         ):
             self.storage.enhanced_image = self._enhance_image(
                 self.storage.grayscale_image, im_settings
@@ -223,6 +231,8 @@ class ImageProcessor(QObject):
         """
         This is the method for image enchancements e.g. blurs.
         """
+
+        print(im_settings)
         _brightness = im_settings["brightness"] / 100
 
         if _brightness > 0:
@@ -243,15 +253,6 @@ class ImageProcessor(QObject):
             image = (image - min_val) / (max_val - min_val)
 
         if im_settings["equalize"]:
-            # hist, bins = np.histogram(image.flatten(), bins=256, range=[0, 1])
-            #
-            # cdf = hist.cumsum()
-            # cdf_normalized = cdf / cdf[-1]
-            #
-            # image = np.interp(
-            #     image.flatten(), bins[:-1], cdf_normalized
-            # ).reshape(image.shape)
-
             # cv wants the image to be uint8 for histogram
             # equalization
             _image = (image * 255).astype(np.uint8)
@@ -281,8 +282,8 @@ class ImageProcessor(QObject):
                     np.float32
                 )
         if im_settings["unsharp_t"]:
-            radius = im_settings["u_radius"] / 10
-            strength = int(im_settings["u_strenght"] / 25)
+            radius = (im_settings["u_radius"] / 10) + 0.01
+            strength = int(im_settings["u_strength"] / 25)
             thresh = im_settings["u_thresh"] / 100
 
             blurred = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=radius)
@@ -295,6 +296,13 @@ class ImageProcessor(QObject):
 
             image = cv2.addWeighted(image, 1.0, unsharp_mask, strength, 0)
 
+            image = np.clip(image, 0.0, 1.0)
+
+        if im_settings["laplacian_t"]:
+            print("Laplacian")
+            strength = im_settings["l_strength"] / 50
+            laplacian_mask = cv2.Laplacian(image, ddepth=cv2.CV_32F)
+            image = image - (strength * laplacian_mask)
             image = np.clip(image, 0.0, 1.0)
 
         return image

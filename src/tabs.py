@@ -269,11 +269,16 @@ class ImageTab(QWidget):
         self.u_radius = SliderControl("Radius", (0, 100), 30, 10, precision=1)
         self.u_radius.value_changed.connect(self.on_settings_changed)
 
-        self.u_strenght = SliderControl("Strength", (0, 100), 25, 100)
-        self.u_strenght.value_changed.connect(self.on_settings_changed)
+        self.u_strength = SliderControl("Strength", (0, 100), 25, 100)
+        self.u_strength.value_changed.connect(self.on_settings_changed)
 
         self.u_thresh = SliderControl("Threshold", (0, 20), 3, 1, precision=1)
         self.u_thresh.value_changed.connect(self.on_settings_changed)
+
+        self.l_strength = SliderControl("Strength", (0, 100), 25, 100)
+        self.l_strength.value_changed.connect(self.on_settings_changed)
+
+        self.sliders.append(self.l_strength)
 
         # Toggle containers
         self.bc_toggle = ToggleContainer(
@@ -291,9 +296,16 @@ class ImageTab(QWidget):
         )
 
         self.unsharp_toggle = ToggleContainer(
-            "Unsharp mask", (self.u_radius, self.u_strenght, self.u_thresh)
+            "Unsharp mask", (self.u_radius, self.u_strength, self.u_thresh)
         )
         self.unsharp_toggle.toggle.toggle_changed.connect(
+            lambda: self.on_settings_changed(sender=None)
+        )
+
+        self.laplacian_toggle = ToggleContainer(
+            "Laplacian shapening", (self.l_strength,)
+        )
+        self.laplacian_toggle.toggle.toggle_changed.connect(
             lambda: self.on_settings_changed(sender=None)
         )
 
@@ -304,6 +316,7 @@ class ImageTab(QWidget):
         layout.addWidget(self.bc_toggle)
         layout.addWidget(self.blur_toggle)
         layout.addWidget(self.unsharp_toggle)
+        layout.addWidget(self.laplacian_toggle)
         layout.addStretch()
 
         container.setLayout(layout)
@@ -321,7 +334,7 @@ class ImageTab(QWidget):
         Args:
             mode_name (str): The selected grayscaling mode.
         """
-        pass
+        # pass
         if mode_name == "Manual RGB":
             self.rgb_widget.setVisible(True)
             grayscale_settings = {
@@ -356,6 +369,7 @@ class ImageTab(QWidget):
             "bc_t": self.bc_toggle.toggle.is_toggle_checked(),
             "blur_t": self.blur_toggle.toggle.is_toggle_checked(),
             "unsharp_t": self.unsharp_toggle.toggle.is_toggle_checked(),
+            "laplacian_t": self.laplacian_toggle.toggle.is_toggle_checked(),
             "brightness": self.brightness.slider.value(),
             "contrast": self.contrast.slider.value(),
             "blur": self.blur.slider.value(),
@@ -363,8 +377,9 @@ class ImageTab(QWidget):
             "wl": self.wl.slider.value(),
             "wt": self.wt.slider.value(),
             "u_radius": self.u_radius.slider.value(),
-            "u_strenght": self.u_strenght.slider.value(),
+            "u_strength": self.u_strength.slider.value(),
             "u_thresh": self.u_thresh.slider.value(),
+            "l_strength": self.l_strength.slider.value(),
             # "sharpness": self.sharpness.slider.value(),
         }
 
