@@ -111,10 +111,7 @@ class Toolbox(QWidget):
     def open_file_dialog(self):
         """This method is called when the button is clicked to open a file dialog."""
         file_dialog = QFileDialog(self)
-        file_filter = (
-            "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
-            "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
-        )
+        file_filter = "Image Files (*.bmp *.jpeg *.jpg *.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
 
         image_path = self.main_window.paths["image_path"]
         print(image_path)
@@ -132,7 +129,7 @@ class Toolbox(QWidget):
             self.writer.load_image(file_path)
 
     def save_file_dialog(self):
-        """This method is called when the button is clicked to open a file dialog."""
+        """This method is called when the button is clicked to save a file."""
         if self.paths["image_path"] is not None:
             file_dialog = QFileDialog(self)
             options = QFileDialog.Options()
@@ -144,7 +141,7 @@ class Toolbox(QWidget):
                 origin = self.paths["save_path"]
 
             file_filter = (
-                "Image Files (*.bmp *.gif *.im *.jpeg *.jpg *.jpe *.jfif "
+                "Image Files (*.bmp *.png *.jpeg *.jpg "
                 "*.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
             )
 

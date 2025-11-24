@@ -393,17 +393,20 @@ class ImageStorage(QObject):
             save_path = os.path.join(base_path, "hopfer.png")
             self.paths["save_path"] = save_path
 
+        # # TODO: Make it work with path edited. For now it just saves it
+        # to the config. Path edited seems to never
+
         # only if the path was actually edited save it to the confing
         # so that next time it should be the default with a hopfer.png
-        if self.save_path_edited:
-            base_path = os.path.dirname(save_path)
-            with open(config_path(), "r") as f:
-                config = json.load(f)
 
-            config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
+        base_path = os.path.dirname(save_path)
+        with open(config_path(), "r") as f:
+            config = json.load(f)
 
-            with open(config_path(), "w") as f:
-                json.dump(config, f, indent=2)
+        config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
+
+        with open(config_path(), "w") as f:
+            json.dump(config, f, indent=2)
 
         base_path = os.path.dirname(save_path)
         base_name = os.path.basename(save_path)
