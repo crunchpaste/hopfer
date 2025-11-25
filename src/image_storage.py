@@ -71,6 +71,7 @@ class ImageStorage(QObject):
 
         self._original_image = None
         self.original_grayscale = False
+        self.resized = None
         self._grayscale_image = None
         self._enhanced_image = None
         self.alpha = None
@@ -103,6 +104,7 @@ class ImageStorage(QObject):
         # keeps the paths but discards all images
         # mostly there to make it easier to take screencaptures
         self._original_image = None
+        self.resized = None
         self.original_grayscale = False
         self._grayscale_image = None
         self.enhanced_image = None
@@ -117,9 +119,10 @@ class ImageStorage(QObject):
         self.res_queue.put(message)
 
     def _load(self, image):
-        # the final procedure of loading an image. expecs a pillow image.
+        # the final procedure of loading an image. expecs a numpy array.
 
         self.original_image, self.alpha = self.extract_alpha_cv(image)
+        self.resized = self.original_image.copy()
         h, w = self.original_image.shape[0], self.original_image.shape[1]
 
         # shared memory seems to be a mess on windows, therefore just avoiding
@@ -315,6 +318,12 @@ class ImageStorage(QObject):
         else:
             num_channels = np_image_float.shape[-1]
 
+        h, w = np_image_float.shape[0], np_image_float.shape[1]
+
+        self.res_queue.put(
+            {"type": "image_size", "height": h, "width": w, "ratio": h / w}
+        )
+
         if num_channels == 1:
             L = np_image_float
             A = None
@@ -379,6 +388,24 @@ class ImageStorage(QObject):
             return r, True
         else:
             return rgb, False
+
+    def resize_original(self, w, h):
+        resized = self.original_image.copy()
+
+        self.resized = cv2.resize(
+            resized, (w, h), interpolation=cv2.INTER_LINEAR
+        )
+
+        self.create_shm(h, w)
+
+        if self.original_grayscale:
+
+            self.grayscale_image = self.resized
+
+        try:
+            self.daemon.processor.start(step=0)
+        except Exception as e:
+            print(e)
 
     def save_image(self):
         """

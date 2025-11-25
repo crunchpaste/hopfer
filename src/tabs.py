@@ -2,6 +2,7 @@ from PySide6.QtCore import QCoreApplication, Qt, Signal
 from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
 
 from controls.color_controls import ColorGroup
+from controls.dpi_controls import DPIGroup
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
@@ -394,7 +395,7 @@ class ImageTab(QWidget):
 
 
 class OutputTab(QWidget):
-    def __init__(self, writer=None, window=None):
+    def __init__(self, writer=None, reader=None, window=None):
         """
         Initialize the OutputTab widget, which allows basic configuration of the saved file and preview colors.
         """
@@ -410,14 +411,17 @@ class OutputTab(QWidget):
         self.layout.setContentsMargins(15, 20, 15, 15)
 
         self.colors = ColorGroup()
+        self.dpi = DPIGroup()
 
         self.layout.addWidget(self.colors)
+        self.layout.addWidget(self.dpi)
 
         self.colors.dark.color_changed.connect(self.on_color_change)
         self.colors.light.color_changed.connect(self.on_color_change)
         self.colors.alpha.color_changed.connect(self.on_color_change)
         self.colors.output.toggle_changed.connect(self.on_preview_change)
         self.colors.ignore.toggle_changed.connect(self.on_ignore_change)
+        self.dpi.size_changed.connect(self.on_size)
 
         self.layout.addStretch()
 
@@ -443,3 +447,6 @@ class OutputTab(QWidget):
 
     def on_ignore_change(self, value):
         self.writer.ignore_alpha(value)
+
+    def on_size(self, w, h):
+        self.writer.resize(w, h)

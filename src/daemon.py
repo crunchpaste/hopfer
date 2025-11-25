@@ -46,6 +46,10 @@ class Daemon:
             elif message["type"] == "load_from_clipboard":
                 # data = message["data"]
                 self.storage.load_from_clipboard()
+            elif message["type"] == "resize":
+                w = message["width"]
+                h = message["height"]
+                self.storage.resize_original(w, h)
             elif message["type"] == "save_image":
                 self.storage.save_image()
             elif message["type"] == "save_to_clipboard":

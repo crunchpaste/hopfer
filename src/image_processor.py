@@ -121,7 +121,7 @@ class ImageProcessor(QObject):
         """
         self.processing = True
 
-        if self.storage.original_image is None:
+        if self.storage.resized is None:
             self.processing = False
             return
 
@@ -160,7 +160,7 @@ class ImageProcessor(QObject):
         """Converts the image to grayscale if necessary."""
         if step == 0:
             self.storage.grayscale_image = self._convert_to_grayscale(
-                self.storage.original_image,
+                self.storage.resized,
                 self.grayscale_mode,
                 self.grayscale_settings,
             )

@@ -10,6 +10,7 @@ class QueueReader(QObject):
     received_processed_nt = Signal(bytes, bool)
     received_notification = Signal(str, int)
     grayscale_signal = Signal(bool)
+    size_signal = Signal(int, int, float)
 
     def __init__(self, queue, window=None, interval=50):
         super().__init__()
@@ -59,6 +60,11 @@ class QueueReader(QObject):
             elif message["type"] == "original_grayscale":
                 value = message["value"]
                 self.grayscale_signal.emit(value)
+
+            elif message["type"] == "image_size":
+                w = message["width"]
+                h = message["height"]
+                self.window.sidebar.output_tab.dpi.set_px_size(w, h)
 
 
 class QueueWriter(QObject):
@@ -128,6 +134,10 @@ class QueueWriter(QObject):
 
     def ignore_alpha(self, value):
         message = {"type": "ignore_alpha", "value": value}
+        self.queue.put(message)
+
+    def resize(self, width, height):
+        message = {"type": "resize", "width": width, "height": height}
         self.queue.put(message)
 
     def send_halftone(self, algorithm, settings):
