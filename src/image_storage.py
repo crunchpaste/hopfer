@@ -309,8 +309,11 @@ class ImageStorage(QObject):
         Assumes image was loaded with cv2.IMREAD_UNCHANGED.
         """
 
-        np_image_float = (image / self.NORMALIZED_MAX).astype(np.float16)
-        num_channels = np_image_float.shape[-1]
+        np_image_float = self.image_to_float(image)
+        if len(np_image_float.shape) == 2:
+            num_channels = 1
+        else:
+            num_channels = np_image_float.shape[-1]
 
         if num_channels == 1:
             L = np_image_float
@@ -356,7 +359,17 @@ class ImageStorage(QObject):
         RGB = image[:, :, ::-1]
         return RGB
 
-    def check_grayscale(self, rgb):
+    @staticmethod
+    def image_to_float(image):
+        image_dtype = image.dtype
+        if image_dtype == np.uint8:
+            image = (image / 255).astype(np.float16)
+        elif image_dtype == np.uint16:
+            image = (image / 65535).astype(np.float16)
+        return image
+
+    @staticmethod
+    def check_grayscale(rgb):
         """This is just a small function to check if an RGB image is actually grayscale. It saves time and resources on converting it to grayscale later on. Turns out using numpy's array_equal is much faster."""
 
         if np.array_equal(rgb[:, :, 0], rgb[:, :, 1]) and np.array_equal(
