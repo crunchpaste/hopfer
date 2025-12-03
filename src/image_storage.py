@@ -414,6 +414,7 @@ class ImageStorage(QObject):
             self.grayscale_image = self.resized
 
         try:
+            self.daemon.processor.reset = True
             self.daemon.processor.start(step=0)
         except Exception as e:
             print(e)
