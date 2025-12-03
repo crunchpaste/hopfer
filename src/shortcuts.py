@@ -64,8 +64,15 @@ class Shortcuts:
 
         # Image manipulation
         # Inverts the colors of the image
-        self.invert_shortcut = QShortcut(
+        self.resize_shortcut = QShortcut(
             QKeySequence("Ctrl+Shift+I"), self.main_window
+        )
+        self.resize_shortcut.activated.connect(
+            self.main_window.open_resize_dialog
+        )
+
+        self.invert_shortcut = QShortcut(
+            QKeySequence("Ctrl+Shift+N"), self.main_window
         )
         self.invert_shortcut.activated.connect(
             self.main_window.sidebar.toolbox._invert
