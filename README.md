@@ -21,6 +21,7 @@
 * [Features](#features)
 * [Requirements](#requirements)
 * [Installation](#installation)
+* [Acknowledgments ](#acknowledgments)
 
 ## Introduction
 
@@ -100,7 +101,7 @@ pip install nuitka
 nuitka --standalone --onefile --include-data-dir=res=res --nofollow-import-to=numba --enable-plugins=pyside6 src/hopfer.py
 ```
 
-## Awesome libraries used in the project
+## Acknowledgments
 
 The project relies on the following awesome open-source libraries. I extend my thanks to their maintainers and contributors!
 
