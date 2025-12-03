@@ -100,7 +100,46 @@ pip install nuitka
 nuitka --standalone --onefile --include-data-dir=res=res --nofollow-import-to=numba --enable-plugins=pyside6 src/hopfer.py
 ```
 
+## Awesome libraries used in the project
 
+The project relies on the following awesome open-source libraries. I extend my thanks to their maintainers and contributors!
+
+### Core
+
+* **`numpy`**: [GitHub Link](https://github.com/numpy/numpy)
+    > The fundamental package for scientific computing with Python.
+
+* **`Numba`**: [GitHub Link](https://github.com/numba/numba)
+    > A Just-In-Time compiler for numerical functions in Python.
+
+* **`opencv-python`**: [GitHub Link](https://github.com/opencv/opencv-python)
+    > Used for image processing and encoding/decoding.
+
+* **`requests`**: [GitHub Link](https://github.com/psf/requests)
+    > A simple, yet elegant, HTTP library.
+
+
+### User Interface
+
+* **`PySide6`**: [Documentation Link](https://doc.qt.io/qtforpython-6/index.html)
+    > The official Python bindings for the Qt framework, used to build the GUI.
+
+* **`PyQt-Frameless-Window`**: [GitHub Link](https://github.com/zhiyiYo/PyQt-Frameless-Window)
+    > Enables the creation of custom frameless windows.
+
+* **`superqt`**: [GitHub Link](https://github.com/pyapp-kit/superqt)
+    > "missing" widgets and components for PyQt/PySide
+
+### System
+
+* **`Nuitka`**: [Website](https://nuitka.net/)
+    > Used for compiling the application into an executable.
+
+* **`platformdirs`**: [GitHub Link](https://github.com/platformdirs/platformdirs)
+    > Used for determining standard, cross-platform directories for storing image and configuration data.
+
+* **`setproctitle`**: [GitHub Link](https://github.com/dvarrazzo/py-setproctitle)
+    >  Allows a process to change its title.
 
 
 ---
