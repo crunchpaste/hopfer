@@ -818,7 +818,7 @@ class ImageStorage(QObject):
         # while this does not produce accurate results for the dithering
         # it is much faster than reprocessing the image on each transform.
         # the halftoning would be accurate again on the next reprocess.
-        h, w = self.grayscale_image.shape
+        # h, w = self.grayscale_image.shape
         self.reset_view = True
 
     def flip_image(self):

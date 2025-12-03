@@ -114,7 +114,6 @@ class MainWindow(FramelessMainWindow):
         self.splitter = QSplitter(Qt.Orientation.Horizontal)
 
         self.sidebar = SideBar(self, writer=self.writer)
-        # self.viewer = PhotoViewer(self, self.storage)
         self.viewer = PhotoViewer(self, None)
         self.viewer.setFocusPolicy(Qt.FocusPolicy.NoFocus)
 
@@ -141,7 +140,6 @@ class MainWindow(FramelessMainWindow):
         # self.titleBar.raise_()
 
     def init_array(self, name, size):
-        # print(f"INIT ARRAY: {self.shm_preview.shape}")
         self.shm = shared_memory.SharedMemory(name=name)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
         self.shm_preview = self.shm_preview.reshape(size)
@@ -165,6 +163,9 @@ class MainWindow(FramelessMainWindow):
         """
         Creates and executes the dialog, then handles the result.
         """
+        if not self.viewer.hasValidPhoto():
+            return
+
         self.dialog = ImageResizeDialog(parent=self)
 
         if self.dialog.exec() == QDialog.Accepted:

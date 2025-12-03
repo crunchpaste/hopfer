@@ -39,10 +39,7 @@ class ToggleButton(QSlider):
     def isChecked(self):
         # Directly check the status of the toggle.
         # Used in the resizing dialog as the label there is external.
-        if self.value() == 1:
-            return True
-        else:
-            return False
+        return self.value() == 1
 
 
 class ToggleWithLabel(QWidget):

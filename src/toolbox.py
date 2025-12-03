@@ -137,6 +137,8 @@ class Toolbox(QWidget):
 
     def save_file_dialog(self):
         """This method is called when the button is clicked to save a file."""
+        if not self.main_window.viewer.hasValidPhoto():
+            return
         if self.paths["image_path"] is not None:
             file_dialog = QFileDialog(self)
             options = QFileDialog.Options()
@@ -171,15 +173,23 @@ class Toolbox(QWidget):
             self.writer.save_image()
 
     def open_resize_dialog(self):
+        if not self.main_window.viewer.hasValidPhoto():
+            return
         self.main_window.open_resize_dialog()
 
     def _rotate(self, cw):
+        if not self.main_window.viewer.hasValidPhoto():
+            return
         self.writer.send_rotate(cw)
 
     def _flip(self):
+        if not self.main_window.viewer.hasValidPhoto():
+            return
         self.writer.send_flip()
 
     def _invert(self):
+        if not self.main_window.viewer.hasValidPhoto():
+            return
         self.writer.send_invert()
 
     def enable_buttons(self, state):

@@ -7,6 +7,8 @@ from PySide6.QtWidgets import (
     QLabel,
     QLineEdit,
     QPushButton,
+    QSizePolicy,
+    QSpacerItem,
     QVBoxLayout,
 )
 from qframelesswindow import FramelessDialog
@@ -48,7 +50,7 @@ class ImageResizeDialog(FramelessDialog):
 
     def create_layout(self):
         grid = QGridLayout()
-        grid.setContentsMargins(50, 95, 50, 50)
+        grid.setContentsMargins(30, 95, 30, 50)
         grid.setVerticalSpacing(15)
         grid.setHorizontalSpacing(25)
 
@@ -102,15 +104,26 @@ class ImageResizeDialog(FramelessDialog):
         self.res_combo.currentIndexChanged.connect(self._change_res_unit)
 
         # ok/cancel
-        # TODO: fix formatting and defaults
         self.ok_btn = QPushButton("Resize")
         self.cancel_btn = QPushButton("Cancel")
+
+        BUTTON_WIDTH = 100
+
+        self.ok_btn.setFixedWidth(BUTTON_WIDTH)
+        self.cancel_btn.setFixedWidth(BUTTON_WIDTH)
         btns = QHBoxLayout()
+        btns.setContentsMargins(30, 0, 30, 15)
         btns.addStretch()
         btns.addWidget(self.cancel_btn)
+        btns.addSpacerItem(
+            QSpacerItem(
+                10, 0, QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed
+            )
+        )
         btns.addWidget(self.ok_btn)
 
         self.ok_btn.clicked.connect(self.accept)
+        self.ok_btn.setDefault(True)
         self.cancel_btn.clicked.connect(self.reject)
 
         self.main_layout = QVBoxLayout()
@@ -155,8 +168,8 @@ class ImageResizeDialog(FramelessDialog):
             w = w_in * 25.4
             h = h_in * 25.4
 
-        self.w_input.setText(f"{w:.4f}" if unit != "px" else f"{int(round(w))}")
-        self.h_input.setText(f"{h:.4f}" if unit != "px" else f"{int(round(h))}")
+        self.w_input.setText(f"{w:.4f}" if unit != "px" else f"{round(w)}")
+        self.h_input.setText(f"{h:.4f}" if unit != "px" else f"{round(h)}")
 
         self._block_update = False
 
