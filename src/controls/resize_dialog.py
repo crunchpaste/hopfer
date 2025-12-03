@@ -1,3 +1,4 @@
+import numpy as np
 from PySide6.QtGui import QDoubleValidator, QIntValidator
 from PySide6.QtWidgets import (
     QComboBox,
@@ -30,6 +31,12 @@ class ImageResizeDialog(FramelessDialog):
         # Internal state, always stays pixels
         self.current_w_px = self.original_w
         self.current_h_px = self.original_h
+
+        # Last states. Checks if the values are actually edited.
+
+        self.last_w = parent.w
+        self.last_h = parent.h
+        self.last_dpi = parent.dpi
 
         self._block_update = False
 
@@ -162,6 +169,12 @@ class ImageResizeDialog(FramelessDialog):
         except ValueError:
             return
 
+        print(val, self.last_w)
+        if val == self.last_w:
+            print("Same")
+            return
+        self.last_w = val
+
         dpi = self._effective_dpi()
         unit = self.unit_combo.currentText()
 
@@ -178,6 +191,7 @@ class ImageResizeDialog(FramelessDialog):
 
         if self.aspect.isChecked():
             self.current_h_px = self.current_w_px / self.original_ratio
+            self.last_h = np.round(self.current_h_px)
 
         self._update_display()
 
@@ -189,6 +203,12 @@ class ImageResizeDialog(FramelessDialog):
             val = float(self.h_input.text())
         except ValueError:
             return
+
+        print(val, self.last_h)
+        if val == self.last_h:
+            print("Same")
+            return
+        self.last_h = val
 
         dpi = self._effective_dpi()
         unit = self.unit_combo.currentText()
@@ -206,6 +226,7 @@ class ImageResizeDialog(FramelessDialog):
 
         if self.aspect.isChecked():
             self.current_w_px = self.current_h_px * self.original_ratio
+            self.last_w = np.round(self.current_w_px)
 
         self._update_display()
 
@@ -217,6 +238,11 @@ class ImageResizeDialog(FramelessDialog):
             new_dpi = self._effective_dpi()
         except ValueError:
             return
+
+        if new_dpi == self.last_dpi:
+            print("Same")
+            return
+        self.last_dpi = new_dpi
 
         unit = self.unit_combo.currentText()
         if unit != "px":
