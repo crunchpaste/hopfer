@@ -1,8 +1,11 @@
 from PySide6.QtCore import QCoreApplication, Qt, Signal
-from PySide6.QtWidgets import QScrollArea, QVBoxLayout, QWidget
+from PySide6.QtWidgets import (
+    QScrollArea,
+    QVBoxLayout,
+    QWidget,
+)
 
 from controls.color_controls import ColorGroup
-from controls.dpi_controls import DPIGroup
 from controls.grayscale_combo import GrayscaleCombo
 from controls.halftone_combo import HalftoneCombo
 from controls.slider_control import SliderControl
@@ -404,6 +407,10 @@ class OutputTab(QWidget):
         self.writer = writer
         self.window = window
 
+        self.h = 0
+        self.w = 0
+        self.dpi = 100
+
         self._initialize_ui()
 
     def _initialize_ui(self):
@@ -411,17 +418,20 @@ class OutputTab(QWidget):
         self.layout.setContentsMargins(15, 20, 15, 15)
 
         self.colors = ColorGroup()
-        self.dpi = DPIGroup()
+        # self.resize_button = QPushButton("Open Resize Dialog", self.window)
+        # self.dpi = DPIGroup()
 
         self.layout.addWidget(self.colors)
-        self.layout.addWidget(self.dpi)
+        # self.layout.addWidget(self.resize_button)
+        # self.layout.addWidget(self.dpi)
 
         self.colors.dark.color_changed.connect(self.on_color_change)
         self.colors.light.color_changed.connect(self.on_color_change)
         self.colors.alpha.color_changed.connect(self.on_color_change)
         self.colors.output.toggle_changed.connect(self.on_preview_change)
         self.colors.ignore.toggle_changed.connect(self.on_ignore_change)
-        self.dpi.size_changed.connect(self.on_size)
+        # self.resize_button.clicked.connect(self.open_resize_dialog)
+        # self.dpi.size_changed.connect(self.on_size)
 
         self.layout.addStretch()
 
@@ -445,8 +455,40 @@ class OutputTab(QWidget):
     def on_preview_change(self, value):
         self.writer.save_like_preview(value)
 
+    # def open_resize_dialog(self):
+    #     """
+    #     Creates and executes the dialog, then handles the result.
+    #     """
+    #     self.dialog = ImageResizeDialog(parent=self)
+    #
+    #     # The exec() method blocks until thoue user closes the dialog.
+    #     # It returns QDialog.Accepted (1) or QDialog.Rejected (0).
+    #     if self.dialog.exec() == QDialog.Accepted:   # <--- note QDialog.Accepted
+    #         result = self.dialog.get_result()
+    #         self.dpi = result['dpi']
+    #         h = result['height_px']
+    #         w = result['width_px']
+    #         interpolation = result['interpolation']
+    #     else:
+    #         print("User cancelled")
+
+    # if result == self.dialog.Accepted:
+    #     # The user clicked Resize
+    #     result = dialog.get_result()
+    #     width_px = result["width_px"]
+    #     height_px = result["height_px"]
+    #     interpolation = result["interpolation"]
+    #     # Do whatever you want with the new size and interpolation
+    # else:
+    #     # User clicked Cancel
+    #     pass
+
     def on_ignore_change(self, value):
         self.writer.ignore_alpha(value)
 
     def on_size(self, w, h):
         self.writer.resize(w, h)
+
+    def set_px_size(self, w, h):
+        self.w = w
+        self.h = h

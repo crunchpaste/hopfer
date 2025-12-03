@@ -64,7 +64,8 @@ class QueueReader(QObject):
             elif message["type"] == "image_size":
                 w = message["width"]
                 h = message["height"]
-                self.window.sidebar.output_tab.dpi.set_px_size(w, h)
+                self.window.h = h
+                self.window.w = w
 
 
 class QueueWriter(QObject):
@@ -136,8 +137,13 @@ class QueueWriter(QObject):
         message = {"type": "ignore_alpha", "value": value}
         self.queue.put(message)
 
-    def resize(self, width, height):
-        message = {"type": "resize", "width": width, "height": height}
+    def resize(self, width, height, interpolation):
+        message = {
+            "type": "resize",
+            "width": width,
+            "height": height,
+            "interpolation": interpolation,
+        }
         self.queue.put(message)
 
     def send_halftone(self, algorithm, settings):

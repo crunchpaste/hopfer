@@ -49,7 +49,8 @@ class Daemon:
             elif message["type"] == "resize":
                 w = message["width"]
                 h = message["height"]
-                self.storage.resize_original(w, h)
+                interpolation = message["interpolation"]
+                self.storage.resize_original(w, h, interpolation)
             elif message["type"] == "save_image":
                 self.storage.save_image()
             elif message["type"] == "save_to_clipboard":

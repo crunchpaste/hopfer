@@ -51,6 +51,12 @@ class Toolbox(QWidget):
 
         # # Image buttons
 
+        self.resize = self._create_button(
+            "f707", "Resize image", self.open_resize_dialog
+        )
+        self.resize.setEnabled(False)
+        # self.rot_cw.clicked.connect(lambda: self._rotate(True))
+
         self.rot_cw = self._create_button("e41a", "Rotate CW", None)
         self.rot_cw.setEnabled(False)
         self.rot_cw.clicked.connect(lambda: self._rotate(True))
@@ -77,6 +83,7 @@ class Toolbox(QWidget):
 
         toolbox_layout.addItem(spacer0)
 
+        toolbox_layout.addWidget(self.resize)
         toolbox_layout.addWidget(self.invert)
         toolbox_layout.addWidget(self.rot_cw)
         toolbox_layout.addWidget(self.rot_ccw)
@@ -110,11 +117,11 @@ class Toolbox(QWidget):
 
     def open_file_dialog(self):
         """This method is called when the button is clicked to open a file dialog."""
+
         file_dialog = QFileDialog(self)
         file_filter = "Image Files (*.bmp *.jpeg *.jpg *.jpeg2000 *.jp2 *.png *.tiff *.tif *.webp);;All Files (*)"
 
         image_path = self.main_window.paths["image_path"]
-        print(image_path)
 
         if image_path is None:
             origin = ""
@@ -163,6 +170,9 @@ class Toolbox(QWidget):
             # self.storage.save_image()
             self.writer.save_image()
 
+    def open_resize_dialog(self):
+        self.main_window.open_resize_dialog()
+
     def _rotate(self, cw):
         self.writer.send_rotate(cw)
 
@@ -176,6 +186,7 @@ class Toolbox(QWidget):
         """Enables the buttons when an image is available"""
         self.save.setEnabled(state)
         self.saveas.setEnabled(state)
+        self.resize.setEnabled(state)
         self.rot_cw.setEnabled(state)
         self.rot_ccw.setEnabled(state)
         self.flip.setEnabled(state)

@@ -389,17 +389,28 @@ class ImageStorage(QObject):
         else:
             return rgb, False
 
-    def resize_original(self, w, h):
+    def resize_original(self, w, h, interpolation):
         resized = self.original_image.copy()
 
-        self.resized = cv2.resize(
-            resized, (w, h), interpolation=cv2.INTER_LINEAR
-        )
+        if interpolation.lower() == "nearest neighbor":
+            method = cv2.INTER_NEAREST
+        elif interpolation.lower() == "bilinear":
+            method = cv2.INTER_LINEAR
+        elif interpolation.lower() == "bicubic":
+            method = cv2.INTER_CUBIC
+        elif interpolation.lower() == "lanczos":
+            method = cv2.INTER_LANCZOS4
+        # elif interpolation.lower() == ("area", "inter_area"):
+        # return cv2.INTER_AREA
+        else:
+            # fallback default
+            method = cv2.INTER_LINEAR
+
+        self.resized = cv2.resize(resized, (w, h), interpolation=method)
 
         self.create_shm(h, w)
 
         if self.original_grayscale:
-
             self.grayscale_image = self.resized
 
         try:

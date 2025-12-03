@@ -5,9 +5,16 @@ from multiprocessing import Manager, Process, Queue, shared_memory
 import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
-from PySide6.QtWidgets import QApplication, QHBoxLayout, QSplitter, QWidget
+from PySide6.QtWidgets import (
+    QApplication,
+    QDialog,
+    QHBoxLayout,
+    QSplitter,
+    QWidget,
+)
 from qframelesswindow import FramelessMainWindow
 
+from controls.resize_dialog import ImageResizeDialog
 from controls.titlebar import HopferTitleBar
 from daemon import Daemon
 from helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
@@ -28,6 +35,10 @@ class MainWindow(FramelessMainWindow):
 
     def __init__(self):
         super().__init__()
+        # needed for the resize dialog
+        self.w = 1
+        self.h = 1
+        self.dpi = 150
         self._initialize_components()
         self._setup_ui()
 
@@ -134,7 +145,6 @@ class MainWindow(FramelessMainWindow):
         self.shm = shared_memory.SharedMemory(name=name)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
         self.shm_preview = self.shm_preview.reshape(size)
-        print(f"ARRAY SIZE: {size}")
 
     def rotate_shm(self, cw):
         if cw:
@@ -150,6 +160,27 @@ class MainWindow(FramelessMainWindow):
     def open_preferences(self):
         dialog = PreferencesDialog(self)
         dialog.exec()
+
+    def open_resize_dialog(self):
+        """
+        Creates and executes the dialog, then handles the result.
+        """
+        self.dialog = ImageResizeDialog(parent=self)
+
+        if self.dialog.exec() == QDialog.Accepted:
+            result = self.dialog.get_result()
+            dpi = result["dpi"]
+            h = result["height_px"]
+            w = result["width_px"]
+            interpolation = result["interpolation"]
+
+            self.h = h
+            self.w = w
+            self.dpi = dpi
+
+            self.writer.resize(w, h, interpolation)
+        else:
+            print("User cancelled")
 
     def display_processed_image(self, array, reset=True):
         """Display the processed image in the photo viewer."""
@@ -197,9 +228,6 @@ class MainWindow(FramelessMainWindow):
 
         _image = clipboard.image()
         _url = clipboard.text()
-
-        print(_image)
-        print(_url)
 
         if not _image.isNull():
             # A much faster way to transfer the image to the daemon
