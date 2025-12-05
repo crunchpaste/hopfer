@@ -358,8 +358,6 @@ class ImageStorage(QObject):
             method = cv2.INTER_CUBIC
         elif interpolation.lower() == "lanczos":
             method = cv2.INTER_LANCZOS4
-        # elif interpolation.lower() == ("area", "inter_area"):
-        # return cv2.INTER_AREA
         else:
             # fallback default
             method = cv2.INTER_LINEAR
@@ -389,7 +387,6 @@ class ImageStorage(QObject):
         If the image is processed, save it, else, do nothing.
         """
         if self.processed_image is None:
-            print("No processed image to save!")
             self.show_notification(
                 "Oops! It seems like you haven't opened an image yet. Open an image and then you can save it.",
                 duration=3000,
@@ -441,7 +438,7 @@ class ImageStorage(QObject):
             alpha = (self.alpha * 255).astype(np.uint8)
             output_image = np.dstack((image, alpha))
 
-        # this parthandles the RGB to BGR conversion needed for cv2.
+        # this part handles the RGB to BGR conversion needed for cv2.
         if output_image.ndim == 3:
             num_channels = output_image.shape[-1]
 
@@ -460,8 +457,7 @@ class ImageStorage(QObject):
                 output_image = output_image[:, :, ::-1]
 
             elif num_channels == 4:
-                # RGBA -> BGRA conversion (swap R and B, leave G and A in place)
-                # We index the channels specifically: [R, G, B, A] -> [B, G, R, A]
+                # RGBA -> BGRA conversion
                 output_image = output_image[:, :, [2, 1, 0, 3]]
 
         try:
@@ -478,7 +474,6 @@ class ImageStorage(QObject):
             self.show_notification(f"Error: {e}", duration=10000)
 
         self.show_notification(f"Image saved to {save_path}", duration=3000)
-        print(f"Image saved to {save_path}")
 
     def save_to_clipboard(self):
         if self.processed_image is not None:
@@ -501,10 +496,6 @@ class ImageStorage(QObject):
         """
         Generate a unique save path for the image. If the file exists,
         a counter is appended to the base filename.
-
-        :param base_path: The directory to save the image.
-        :param base_name: The base name of the file (including extension).
-        :return: A unique file path for saving.
         """
         # Extract the file extension (format) from the base_name
         base_name_without_ext = base_name.rsplit(".", 1)[0]
@@ -550,8 +541,6 @@ class ImageStorage(QObject):
     def original_image(self):
         """
         Return the original image as a NumPy array (normalized to [0, 1]).
-
-        :return: Original image array.
         """
         if self._original_image is not None:
             return self.f32(self._original_image)

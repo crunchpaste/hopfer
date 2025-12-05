@@ -231,7 +231,6 @@ class ImageProcessor:
         This is the method for image enchancements e.g. blurs.
         """
 
-        print(im_settings)
         _brightness = im_settings["brightness"] / 100
 
         if _brightness > 0:
@@ -298,7 +297,6 @@ class ImageProcessor:
             image = np.clip(image, 0.0, 1.0)
 
         if im_settings["laplacian_t"]:
-            print("Laplacian")
             strength = im_settings["l_strength"] / 50
             laplacian_mask = cv2.Laplacian(image, ddepth=cv2.CV_32F)
             image = image - (strength * laplacian_mask)

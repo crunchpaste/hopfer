@@ -118,7 +118,6 @@ class HalftoneTab(QWidget):
         Args:
             algorithm_name (str): The selected halftoning algorithm.
         """
-        print(f"Algorithm changed to: {algorithm_name}")
 
         # Remove the old settings widget from the layout if it exists
         self._remove_old_settings_widget()
@@ -151,8 +150,6 @@ class HalftoneTab(QWidget):
         Args:
             settings (dict): The new settings for the algorithm.
         """
-        print(f"Settings changed: {settings}")
-
         # Update processor settings and algorithm, then start processing
         algorithm = self.current_algorithm
         # self.processor.start(step=2)
