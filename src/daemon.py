@@ -14,21 +14,13 @@ class Daemon:
         self.req_queue = request
         # for save and open directories
         self.paths = paths
-        # shared memory manager
-        self.smm = None
-
-        # in case of linux, possibly mac too initialize here.
-        if os.name != "nt":
-            self.storage = ImageStorage(self)
-            self.processor = ImageProcessor(self, self.storage)
 
     def run(self):
         # initializing processor and storage as windows uses spawn
         # instead of fork, and these classes cant be serialized
-        if os.name == "nt":
-            self.storage = ImageStorage(self)
-            self.processor = ImageProcessor(self, self.storage)
-        else:
+        self.storage = ImageStorage(self)
+        self.processor = ImageProcessor(self, self.storage)
+        if os.name != "nt":
             # setproctitle seems to not work on windows too
             setproctitle("hopferd")
         while True:
@@ -55,6 +47,9 @@ class Daemon:
                 self.storage.save_image()
             elif message["type"] == "save_to_clipboard":
                 self.storage.save_to_clipboard()
+            elif message["type"] == "update_paths":
+                paths = message["paths"]
+                self.storage.paths = paths
             elif message["type"] == "reset_storage":
                 self.storage.reset()
             elif message["type"] == "rotate":
@@ -104,5 +99,11 @@ class Daemon:
 
             elif message["type"] == "exit":
                 del self.storage.shm_preview
-                self.storage.smm.shutdown()
+                self.storage.shm.close()
+                message = {
+                    "type": "close_shm",
+                }
+                self.res_queue.put(message)
+
+                self.storage.shm.unlink()
                 break

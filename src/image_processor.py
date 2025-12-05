@@ -2,7 +2,6 @@ import time
 
 import cv2
 import numpy as np
-from PySide6.QtCore import QObject
 
 from helpers.decorators import queue
 from helpers.kernels import get_kernel
@@ -66,7 +65,7 @@ except ImportError:
     )
 
 
-class ImageProcessor(QObject):
+class ImageProcessor:
     """
     This class processes images using various halftoning algorithms and is part of the daemon.
     It takes images from ImageStorage and sends the processed images back to storage which sends them to the GUI.

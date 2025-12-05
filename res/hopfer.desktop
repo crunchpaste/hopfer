@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=hopfer
+Comment=Halftone images.
+Exec=$HOME/hopfer/hopfer.bin %F
+Icon=$HOME/.config/hopfer/hopfer.png
+Type=Application
+Terminal=false
+Categories=Graphics;
+StartupNotify=true
+MimeType=image/png;image/jpeg;image/tiff;image/webp;
+Keywords=halftone;dither;print;image editing;graphics;

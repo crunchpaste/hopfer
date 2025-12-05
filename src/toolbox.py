@@ -16,7 +16,7 @@ class Toolbox(QWidget):
         self.writer = writer
 
         self.main_window = main_window
-        self.paths = self.main_window.paths
+        # self.paths = self.main_window.paths
 
         self.setObjectName("toolbox")  # For QSS styling
 
@@ -139,15 +139,15 @@ class Toolbox(QWidget):
         """This method is called when the button is clicked to save a file."""
         if not self.main_window.viewer.hasValidPhoto():
             return
-        if self.paths["image_path"] is not None:
+        if self.main_window.paths["image_path"] is not None:
             file_dialog = QFileDialog(self)
             options = QFileDialog.Options()
             options |= QFileDialog.DontConfirmOverwrite
 
-            if self.paths["save_path"] is None:
+            if self.main_window.paths["save_path"] is None:
                 origin = ""
             else:
-                origin = self.paths["save_path"]
+                origin = self.main_window.paths["save_path"]
 
             file_filter = (
                 "Image Files (*.bmp *.png *.jpeg *.jpg "
@@ -159,13 +159,13 @@ class Toolbox(QWidget):
             )
 
             if file_path:
-                self.paths["save_path"] = file_path
-
-                if self.paths["image_path"] != file_path:
-                    self.paths["save_path_edited"] = True
-                else:
-                    self.paths["save_path_edited"] = False
-
+                self.main_window.paths["save_path"] = file_path
+                #
+                #     if self.main_window.paths["image_path"] != file_path:
+                #         # self.paths["save_path_edited"] = True
+                #     else:
+                #         # self.paths["save_path_edited"] = False
+                self.writer.update_paths(self.main_window.paths)
                 self.writer.save_image()
         else:
             # This is just so that an error pops in the notification pane.

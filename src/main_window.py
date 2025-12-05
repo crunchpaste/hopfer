@@ -1,6 +1,6 @@
 import json
 import pickle
-from multiprocessing import Manager, Process, Queue, shared_memory
+from multiprocessing import Process, SimpleQueue, shared_memory
 
 import numpy as np
 from PySide6.QtCore import Qt
@@ -44,22 +44,13 @@ class MainWindow(FramelessMainWindow):
 
     def _initialize_components(self):
         # the request queue
-        self.req_queue = Queue()
+        self.req_queue = SimpleQueue()
         # the response queue
-        self.res_queue = Queue()
-        # manager for simple values
-        self.manager = Manager()
+        self.res_queue = SimpleQueue()
 
-        self.paths = self.manager.dict()
+        self.paths = {"image_path": None, "save_path": None}
 
-        self.paths["image_path"] = None
-        self.paths["save_path"] = None
-
-        self.daemon = Daemon(
-            response=self.res_queue,
-            request=self.req_queue,
-            paths=self.paths,
-        )
+        self.daemon = Daemon(response=self.res_queue, request=self.req_queue)
 
         self.daemon_process = Process(target=self.daemon.run, daemon=False)
         self.daemon_process.start()
@@ -140,7 +131,7 @@ class MainWindow(FramelessMainWindow):
         # self.titleBar.raise_()
 
     def init_array(self, name, size):
-        self.shm = shared_memory.SharedMemory(name=name)
+        self.shm = shared_memory.SharedMemory(name=name, track=False)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
         self.shm_preview = self.shm_preview.reshape(size)
 

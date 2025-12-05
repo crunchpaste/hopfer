@@ -61,6 +61,10 @@ class QueueReader(QObject):
                 value = message["value"]
                 self.grayscale_signal.emit(value)
 
+            elif message["type"] == "update_paths":
+                paths = message["paths"]
+                self.window.paths = paths
+
             elif message["type"] == "image_size":
                 w = message["width"]
                 h = message["height"]
@@ -78,6 +82,10 @@ class QueueWriter(QObject):
 
     def close(self):
         message = {"type": "exit"}
+        self.queue.put(message)
+
+    def update_paths(self, paths):
+        message = {"type": "update_paths", "paths": paths}
         self.queue.put(message)
 
     def load_image(self, path):

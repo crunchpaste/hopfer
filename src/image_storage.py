@@ -1,7 +1,7 @@
 import json
 import os
 import pickle
-from multiprocessing.managers import SharedMemoryManager
+from multiprocessing.shared_memory import SharedMemory
 from urllib.parse import unquote, urlparse
 
 import cv2
@@ -40,13 +40,9 @@ class ImageStorage(QObject):
 
         self.daemon = daemon
 
-        self.paths = self.daemon.paths
-
         self.res_queue = self.daemon.res_queue
         self.req_queue = self.daemon.req_queue
 
-        self.smm = SharedMemoryManager()
-        self.smm.start()
         self.shm = None
         self.shm_preview = None
 
@@ -61,8 +57,8 @@ class ImageStorage(QObject):
             image_path = user_pictures_dir()
             save_path = os.path.join(user_pictures_dir(), "hopfer.png")
 
-        self.paths["image_path"] = image_path
-        self.paths["save_path"] = save_path
+        self.paths = {"image_path": image_path, "save_path": save_path}
+        self.update_paths()
 
         self.save_path_edited = False  # Track if the save path has been altered
 
@@ -87,9 +83,17 @@ class ImageStorage(QObject):
         self.algorithm = "None"
 
     def create_shm(self, height, width):
-        if self.smm is not None:
-            self.smm.shutdown()
-        self.shm = self.smm.SharedMemory(size=height * width * 3)
+        if self.shm is not None:
+            self.shm.close()
+            message = {
+                "type": "close_shm",
+            }
+            self.res_queue.put(message)
+
+            self.shm.unlink()
+        self.shm = SharedMemory(
+            size=height * width * 3, create=True, track=False
+        )
         self.shm_preview = np.ndarray(
             (height, width, 3), dtype=np.uint8, buffer=self.shm.buf
         )
@@ -197,6 +201,8 @@ class ImageStorage(QObject):
 
             with open(config_path(), "w") as f:
                 json.dump(config, f, indent=2)
+
+            self.update_paths()
 
             cv_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
@@ -408,7 +414,11 @@ class ImageStorage(QObject):
 
         self.resized = cv2.resize(resized, (w, h), interpolation=method)
 
-        self.create_shm(h, w)
+        if os.name != "nt":
+            try:
+                self.create_shm(h, w)
+            except Exception as e:
+                print(f"CREATING SHM: {e}")
 
         if self.original_grayscale:
             self.grayscale_image = self.resized
@@ -444,6 +454,8 @@ class ImageStorage(QObject):
             base_path = user_pictures_dir()
             save_path = os.path.join(base_path, "hopfer.png")
             self.paths["save_path"] = save_path
+
+        self.update_paths()
 
         # # TODO: Make it work with path edited. For now it just saves it
         # to the config. Path edited seems to never
@@ -850,5 +862,12 @@ class ImageStorage(QObject):
             "type": "notification",
             "notification": notification,
             "duration": duration,
+        }
+        self.res_queue.put(message)
+
+    def update_paths(self):
+        message = {
+            "type": "update_paths",
+            "paths": self.paths,
         }
         self.res_queue.put(message)

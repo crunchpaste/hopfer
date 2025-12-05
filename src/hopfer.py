@@ -12,17 +12,8 @@ from setproctitle import setproctitle
 from helpers.load_stylesheet import load_qss
 from helpers.no_outline import NoFocusProxyStyle
 from main_window import MainWindow
-from res_loader import create_desktop_file, get_path
+from res_loader import get_path
 from shortcuts import Shortcuts
-
-
-def setup_linux_icon():
-    """
-    This is a hacky workaround to get a somewhat pretty icon in a dock, panel or taskbar on Linux, as noting else seemed to work.
-    """
-    binary_path = get_path(".")
-    icon_path = get_path("res/hopfer.png")
-    return create_desktop_file(binary_path, icon_path)
 
 
 def load_font(path):
@@ -82,14 +73,11 @@ def main():
     TODO: Create a splash screen.
     """
 
-    # desktop_file_path = None
     start = time.perf_counter()
 
-    if not hasattr(sys.modules["__main__"], "__compiled__"):
-        # only get the hash if this is not a nuitka compiled binary
-        get_latest_hash()
-
-    setup_linux_icon()
+    # if not hasattr(sys.modules["__main__"], "__compiled__"):
+    #     # only get the hash if this is not a nuitka compiled binary
+    #     get_latest_hash()
 
     generate_config_if_none()
 
