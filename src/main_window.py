@@ -283,7 +283,6 @@ class MainWindow(FramelessMainWindow):
 
     def closeEvent(self, event):
         print(self.save_settings())
-        del self.shm_preview
         self.writer.close()
         self.daemon_process.join()
         super().closeEvent(event)
