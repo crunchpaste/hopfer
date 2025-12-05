@@ -182,9 +182,7 @@ class ImageResizeDialog(FramelessDialog):
         except ValueError:
             return
 
-        print(val, self.last_w)
         if val == self.last_w:
-            print("Same")
             return
         self.last_w = val
 
@@ -217,9 +215,7 @@ class ImageResizeDialog(FramelessDialog):
         except ValueError:
             return
 
-        print(val, self.last_h)
         if val == self.last_h:
-            print("Same")
             return
         self.last_h = val
 
@@ -253,7 +249,6 @@ class ImageResizeDialog(FramelessDialog):
             return
 
         if new_dpi == self.last_dpi:
-            print("Same")
             return
         self.last_dpi = new_dpi
 

@@ -28,7 +28,6 @@ class ImageStorage(QObject):
 
     # Constants for image processing and saving
     MAX_SAVE_ATTEMPTS = 100
-    NORMALIZED_MAX = 255.0
 
     def __init__(self, daemon):
         """
@@ -125,7 +124,7 @@ class ImageStorage(QObject):
     def _load(self, image):
         # the final procedure of loading an image. expecs a numpy array.
 
-        self.original_image, self.alpha = self.extract_alpha_cv(image)
+        self.original_image, self.alpha = self.extract_alpha(image)
         self.resized = self.original_image.copy()
         h, w = self.original_image.shape[0], self.original_image.shape[1]
 
@@ -266,53 +265,6 @@ class ImageStorage(QObject):
             return alpha
 
     def extract_alpha(self, image):
-        if image.mode == "LA":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
-                np.float16
-            )
-            L = np_image[:, :, 0]
-            A = self.discard_alpha(np_image[:, :, 1])
-
-            self.original_grayscale = True
-            return L, A
-        elif image.mode == "L":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
-                np.float32
-            )
-            L = np_image
-            A = None
-            self.original_grayscale = True
-            return L, A
-        elif image.mode == "RGBA":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
-                np.float32
-            )
-            RGB = np_image[:, :, :3]
-            A = self.discard_alpha(np_image[:, :, 3])
-            RGB, is_gray = self.check_grayscale(RGB)
-            self.original_grayscale = is_gray
-            return RGB, A
-        elif image.mode == "RGB":
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
-                np.float32
-            )
-            RGB = np_image
-            A = None
-            RGB, is_gray = self.check_grayscale(RGB)
-            self.original_grayscale = is_gray
-            return RGB, A
-        else:
-            image = image.convert("RGB")
-            np_image = (np.array(image) / self.NORMALIZED_MAX).astype(
-                np.float32
-            )
-            RGB = np_image
-            RGB, is_gray = self.check_grayscale(RGB)
-            A = None
-            self.original_grayscale = is_gray
-            return RGB, A
-
-    def extract_alpha_cv(self, image):
         """
         Extracts alpha and color/grayscale channels from an OpenCV image based on its channels.
         Assumes image was loaded with cv2.IMREAD_UNCHANGED.
