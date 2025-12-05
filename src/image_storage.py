@@ -827,6 +827,11 @@ class ImageStorage(QObject):
             if os.name != "nt":
                 self.shm_preview = np.rot90(self.shm_preview, k=1)
 
+        h, w = self.grayscale_image.shape
+        self.res_queue.put(
+            {"type": "image_size", "height": h, "width": w, "ratio": h / w}
+        )
+
         # while this does not produce accurate results for the dithering
         # it is much faster than reprocessing the image on each transform.
         # the halftoning would be accurate again on the next reprocess.
