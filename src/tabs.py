@@ -335,7 +335,7 @@ class ImageTab(QWidget):
         Args:
             mode_name (str): The selected grayscaling mode.
         """
-        # pass
+
         if mode_name == "Manual RGB":
             self.rgb_widget.setVisible(True)
             grayscale_settings = {
@@ -346,6 +346,8 @@ class ImageTab(QWidget):
         else:
             self.rgb_widget.setVisible(False)
             grayscale_settings = {}
+
+        print(grayscale_settings)
 
         self.writer.send_grayscale(mode_name, grayscale_settings)
 

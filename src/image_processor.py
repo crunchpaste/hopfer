@@ -159,7 +159,7 @@ class ImageProcessor:
         """Converts the image to grayscale if necessary."""
         if step == 0:
             self.storage.grayscale_image = self._convert_to_grayscale(
-                self.storage.resized,
+                self.storage.resized.copy(),
                 self.grayscale_mode,
                 self.grayscale_settings,
             )
@@ -249,7 +249,6 @@ class ImageProcessor:
             min_val = np.min(image)
             max_val = np.max(image)
             image = (image - min_val) / (max_val - min_val)
-
         if im_settings["equalize"]:
             # cv wants the image to be uint8 for histogram
             # equalization
