@@ -147,7 +147,7 @@ class PreferencesDialog(FramelessDialog):
         with open(get_path("res/hash.txt"), "r") as file:
             hash = file.read()
 
-        self.version_label = QLabel(f"prealpha+{hash}")
+        self.version_label = QLabel("v0.11.1")
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.version_label)
 
