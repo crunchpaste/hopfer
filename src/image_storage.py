@@ -751,6 +751,7 @@ class ImageStorage(QObject):
     def rotate_image(self, cw=True):
         if cw:
             self.original_image = np.rot90(self.original_image, k=-1)
+            self.resized = np.rot90(self.resized, k=-1)
             self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
             self.processed_image = np.rot90(self.processed_image, k=-1)
@@ -760,6 +761,7 @@ class ImageStorage(QObject):
                 self.shm_preview = np.rot90(self.shm_preview, k=-1)
         else:
             self.original_image = np.rot90(self.original_image, k=1)
+            self.resized = np.rot90(self.resized, k=1)
             self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
             self.processed_image = np.rot90(self.processed_image, k=1)
@@ -768,7 +770,7 @@ class ImageStorage(QObject):
             if os.name != "nt":
                 self.shm_preview = np.rot90(self.shm_preview, k=1)
 
-        h, w = self.grayscale_image.shape
+        h, w = self.grayscale_imagenumcodecs.shape
         self.res_queue.put(
             {"type": "image_size", "height": h, "width": w, "ratio": h / w}
         )
@@ -781,6 +783,7 @@ class ImageStorage(QObject):
 
     def flip_image(self):
         self.original_image = np.fliplr(self.original_image)
+        self.resized = np.fliplr(self.resized)
         self.grayscale_image = np.fliplr(self.grayscale_image)
         self.enhanced_image = np.fliplr(self.enhanced_image)
         self.processed_image = np.fliplr(self.processed_image)
@@ -793,6 +796,7 @@ class ImageStorage(QObject):
 
     def invert_image(self):
         self.original_image = 1 - self.original_image
+        self.resized = 1 - self.resized
         self.grayscale_image = 1 - self.grayscale_image
         self.enhanced_image = 1 - self.enhanced_image
         self.processed_image = 1 - self.processed_image

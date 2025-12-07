@@ -39,6 +39,7 @@ class MainWindow(FramelessMainWindow):
         self.w = 1
         self.h = 1
         self.dpi = 150
+        self.shm = None
         self._initialize_components()
         self._setup_ui()
 
@@ -144,6 +145,7 @@ class MainWindow(FramelessMainWindow):
     def close_shm(self):
         if self.shm_preview is not None:
             del self.shm_preview
+        if self.shm is not None:
             self.shm.close()
 
     def open_preferences(self):
@@ -172,7 +174,7 @@ class MainWindow(FramelessMainWindow):
 
             self.writer.resize(w, h, interpolation)
         else:
-            print("User cancelled")
+            pass
 
     def display_processed_image(self, array, reset=True):
         """Display the processed image in the photo viewer."""
@@ -282,7 +284,8 @@ class MainWindow(FramelessMainWindow):
         self.clearFocus()
 
     def closeEvent(self, event):
-        print(self.save_settings())
+        # print(self.save_settings())
+        self.close_shm()
         self.writer.close()
         self.daemon_process.join()
         super().closeEvent(event)

@@ -99,11 +99,13 @@ class Daemon:
 
             elif message["type"] == "exit":
                 del self.storage.shm_preview
-                self.storage.shm.close()
-                message = {
-                    "type": "close_shm",
-                }
-                self.res_queue.put(message)
+                if self.storage.shm is not None:
+                    self.storage.shm.close()
+                    # message = {
+                    #     "type": "close_shm",
+                    # }
+                    # self.res_queue.put(message)
 
-                self.storage.shm.unlink()
+                    self.storage.shm.unlink()
+
                 break

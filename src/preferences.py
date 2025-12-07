@@ -144,10 +144,10 @@ class PreferencesDialog(FramelessDialog):
         self.logotype.setObjectName("logotype")
         layout.addWidget(self.logotype)
 
-        with open(get_path("res/hash.txt"), "r") as file:
-            hash = file.read()
+        # with open(get_path("res/hash.txt"), "r") as file:
+        #     hash = file.read()
 
-        self.version_label = QLabel("v0.11.1")
+        self.version_label = QLabel("v0.11.2")
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.version_label)
 
