@@ -133,6 +133,9 @@ The project relies on the following awesome open-source libraries. I extend my t
 
 ### System
 
+* **`makeself`**: [GitHub Link](https://github.com/megastep/makeself)
+    > Used for creating the Linux installer.
+
 * **`Nuitka`**: [Website](https://nuitka.net/)
     > Used for compiling the application into an executable.
 
