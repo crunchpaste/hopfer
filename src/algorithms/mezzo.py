@@ -11,7 +11,6 @@ def mezzo(img, settings, mode="uniform"):
         r_min, r_max = settings["range"]
         r_min /= 100
         r_max /= 100
-        print(r_min, r_max)
         noise = rng.uniform(r_min, r_max, (h, w))
     elif mode == "gauss":
         loc = settings["location"] / 100
