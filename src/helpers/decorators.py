@@ -30,8 +30,7 @@ def debounce(wait):
 
 def debounce_alt(wait):
     """
-    This is functionally the same but keeps indipendent timers. It is mostly
-    a workaround for linked sliders.
+    This is functionally the same but keeps indipendent timers. It is mostly a workaround for linked sliders.
     """
 
     def decorator(fn):
@@ -54,43 +53,3 @@ def debounce_alt(wait):
         return debounced
 
     return decorator
-
-
-def queue(method):
-    """This is a decorator for the start method of the ImageProcessor class.
-    It ensures that only one processing task is handled at a time, no matter
-    how many calls to start() are made.
-    """
-
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        # keeps track if the step argument
-        step = kwargs.get("step", 0)
-
-        if self.processing:
-            if self.queued_call:
-                _, prev_args, prev_kwargs = self.queued_call
-                prev_step = prev_kwargs.get(
-                    "step", prev_args[0] if prev_args else 0
-                )
-                step = min(step, prev_step)
-            self.queued_call = (method, (step,), {})
-            return
-
-        self.processing = True
-        try:
-            result = method(self, step=step)
-        finally:
-            self.processing = False
-            if self.queued_call:
-                queued_method, queued_args, queued_kwargs = self.queued_call
-                self.queued_call = None  # Reset the queue
-                threading.Timer(
-                    0,
-                    self._delayed_method_call,
-                    args=(queued_method, queued_args, queued_kwargs),
-                ).start()
-
-        return result
-
-    return wrapper

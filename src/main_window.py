@@ -40,6 +40,7 @@ class MainWindow(FramelessMainWindow):
         self.h = 1
         self.dpi = 150
         self.shm = None
+        self.processing = False
         self._initialize_components()
         self._setup_ui()
 

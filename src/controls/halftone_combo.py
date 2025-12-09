@@ -146,7 +146,6 @@ class HalftoneCombo(QWidget):
     def emit_algorithm_changed(self, text):
         """Emit the algorithmChanged signal with the selected algorithm."""
         self.algorithmChanged.emit(text)
-        print(f"Selected algorithm: {text}")
 
     def showPopup(self):
         """Found this suggested somewhere on stackexchange. Doesn't really seem to work."""

@@ -1,6 +1,5 @@
 import json
 import os
-import subprocess
 import sys
 import time
 
@@ -22,6 +21,7 @@ def load_font(path):
     """
     font_path = get_path(path)
     font_id = QFontDatabase.addApplicationFont(font_path)
+
     if font_id == -1:
         print("Failed to load font!")
     else:
@@ -34,20 +34,6 @@ def load_font(path):
         # https://mactype.net
         font.setHintingPreference(QFont.HintingPreference.PreferFullHinting)
         font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
-
-        print("Loaded Font Family:", font_families[0])  # The actual font name
-
-
-def get_latest_hash():
-    try:
-        hash = subprocess.check_output(
-            ["git", "rev-parse", "--short", "HEAD"], cwd=".", text=True
-        ).strip()
-        with open(get_path("res/hash.txt"), "w") as file:
-            file.write(hash)
-        print(f"{hash}")
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
 
 
 def generate_config_if_none():
@@ -75,15 +61,7 @@ def main():
 
     start = time.perf_counter()
 
-    # if not hasattr(sys.modules["__main__"], "__compiled__"):
-    #     # only get the hash if this is not a nuitka compiled binary
-    #     get_latest_hash()
-
     generate_config_if_none()
-
-    # Setup Linux environment if applicable
-    # if sys.platform.startswith("linux") or platform.system() == "Linux":
-    #     desktop_file_path = setup_linux_icon()
 
     # AA_DontUseNativeDialogs is used for custom styling of
     # the Open File Dialog. Not yet styled.
@@ -108,22 +86,14 @@ def main():
 
     end = time.perf_counter()
 
-    print(f"Boot time: {end - start} seconds")
+    # print(f"Boot time: {end - start} seconds")
 
     if len(sys.argv) > 1:
-        # sys.argv[0] is the script/executable path, sys.argv[1] is the first argument
+        # Load an image passed from cli or a file manager
         path = sys.argv[1]
         window.writer.load_image(path)
-        print(f"File passed via CLI/File Manager: {path}")
-    else:
-        print("No file passed")
 
     sys.exit(app.exec())
-    # pass
-    #     # Delete the .desktop file. Suitable only for portable versions and should be improved.
-    #     if desktop_file_path and os.path.exists(desktop_file_path):
-    #         os.remove(desktop_file_path)
-    #         print(f".desktop file removed: {desktop_file_path}")
 
 
 if __name__ == "__main__":

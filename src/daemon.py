@@ -77,35 +77,31 @@ class Daemon:
             elif message["type"] == "ignore_alpha":
                 value = message["value"]
                 self.storage.ignore_alpha = value
+
             # PROCESSOR RELATED
             elif (
-                message["type"] == "grayscale_settings"
+                message["type"] == "process"
                 and self.storage.original_image is not None
             ):
-                self.processor.grayscale_mode = message["mode"]
-                self.processor.grayscale_settings = message["settings"]
-                self.processor.convert = True
-                self.processor.start(step=0)
-            elif (
-                message["type"] == "enhance_settings"
-                and self.storage.original_image is not None
-            ):
-                self.processor.image_settings = message["settings"]
-                self.processor.start(step=1)
-            elif message["type"] == "halftone_settings":
-                self.processor.algorithm = message["algorithm"]
-                self.processor.settings = message["settings"]
-                self.processor.start(step=2)
+                step = []
+                if message["g_mode"] is not None:
+                    self.processor.grayscale_mode = message["g_mode"]
+                    self.processor.grayscale_settings = message["g_settings"]
+                    self.processor.convert = True
+                    step.append(0)
+                if message["e_settings"] is not None:
+                    self.processor.image_settings = message["e_settings"]
+                    step.append(1)
+                if message["h_algorithm"] is not None:
+                    self.processor.algorithm = message["h_algorithm"]
+                    self.processor.settings = message["h_settings"]
+                    step.append(2)
+
+                self.processor.start(step=min(step))
 
             elif message["type"] == "exit":
                 del self.storage.shm_preview
                 if self.storage.shm is not None:
                     self.storage.shm.close()
-                    # message = {
-                    #     "type": "close_shm",
-                    # }
-                    # self.res_queue.put(message)
-
                     self.storage.shm.unlink()
-
                 break

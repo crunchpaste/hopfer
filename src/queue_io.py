@@ -19,6 +19,7 @@ class QueueReader(QObject):
         self.timer = QTimer()
         self.timer.timeout.connect(self.check_queue)
         self.timer.start(interval)
+        self.processing = False
 
     def check_queue(self):
         while not self.queue.empty():
@@ -35,11 +36,13 @@ class QueueReader(QObject):
                 array = message["array"]
                 reset = message["reset"]
                 self.received_processed.emit(array, reset)
+                self.window.processing = False
 
             elif message["type"] == "display_image_nt":
                 array = message["array"]
                 reset = message["reset"]
                 self.received_processed_nt.emit(array, reset)
+                self.window.processing = False
 
             elif message["type"] == "data_for_clipboard":
                 data = message["data"]
@@ -47,6 +50,7 @@ class QueueReader(QObject):
 
             elif message["type"] == "started_processing":
                 self.show_processing_label.emit(True)
+                self.window.processing = True
 
             elif message["type"] == "notification":
                 notification = message["notification"]
@@ -75,10 +79,21 @@ class QueueReader(QObject):
 class QueueWriter(QObject):
     rotate = Signal(bool)
 
-    def __init__(self, queue, window=None):
+    def __init__(self, queue, window=None, interval=50):
         super().__init__()
         self.queue = queue
         self.window = window
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.check_pending)
+        self.timer.start(interval)
+
+        # processing related
+        self.pending = False
+        self.g_settings = None
+        self.g_mode = None
+        self.e_settings = None
+        self.h_settings = None
+        self.h_algorithm = None
 
     def close(self):
         message = {"type": "exit"}
@@ -154,25 +169,45 @@ class QueueWriter(QObject):
         }
         self.queue.put(message)
 
-    def send_halftone(self, algorithm, settings):
-        message = {
-            "type": "halftone_settings",
-            "algorithm": algorithm,
-            "settings": settings,
-        }
-        self.queue.put(message)
-
+    # TODO: Remove the dummy methods down there to make the class a bit cleaner.
     def send_grayscale(self, mode, settings):
-        message = {
-            "type": "grayscale_settings",
-            "mode": mode,
-            "settings": settings,
-        }
-        self.queue.put(message)
+        self.send_process("grayscale", settings, algorithm=mode)
 
     def send_enhance(self, settings):
-        message = {
-            "type": "enhance_settings",
-            "settings": settings,
-        }
-        self.queue.put(message)
+        self.send_process("enhance", settings)
+
+    def send_halftone(self, algorithm, settings):
+        self.send_process("halftone", settings, algorithm)
+
+    def send_process(self, type, settings, algorithm=None):
+        self.pending = True
+        if type == "grayscale":
+            self.g_mode = algorithm
+            self.g_settings = settings
+        if type == "enhance":
+            self.e_settings = settings
+        if type == "halftone":
+            self.h_algorithm = algorithm
+            self.h_settings = settings
+
+    def check_pending(self):
+        if self.pending and not self.window.processing:
+            message = {
+                "type": "process",
+                "g_mode": self.g_mode,
+                "g_settings": self.g_settings,
+                "e_settings": self.e_settings,
+                "h_algorithm": self.h_algorithm,
+                "h_settings": self.h_settings,
+            }
+            self.queue.put(message)
+
+            # reset them all
+            self.pending = False
+            self.g_settings = None
+            self.g_mode = None
+            self.e_settings = None
+            self.h_settings = None
+            self.h_algorithm = None
+        else:
+            return

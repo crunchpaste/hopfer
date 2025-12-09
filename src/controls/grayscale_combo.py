@@ -57,7 +57,6 @@ class GrayscaleCombo(QWidget):
         """Emit the modeChanged signal with the selected mode."""
 
         self.modeChanged.emit(text)
-        print(f"Selected mode: {text}")
 
     def showPopup(self):
         """Found this suggested somewhere on stackexchange. Doesn't really seem to work."""

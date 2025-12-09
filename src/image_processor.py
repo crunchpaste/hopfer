@@ -3,7 +3,6 @@ import time
 import cv2
 import numpy as np
 
-from helpers.decorators import queue
 from helpers.kernels import get_kernel
 
 try:
@@ -112,7 +111,6 @@ class ImageProcessor:
         # Reset is used a flag for the viewer to be reset. Set to True when a new image is loaded.
         self.reset = True
 
-    @queue
     def start(self, step=0):
         """
         The main method of the processor. It processes the image in a sequential manner
@@ -143,7 +141,7 @@ class ImageProcessor:
             self._handle_processing_error()
             processed_image = self.storage.processed_image
 
-        print(f"PROCESSING: {time.perf_counter() - start_time:.6f} seconds")
+        # print(f"PROCESSING: {time.perf_counter() - start_time:.6f} seconds")
 
         self._send_result(processed_image)
 
