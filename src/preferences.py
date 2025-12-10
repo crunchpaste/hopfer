@@ -115,24 +115,28 @@ class PreferencesTab(QWidget):
             load_svg(get_path("res/type.svg"), self.colors)
         )
         self.dialog.titleBar.set_button_colors()
+        self.dialog.about.update_text()
 
 
 class AboutTab(QWidget):
-    def __init__(self):
+    def __init__(self, dialog):
         super().__init__()
+        self.colors = dialog.colors
+
         layout = QVBoxLayout()
 
         with open(get_path("res/desc.html"), "r") as file:
             text = file.read()
+            text = text.replace("@accent", self.colors.accent)
 
-        description_label = QLabel()
-        description_label.setObjectName("about")
-        description_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        description_label.setWordWrap(True)
-        description_label.setTextFormat(Qt.MarkdownText)
-        description_label.setText(text)
-        description_label.setOpenExternalLinks(True)
-        layout.addWidget(description_label)
+        self.description_label = QLabel()
+        self.description_label.setObjectName("about")
+        self.description_label.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        self.description_label.setWordWrap(True)
+        self.description_label.setTextFormat(Qt.MarkdownText)
+        self.description_label.setText(text)
+        self.description_label.setOpenExternalLinks(True)
+        layout.addWidget(self.description_label)
 
         layout.addStretch()
 
@@ -154,6 +158,12 @@ class AboutTab(QWidget):
         layout.addLayout(links_layout)
 
         self.setLayout(layout)
+
+    def update_text(self):
+        with open(get_path("res/desc.html"), "r") as file:
+            text = file.read()
+            text = text.replace("@accent", self.colors.accent)
+        self.description_label.setText(text)
 
 
 class PreferencesDialog(FramelessDialog):
@@ -197,9 +207,14 @@ class PreferencesDialog(FramelessDialog):
         close_button = QPushButton("Close")
         close_button.clicked.connect(self.accept)  # Closes the dialog
 
-        self.tabs.addTab(AboutTab(), "About")
-        self.tabs.addTab(ShortcutsTab(self), "Shortcuts")
-        self.tabs.addTab(PreferencesTab(self), "Preferences")
+        # tab definitions
+        self.about = AboutTab(self)
+        self.shortcuts = ShortcutsTab(self)
+        self.preferences = PreferencesTab(self)
+
+        self.tabs.addTab(self.about, "About")
+        self.tabs.addTab(self.shortcuts, "Shortcuts")
+        self.tabs.addTab(self.preferences, "Preferences")
         layout.addWidget(self.tabs)
 
         self.setLayout(layout)
