@@ -22,7 +22,9 @@ class ImageResizeDialog(FramelessDialog):
         super().__init__(parent)
         self.setWindowTitle("Resize image")
         self.setFixedSize(500, 400)
-        self.setTitleBar(DialogTitleBar(self, parent.colors, label="Resize image"))
+        self.setTitleBar(
+            DialogTitleBar(self, parent.colors, label="Resize image")
+        )
 
         # original pixel size and dpi
         self.original_w = parent.w

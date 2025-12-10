@@ -19,11 +19,11 @@ from controls.resize_dialog import ImageResizeDialog
 from controls.titlebar import HopferTitleBar
 from daemon import Daemon
 from helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
-from helpers.paths import config_path
 from helpers.load_stylesheet import load_qss
-from res_loader import get_path
+from helpers.paths import config_path
 from preferences import PreferencesDialog
 from queue_io import QueueReader, QueueWriter
+from res_loader import get_path
 from sidebar import SideBar
 from viewer import PhotoViewer
 

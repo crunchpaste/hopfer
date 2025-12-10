@@ -1,17 +1,16 @@
-class ColorManager():
+class ColorManager:
     """A very simple class that holds the colors. It is used mainly for live color theme switching"""
 
     def __init__(self, theme="dark"):
-
         self.theme = theme
-        self.primary = None # Color of text
-        self.secondary = None # Color of backgrounds
-        self.accent = None # Color of focused elements
-        self.disabled = None # Color of disabled elements
-        self.titlebar_bg = None # Color of the titlebar background
-        self.titlebar_sh = None # Color of the titlebar shadow
-        self.titlebar_btn = None # Background of the titlebar buttons
-        self.separator = None # Color of the separator in halftone combo
+        self.primary = None  # Color of text
+        self.secondary = None  # Color of backgrounds
+        self.accent = None  # Color of focused elements
+        self.disabled = None  # Color of disabled elements
+        self.titlebar_bg = None  # Color of the titlebar background
+        self.titlebar_sh = None  # Color of the titlebar shadow
+        self.titlebar_btn = None  # Background of the titlebar buttons
+        self.separator = None  # Color of the separator in halftone combo
 
         self.set_theme(self.theme)
 

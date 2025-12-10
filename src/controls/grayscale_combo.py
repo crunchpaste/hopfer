@@ -1,5 +1,11 @@
-from PySide6.QtCore import QPoint, Signal, Qt
-from PySide6.QtWidgets import QComboBox, QFrame, QLabel, QListView, QVBoxLayout, QWidget
+from PySide6.QtCore import QPoint, Signal
+from PySide6.QtWidgets import (
+    QComboBox,
+    QLabel,
+    QListView,
+    QVBoxLayout,
+    QWidget,
+)
 
 
 class GrayscaleCombo(QWidget):
@@ -50,9 +56,7 @@ class GrayscaleCombo(QWidget):
         ]
 
         list_view = QListView()
-        combobox.setView(
-            list_view
-        )
+        combobox.setView(list_view)
 
         combobox.addItems(modes)
 
@@ -78,4 +82,6 @@ class GrayscaleCombo(QWidget):
         self.view().window().move(self.mapToGlobal(QPoint(0, self.height())))
 
     def set_theme(self):
-        self.combobox.view().parentWidget().setStyleSheet(f'background-color: {self.colors.secondary}')
+        self.combobox.view().parentWidget().setStyleSheet(
+            f"background-color: {self.colors.secondary}"
+        )

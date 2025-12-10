@@ -90,7 +90,9 @@ class ColorPicker(FramelessDialog):
         self.update_rgb(self.color)
         self.update_hsv(self.color)
 
-        self.setTitleBar(DialogTitleBar(self, self.colors, label="Color picker"))
+        self.setTitleBar(
+            DialogTitleBar(self, self.colors, label="Color picker")
+        )
         self.titleBar.focus.setFocus()
         self.titleBar.raise_()
 

@@ -2,7 +2,6 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from processing_label import ProcessingIndicator
 from viewer_controls import ViewerControls
-from res_loader import get_path
 
 
 class PhotoViewer(QtWidgets.QGraphicsView):
@@ -82,7 +81,9 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         """Set a new photo in the viewer."""
         if pixmap and not pixmap.isNull():
             self._empty = False
-            self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(self.colors.secondary)))
+            self.setBackgroundBrush(
+                QtGui.QBrush(QtGui.QColor(self.colors.secondary))
+            )
             self.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
             self._photo.setPixmap(pixmap)
         else:
@@ -316,9 +317,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             self.setStyleSheet("QGraphicsView {border: 2px solid transparent}")
 
     def set_theme(self):
-
         if self.hasValidPhoto():
-            self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(self.colors.secondary)))
+            self.setBackgroundBrush(
+                QtGui.QBrush(QtGui.QColor(self.colors.secondary))
+            )
         self.blurBtnBG()
 
     def reset_to_default(self):

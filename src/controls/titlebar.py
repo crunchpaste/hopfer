@@ -130,6 +130,7 @@ class HopferTitleBar(TitleBar):
             #     button._hoverBgColor = QColor(self.colors.titlebar_btn)
             #     button._pressedBgColor = QColor(self.colors.titlebar_btn)
 
+
 class DialogTitleBar(TitleBar):
     """Custom title bar for the preferences dialog"""
 
@@ -194,12 +195,13 @@ class DialogTitleBar(TitleBar):
         #         border-bottom: 2px solid #192020;
         #     }color
         # """)
+
     def set_button_colors(self):
-            self.closeBtn._normalColor = QColor(self.colors.disabled)
-            self.closeBtn._hoverColor = QColor(self.colors.accent)
-            self.closeBtn._pressedColor = QColor(self.colors.primary)
-            self.closeBtn._hoverBgColor = QColor(self.colors.titlebar_btn)
-            self.closeBtn._pressedBgColor = QColor(self.colors.titlebar_btn)
+        self.closeBtn._normalColor = QColor(self.colors.disabled)
+        self.closeBtn._hoverColor = QColor(self.colors.accent)
+        self.closeBtn._pressedColor = QColor(self.colors.primary)
+        self.closeBtn._hoverBgColor = QColor(self.colors.titlebar_btn)
+        self.closeBtn._pressedBgColor = QColor(self.colors.titlebar_btn)
 
 
 class HSvgTitleBarButton(SvgTitleBarButton):

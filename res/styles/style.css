@@ -369,6 +369,7 @@ QSlider::add-page:horizontal {
     margin: 6px 0; /* Align with the groove */
 }
 QSlider::handle:horizontal {
+  /* TODO: Fix the look of sliders */
     background: @primary;
     border: 3px solid @secondary;
     width: 5px;

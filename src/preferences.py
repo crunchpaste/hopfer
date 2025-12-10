@@ -15,6 +15,7 @@ from PySide6.QtWidgets import (
 from qframelesswindow import FramelessDialog
 
 from controls.titlebar import DialogTitleBar
+from controls.toggle import ToggleWithLabel
 from res_loader import get_path, load_svg
 
 # Quite messy should fix at some point
@@ -85,6 +86,29 @@ class ShortcutsTab(QWidget):
         main_layout.addWidget(scroll)
 
 
+class PreferencesTab(QWidget):
+    def __init__(self, dialog):
+        super().__init__()
+        self.dialog = dialog
+        self.colors = dialog.colors
+        layout = QVBoxLayout()
+
+        self.theme = ToggleWithLabel(label="Dark theme")
+        if self.colors.theme == "dark":
+            self.theme.set_toggle_checked(True)
+        else:
+            self.theme.set_toggle_checked(False)
+
+        self.theme.toggle_changed.connect(self.on_theme)
+
+        layout.addWidget(self.theme)
+        layout.addStretch()
+        self.setLayout(layout)
+
+    def on_theme(self):
+        self.dialog.parent.toggle_theme()
+
+
 class AboutTab(QWidget):
     def __init__(self):
         super().__init__()
@@ -130,6 +154,9 @@ class PreferencesDialog(FramelessDialog):
         self.setWindowTitle("Preferences")
         self.setModal(True)
 
+        self.parent = parent
+        self.colors = parent.colors
+
         self.setFixedSize(445, 765)
         layout = QVBoxLayout()
 
@@ -140,7 +167,7 @@ class PreferencesDialog(FramelessDialog):
         )
 
         self.logotype = QSvgWidget()
-        self.logotype.load(load_svg(get_path("res/type.svg"), parent.colors))
+        self.logotype.load(load_svg(get_path("res/type.svg"), self.colors))
         self.logotype.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         self.logotype.setObjectName("logotype")
         layout.addWidget(self.logotype)
@@ -164,6 +191,7 @@ class PreferencesDialog(FramelessDialog):
 
         self.tabs.addTab(AboutTab(), "About")
         self.tabs.addTab(ShortcutsTab(self), "Shortcuts")
+        self.tabs.addTab(PreferencesTab(self), "Preferences")
         layout.addWidget(self.tabs)
 
         self.setLayout(layout)

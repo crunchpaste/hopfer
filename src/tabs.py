@@ -1,10 +1,5 @@
 from PySide6.QtCore import QCoreApplication, Qt, Signal
-from PySide6.QtWidgets import (
-    QScrollArea,
-    QVBoxLayout,
-    QWidget,
-    QPushButton
-)
+from PySide6.QtWidgets import QPushButton, QScrollArea, QVBoxLayout, QWidget
 
 from controls.color_controls import ColorGroup
 from controls.grayscale_combo import GrayscaleCombo

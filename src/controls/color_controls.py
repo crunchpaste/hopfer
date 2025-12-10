@@ -141,9 +141,7 @@ class ColorControl(QWidget):
             color_code = QColor(color[0], color[1], color[2]).name()
 
         self.swatch.setObjectName("swatch")
-        self.swatch.setStyleSheet(
-            f"background-color: {color_code}"
-        )
+        self.swatch.setStyleSheet(f"background-color: {color_code}")
 
         self.hex.setText(color_code)
 
