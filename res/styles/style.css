@@ -105,8 +105,8 @@ QSplitter::handle:hover {
 QSpinBox {
     color: @primary;
     background: @secondary;
-    height: 30px;
-    border: 1px solid @primary;
+    height: 26px;
+    border: 2px solid @primary;
     border-radius: 2px;
     selection-color: @accent;
     selection-background-color: @secondary;
@@ -118,9 +118,9 @@ QSpinBox::up-button {
     background: transparent;
     subcontrol-origin: border;
     subcontrol-position: right;
-    height: 31px;
-    border: 1px solid @primary;
-    border-radius: 2px;
+    height: 28px;
+    border: 2px solid @primary;
+    /* border-radius: 0px; */
     width: 25px;
     padding: 0px;
 }

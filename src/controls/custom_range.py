@@ -10,35 +10,45 @@ class RangeSlider(QRangeSlider):
     it fit the look of the rest of the sliders.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, colors=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self._style.pen_active = "#f0f6f0"
-        self._style.pen_inactive = "#f0f6f0"
-        self._style.pen_disabled = "#f0f6f0"
-        self._style.brush_active = "#f0f6f0"
-        self._style.brush_inactive = "#f0f6f0"
-        self._style.brush_disabled = "#f0f6f0"
+        self.colors = colors
+        self._style.pen_active = self.colors.primary
+        self._style.pen_inactive = self.colors.primary
+        self._style.pen_disabled = self.colors.primary
+        self._style.brush_active = self.colors.primary
+        self._style.brush_inactive = self.colors.primary
+        self._style.brush_disabled = self.colors.primary
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
     def focusInEvent(self, event: QFocusEvent):
         """Called when the slider gains focus."""
-        self._style.pen_active = "#fa8072"
-        self._style.pen_inactive = "#fa8072"
-        self._style.pen_disabled = "#fa8072"
-        self._style.brush_active = "#fa8072"
-        self._style.brush_inactive = "#fa8072"
-        self._style.brush_disabled = "#fa8072"
+        self._style.pen_active = self.colors.accent
+        self._style.pen_inactive = self.colors.accent
+        self._style.pen_disabled = self.colors.accent
+        self._style.brush_active = self.colors.accent
+        self._style.brush_inactive = self.colors.accent
+        self._style.brush_disabled = self.colors.accent
 
         super().focusInEvent(event)
 
     def focusOutEvent(self, event: QFocusEvent):
         """Called when the slider loses focus."""
-        self._style.pen_active = "#f0f6f0"
-        self._style.pen_inactive = "#f0f6f0"
-        self._style.pen_disabled = "#f0f6f0"
-        self._style.brush_active = "#f0f6f0"
-        self._style.brush_inactive = "#f0f6f0"
-        self._style.brush_disabled = "#f0f6f0"
+        self._style.pen_active = self.colors.primary
+        self._style.pen_inactive = self.colors.primary
+        self._style.pen_disabled = self.colors.primary
+        self._style.brush_active = self.colors.primary
+        self._style.brush_inactive = self.colors.primary
+        self._style.brush_disabled = self.colors.primary
 
         super().focusOutEvent(event)
+
+    def update_slider(self):
+        self._style.pen_active = self.colors.primary
+        self._style.pen_inactive = self.colors.primary
+        self._style.pen_disabled = self.colors.primary
+        self._style.brush_active = self.colors.primary
+        self._style.brush_inactive = self.colors.primary
+        self._style.brush_disabled = self.colors.primary
+        self.repaint()

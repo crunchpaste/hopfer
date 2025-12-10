@@ -163,11 +163,11 @@ class PhansalkarSettings(HalftoneSettings):
 
 
 class MezzoSettings(HalftoneSettings):
-    def __init__(self):
+    def __init__(self, colors=None):
         super().__init__()
 
         self.range_slider = SliderControl(
-            "Uniform range", (0, 100), (0, 100), 100, True
+            "Uniform range", (0, 100), (0, 100), 100, True, colors=colors
         )
         self.range_slider.value_changed.connect(self.emit_settings_changed)
 

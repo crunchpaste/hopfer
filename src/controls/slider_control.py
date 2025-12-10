@@ -27,6 +27,7 @@ class SliderControl(QWidget):
         precision=2,
         padding=10,
         stretch=False,
+        colors=None,
     ):
         super().__init__()
 
@@ -39,7 +40,7 @@ class SliderControl(QWidget):
         min_value, max_value = range[0], range[1]
 
         if self.double:
-            self.slider = RangeSlider(Qt.Orientation.Horizontal)
+            self.slider = RangeSlider(Qt.Orientation.Horizontal, colors=colors)
         else:
             self.slider = QSlider(Qt.Orientation.Horizontal)
         self.slider.setRange(min_value, max_value)

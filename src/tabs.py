@@ -71,7 +71,8 @@ class HalftoneTab(QWidget):
         elif algorithm_name == "Phansalkar threshold":
             return PhansalkarSettings()
         elif algorithm_name == "Mezzotint uniform":
-            return MezzoSettings()
+            # colors from the window are needed as rangleslider cant be styled with css
+            return MezzoSettings(self.window.colors)
         elif algorithm_name == "Mezzotint normal":
             return GaussSettings()
         elif algorithm_name == "Mezzotint beta":
