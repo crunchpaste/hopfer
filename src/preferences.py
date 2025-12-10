@@ -111,6 +111,11 @@ class PreferencesTab(QWidget):
         else:
             self.dialog.parent.set_theme("light")
 
+        self.dialog.logotype.load(
+            load_svg(get_path("res/type.svg"), self.colors)
+        )
+        self.dialog.titleBar.set_button_colors()
+
 
 class AboutTab(QWidget):
     def __init__(self):
