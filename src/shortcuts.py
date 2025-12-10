@@ -159,5 +159,3 @@ class Shortcuts:
         self.x9_shortcut.activated.connect(
             lambda: self.main_window.viewer.resetToScale(9)
         )
-
-        print("Shortcuts initialized successfully!")

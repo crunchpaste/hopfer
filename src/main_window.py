@@ -95,7 +95,6 @@ class MainWindow(FramelessMainWindow):
             w = config["window"]["width"]
             h = config["window"]["height"]
             maximized = config["window"]["maximized"]
-            print("loaded")
             theme = config["theme"]
 
         except Exception:
@@ -317,7 +316,6 @@ class MainWindow(FramelessMainWindow):
 
     def closeEvent(self, event):
         self.save_settings()
-        print("saved")
         self.close_shm()
         self.writer.close()
         self.daemon_process.join()

@@ -65,8 +65,6 @@ class GrayscaleCombo(QWidget):
         # https://stackoverflow.com/questions/54315474/how-to-remove-white-background-on-top-and-bottom-from-popup-of-qcombobox
 
         # combobox.view().parentWidget().setStyleSheet(f'background-color: {self.colors.secondary}')
-        combobox.setProperty("no-native-popup", True)
-        print(combobox.view().parentWidget())
 
         return combobox
 
