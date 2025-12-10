@@ -295,6 +295,7 @@ class MainWindow(FramelessMainWindow):
         self.colors.set_theme(theme.lower())
         self.titleBar.change_theme()
         self.viewer.set_theme()
+        load_qss(self.app, get_path("res/styles/style.css"), self.colors)
 
         # HACK: this is very very ugly, but superqt does not support qss styling so we have to manually update the slider color when the theme changes.
         try:
@@ -302,12 +303,10 @@ class MainWindow(FramelessMainWindow):
                 self.sidebar.halftone_tab.current_algorithm
                 == "Mezzotint uniform"
             ):
-                self.sidebar.halftone_tab.settings_widget.range_slider.slider.update_slider()
-                pass
+                sw = self.sidebar.halftone_tab.settings_widget
+                sw.range_slider.slider.update_slider()
         except Exception as e:
-            print("here?")
             print(e)
-        load_qss(self.app, get_path("res/styles/style.css"), self.colors)
 
     def mousePressEvent(self, event):
         # just clearing the focus as it was quite annoying when trying to
