@@ -1,13 +1,14 @@
-from PySide6.QtCore import QPoint, Signal
-from PySide6.QtWidgets import QComboBox, QLabel, QListView, QVBoxLayout, QWidget
+from PySide6.QtCore import QPoint, Signal, Qt
+from PySide6.QtWidgets import QComboBox, QFrame, QLabel, QListView, QVBoxLayout, QWidget
 
 
 class GrayscaleCombo(QWidget):
     modeChanged = Signal(str)  # Signal emitted when the algorithm changes
 
-    def __init__(self):
+    def __init__(self, colors):
         super().__init__()
         # Initialize UI components
+        self.colors = colors
         self._initialize_ui()
 
     def _initialize_ui(self):
@@ -47,10 +48,22 @@ class GrayscaleCombo(QWidget):
             "Value",
             "Manual RGB",
         ]
-        combobox.addItems(modes)
+
+        list_view = QListView()
         combobox.setView(
-            QListView()
-        )  # Ensure dropdown uses a list view for better presentation
+            list_view
+        )
+
+        combobox.addItems(modes)
+
+        # HACK: fixes the ugly shadow behind the dropdown
+        # found on stackoverflow:
+        # https://stackoverflow.com/questions/54315474/how-to-remove-white-background-on-top-and-bottom-from-popup-of-qcombobox
+
+        # combobox.view().parentWidget().setStyleSheet(f'background-color: {self.colors.secondary}')
+        combobox.setProperty("no-native-popup", True)
+        print(combobox.view().parentWidget())
+
         return combobox
 
     def emit_mode_changed(self, text):
@@ -63,3 +76,6 @@ class GrayscaleCombo(QWidget):
         super().showPopup()
         # Move the popup to the top left of the combobox to control position
         self.view().window().move(self.mapToGlobal(QPoint(0, self.height())))
+
+    def set_theme(self):
+        self.combobox.view().parentWidget().setStyleSheet(f'background-color: {self.colors.secondary}')

@@ -7,16 +7,20 @@ from PySide6.QtWidgets import (
     QStyledItemDelegate,
     QVBoxLayout,
     QWidget,
+    QFrame
 )
 
 
 class StyledSeparatorDelegate(QStyledItemDelegate):
+    def __init__(self, colors, parent=None):
+        super().__init__(parent)
+        self.colors = colors
     def paint(self, painter, option, index):
         """Paint method to style separators."""
         if index.data(Qt.UserRole) == "separator":  # Check if separator
             painter.save()
             pen = painter.pen()
-            pen.setColor(QColor("#282929"))
+            pen.setColor(QColor(self.colors.separator))
             pen.setWidth(3)
             painter.setPen(pen)
             painter.drawLine(
@@ -39,14 +43,16 @@ class StyledSeparatorDelegate(QStyledItemDelegate):
 class HalftoneCombo(QWidget):
     algorithmChanged = Signal(str)  # Signal emitted when the algorithm changes
 
-    def __init__(self):
+    def __init__(self, colors):
         super().__init__()
 
         # Initialize UI components
+        self.colors = colors
         self._initialize_ui()
 
     def _initialize_ui(self):
         # Label for the combo box
+
         self.label = QLabel("Halftoning Algorithm")
 
         # ComboBox for algorithm selection
@@ -73,7 +79,7 @@ class HalftoneCombo(QWidget):
         """
         combobox = QComboBox()
         combobox.setView(QListView())  # Enable custom delegate support
-        combobox.setItemDelegate(StyledSeparatorDelegate(combobox))
+        combobox.setItemDelegate(StyledSeparatorDelegate(self.colors, parent=combobox))
         combobox.setMaxVisibleItems(25)
         algorithms = [
             "None",
@@ -152,3 +158,6 @@ class HalftoneCombo(QWidget):
         super().showPopup()
         # Move the popup to the top left of the combobox to control position
         self.view().window().move(self.mapToGlobal(QPoint(0, self.height())))
+        
+    def set_theme(self):
+        self.combobox.view().parentWidget().setStyleSheet(f'background-color: {self.colors.secondary}')

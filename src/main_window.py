@@ -14,11 +14,14 @@ from PySide6.QtWidgets import (
 )
 from qframelesswindow import FramelessMainWindow
 
+from controls.color_manager import ColorManager
 from controls.resize_dialog import ImageResizeDialog
 from controls.titlebar import HopferTitleBar
 from daemon import Daemon
 from helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
 from helpers.paths import config_path
+from helpers.load_stylesheet import load_qss
+from res_loader import get_path
 from preferences import PreferencesDialog
 from queue_io import QueueReader, QueueWriter
 from sidebar import SideBar
@@ -33,8 +36,11 @@ class MainWindow(FramelessMainWindow):
     Inherits from FramelessMainWindow and is used for the custom toolbar capabilities.
     """
 
-    def __init__(self):
+    def __init__(self, app):
         super().__init__()
+        # a reference to the main app so that it can be restyled
+        self.app = app
+        self.colors = ColorManager()
         # needed for the resize dialog
         self.w = 1
         self.h = 1
@@ -128,6 +134,8 @@ class MainWindow(FramelessMainWindow):
 
         self.setMenuWidget(self.titleBar)
         self.titleBar.focus.setFocus()
+
+        self.sidebar.image_tab.theme_button.clicked.connect(self.toggle_theme)
 
         # it says its needed in the docs, doesnt seem to actually be
         # self.titleBar.raise_()
@@ -276,6 +284,15 @@ class MainWindow(FramelessMainWindow):
 
         with open(config_path(), "w") as f:
             json.dump(config, f, indent=2)
+
+    def toggle_theme(self):
+        if self.colors.theme == "dark":
+            self.colors.set_theme("light")
+        else:
+            self.colors.set_theme("dark")
+        self.titleBar.change_theme()
+        self.viewer.set_theme()
+        load_qss(self.app, get_path("res/styles/style.css"), self.colors)
 
     def mousePressEvent(self, event):
         # just clearing the focus as it was quite annoying when trying to

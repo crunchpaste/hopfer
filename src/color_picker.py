@@ -40,6 +40,9 @@ class ColorPicker(FramelessDialog):
 
     def __init__(self, color=None, parent=None):
         super().__init__(parent)
+
+        self.colors = parent.colors
+
         self.setWindowTitle("Color Picker")
         self.setFixedSize(905, 600)
         outer_layout = QVBoxLayout(self)
@@ -87,7 +90,7 @@ class ColorPicker(FramelessDialog):
         self.update_rgb(self.color)
         self.update_hsv(self.color)
 
-        self.setTitleBar(DialogTitleBar(self, label="Color picker"))
+        self.setTitleBar(DialogTitleBar(self, self.colors, label="Color picker"))
         self.titleBar.focus.setFocus()
         self.titleBar.raise_()
 

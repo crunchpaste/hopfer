@@ -3,6 +3,7 @@ from PySide6.QtWidgets import (
     QScrollArea,
     QVBoxLayout,
     QWidget,
+    QPushButton
 )
 
 from controls.color_controls import ColorGroup
@@ -44,7 +45,7 @@ class HalftoneTab(QWidget):
         self.layout = QVBoxLayout()
 
         # Add the combobox for algorithm selection
-        self.combobox = HalftoneCombo()
+        self.combobox = HalftoneCombo(self.window.colors)
         self.combobox.combobox.currentTextChanged.connect(
             self.on_algorithm_changed
         )
@@ -174,7 +175,7 @@ class ImageTab(QWidget):
     def _initialize_ui(self):
         self.layout = QVBoxLayout()
 
-        self.combobox = GrayscaleCombo()
+        self.combobox = GrayscaleCombo(self.window.colors)
         self.combobox.combobox.currentTextChanged.connect(self.on_mode_changed)
 
         self.rgb_widget = QWidget()
@@ -310,6 +311,10 @@ class ImageTab(QWidget):
             lambda: self.on_settings_changed(sender=None)
         )
 
+        # theme button
+
+        self.theme_button = QPushButton("Theme")
+
         self.layout.addWidget(self.combobox)
         layout.addWidget(self.rgb_widget)
         layout.addWidget(self.normalize)
@@ -319,6 +324,7 @@ class ImageTab(QWidget):
         layout.addWidget(self.unsharp_toggle)
         layout.addWidget(self.laplacian_toggle)
         layout.addStretch()
+        # layout.addWidget(self.theme_button)
 
         container.setLayout(layout)
         scroll.setWidget(container)

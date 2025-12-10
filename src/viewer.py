@@ -2,6 +2,7 @@ from PySide6 import QtCore, QtGui, QtWidgets
 
 from processing_label import ProcessingIndicator
 from viewer_controls import ViewerControls
+from res_loader import get_path
 
 
 class PhotoViewer(QtWidgets.QGraphicsView):
@@ -14,7 +15,10 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def __init__(self, window, storage=None, parent=None):
         super().__init__(parent)
 
+        self.setObjectName("viewer")
+
         self.window = window  # needed to regain focus after a drop
+        self.colors = window.colors
         # self.storage = storage  # needed to load image after a drop
         self.setAcceptDrops(True)
 
@@ -68,6 +72,8 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         self.controls.x2.clicked.connect(lambda: self.resetToScale(scale=2))
         self.controls.blur.clicked.connect(self.toggleBlur)
 
+        self.set_theme()
+
     def hasValidPhoto(self):
         """Check if the viewer currently has a valid photo."""
         return not self._empty
@@ -76,7 +82,7 @@ class PhotoViewer(QtWidgets.QGraphicsView):
         """Set a new photo in the viewer."""
         if pixmap and not pixmap.isNull():
             self._empty = False
-            self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(34, 35, 35)))
+            self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(self.colors.secondary)))
             self.setDragMode(QtWidgets.QGraphicsView.DragMode.ScrollHandDrag)
             self._photo.setPixmap(pixmap)
         else:
@@ -88,20 +94,31 @@ class PhotoViewer(QtWidgets.QGraphicsView):
     def toggleBlur(self):
         # Toggle the blur effect and apply a style to the button
         self._blur.setEnabled(not self._blur.isEnabled())
+        self.blurBtnBG()
+
+    def blurBtnBG(self):
         if self._blur.isEnabled():
-            self.controls.blur.setStyleSheet(
-                "QPushButton {background-color: #f0f6f0;}"
-                "QPushButton {color: #222323;}"
-                "QPushButton:hover {background-color: #222323;}"
-                "QPushButton:hover {color:  #f0f6f0;}"
-            )
+            self.controls.blur.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {self.colors.primary};
+                    color: {self.colors.secondary};
+                }}
+                QPushButton:hover {{
+                    background-color: {self.colors.secondary};
+                    color: {self.colors.primary};
+                }}
+            """)
         else:
-            self.controls.blur.setStyleSheet(
-                "QPushButton {background-color: #222323;}"
-                "QPushButton {color:  #f0f6f0;}"
-                "QPushButton:hover {background-color: #f0f6f0;}"
-                "QPushButton:hover {color: #222323;;}"
-            )
+            self.controls.blur.setStyleSheet(f"""
+                QPushButton {{
+                    background-color: {self.colors.secondary};
+                    color: {self.colors.primary};
+                }}
+                QPushButton:hover {{
+                background-color: {self.colors.primary};
+                color: {self.colors.secondary};
+                }}
+            """)
 
     def resetView(self, scale=1):
         """Reset the view to fit the photo within the viewport."""
@@ -297,6 +314,12 @@ class PhotoViewer(QtWidgets.QGraphicsView):
             # event is not triggered as it is quite jarring. The border is
             # compensated with the margin in style.css
             self.setStyleSheet("QGraphicsView {border: 2px solid transparent}")
+
+    def set_theme(self):
+
+        if self.hasValidPhoto():
+            self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(self.colors.secondary)))
+        self.blurBtnBG()
 
     def reset_to_default(self):
         # removes image and resets everything to defaults

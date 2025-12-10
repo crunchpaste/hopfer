@@ -1,5 +1,6 @@
 import os
 import sys
+from PySide6.QtCore import QByteArray
 
 
 def get_path(relative_path):
@@ -31,3 +32,25 @@ def get_path(relative_path):
 
     # Return the final path by joining the base path with the relative resource path
     return os.path.join(base_path, relative_path)
+
+def load_svg(file_path, colors=None):
+    if not os.path.exists(file_path):
+
+        return QByteArray()
+
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            svg_string = f.read()
+    except Exception as e:
+        return QByteArray()
+
+    if colors is not None:
+        svg_string = svg_string.replace("@primary", colors.primary)
+    else:
+        svg_string = svg_string.replace("@primary", "#f0f6f0")
+
+    svg_byte_string = svg_string.encode('utf-8')
+
+    svg_qbytearray = QByteArray(svg_byte_string)
+
+    return svg_qbytearray

@@ -26,9 +26,6 @@ class SideBar(QWidget):
         self.notifications = NotificationPane(self)
 
         # Add individual tabs
-        # self.image_tab = ImageTab(self.processor)
-        # self.halftone_tab = HalftoneTab(self.processor)
-        # self.output_tab = OutputTab(self.storage)
 
         self.image_tab = ImageTab(writer=self.writer, window=self.main_window)
         self.halftone_tab = HalftoneTab(

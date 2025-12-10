@@ -140,8 +140,9 @@ class ColorControl(QWidget):
         elif isinstance(color, np.ndarray):
             color_code = QColor(color[0], color[1], color[2]).name()
 
+        self.swatch.setObjectName("swatch")
         self.swatch.setStyleSheet(
-            f"background-color: {color_code}; border: 2px solid #f0f6f6;"
+            f"background-color: {color_code}"
         )
 
         self.hex.setText(color_code)

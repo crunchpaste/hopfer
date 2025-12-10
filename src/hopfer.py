@@ -78,7 +78,7 @@ def main():
     # highlight in an editor.
     load_qss(app, get_path("res/styles/style.css"))
 
-    window = MainWindow()
+    window = MainWindow(app)
     window.setWindowIcon(QIcon(get_path("res/hopfer.png")))
     window.show()
 

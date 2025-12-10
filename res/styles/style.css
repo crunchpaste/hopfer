@@ -9,7 +9,7 @@ QListView {
 QWidget {
     background-color: @secondary;
     color: @primary;
-    font-size: 14px;
+    font-size: 10pt;
 }
 
 QPushButton {
@@ -34,18 +34,18 @@ QPushButton:focus {
 }
 QComboBox {
     background-color: @secondary;
-    border: 1px solid @primary;
+    border: 2px solid @primary;
     padding: 4px;
     color: @primary;
 }
 QComboBox:disabled {
-    border: 1px solid @disabled;
+    border: 2px solid @disabled;
     border-radius: 1px;
     padding: 4px;
     color: @disabled;
 }
 QComboBox:focus {
-    border: 1px solid @accent;
+    border: 2px solid @accent;
     color: @accent;
 }
 QComboBox::drop-down {
@@ -55,14 +55,28 @@ QComboBox::drop-down {
 }
 QComboBox::down-arrow {
     image: url("@res/icons/menu-down.@ext");
+    margin-right: 7px
+}
+
+QComboBox::down-arrow::disabled {
+    image: none
+}
+
+QComboBox QAbstractItemView {
+    border: none;
+    outline: 0;
+    padding: 0px;
+    show-decoration-selected: 1;
 }
 /* Dropdown List */
 QComboBox QAbstractItemView {
     background-color: @secondary;
-    border: 1px solid @primary;
+    border: 2px solid @primary;
     border-radius: 2px;
     padding: 5px;
+    margin-top: 0px;
 }
+
 QComboBox QAbstractItemView::item {
     padding: 5px;
 }
@@ -81,11 +95,11 @@ QComboBox QAbstractItemView::item:selected {
 }
 
 QSplitter::handle {
-    image: url("@res/icons/handle.svg");
+    image: url("@res/icons/handle@theme.svg");
     height: 6px;
 }
 QSplitter::handle:hover {
-    image: url("@res/icons/handle_hover.svg");
+    image: url("@res/icons/handle_hover@theme.svg");
 }
 
 QSpinBox {
@@ -259,12 +273,19 @@ QToolTip {
 
 QTabWidget::tab-bar {
     alignment: left;
+    margin-bottom: 10px;
 }
 
+/* QTabWidget > QTabBar::tab {
+    margin-bottom: 10px;
+} */
+
 QTabBar::tab {
-    background-color: @secondary;
-    border: 1px solid @primary;
+    background-color: none;
+    border: 2px solid @primary;
     padding: 5px 10px;
+    margin-bottom: 3px;
+    margin-right: 3px
 }
 
 QTabBar::tab:selected {
@@ -281,7 +302,7 @@ QTabBar::tab:hover {
 }
 
 QTabWidget::pane {
-    border: 1px solid @primary;
+    border: 2px solid @primary;
     background-color: transparent;
 }
 
@@ -379,7 +400,7 @@ QGraphicsView {
     border: 2px solid transparent;
     margin: 8px; /* should have been 10, but this is compensating for te border */
     min-width: 240px;
-    background: url("@res/background.svg") no-repeat center center;
+    background: url("@res/background@theme.svg") no-repeat center center;
 }
 QGraphicsView focus {
     border: 1px solid @accent;
@@ -456,6 +477,19 @@ QScrollBar::sub-line:vertical {
 
 #about {
     padding: 10px;
+}
+
+#customTitleBar {
+    background: @titlebarBg;
+    border-bottom: 2px solid @titlebarSh;
+}
+
+#titleBarLogo {
+    background: transparent
+}
+
+#swatch {
+   border: 2px solid @primary;
 }
 
 p {

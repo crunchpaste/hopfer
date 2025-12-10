@@ -15,7 +15,7 @@ from PySide6.QtWidgets import (
 from qframelesswindow import FramelessDialog
 
 from controls.titlebar import DialogTitleBar
-from res_loader import get_path
+from res_loader import get_path, load_svg
 
 # Quite messy should fix at some point
 
@@ -139,7 +139,8 @@ class PreferencesDialog(FramelessDialog):
             )
         )
 
-        self.logotype = QSvgWidget(get_path("res/type.svg"))
+        self.logotype = QSvgWidget()
+        self.logotype.load(load_svg(get_path("res/type.svg"), parent.colors))
         self.logotype.renderer().setAspectRatioMode(Qt.KeepAspectRatio)
         self.logotype.setObjectName("logotype")
         layout.addWidget(self.logotype)
@@ -166,5 +167,5 @@ class PreferencesDialog(FramelessDialog):
         layout.addWidget(self.tabs)
 
         self.setLayout(layout)
-        self.setTitleBar(DialogTitleBar(self))
+        self.setTitleBar(DialogTitleBar(self, parent.colors))
         self.titleBar.raise_()
