@@ -106,7 +106,10 @@ class PreferencesTab(QWidget):
         self.setLayout(layout)
 
     def on_theme(self):
-        self.dialog.parent.toggle_theme()
+        if self.theme.is_toggle_checked():
+            self.dialog.parent.set_theme("dark")
+        else:
+            self.dialog.parent.set_theme("light")
 
 
 class AboutTab(QWidget):

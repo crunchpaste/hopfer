@@ -36,22 +36,68 @@ def load_font(path):
         font.setStyleStrategy(QFont.StyleStrategy.PreferAntialias)
 
 
+# def generate_config_if_none():
+#     config_folder = os.path.join(user_config_dir(), "hopfer")
+#     config_path = os.path.join(config_folder, "config.json")
+#
+#     if not os.path.exists(config_path):
+#         os.makedirs(config_folder, exist_ok=True)
+#         config = {
+#             "window": {"width": 1200, "height": 800, "maximized": False},
+#             "paths": {
+#                 "open_path": user_pictures_dir(),
+#                 "save_path": user_pictures_dir(),
+#             },
+#             "theme": "dark"
+#         }
+#         with open(config_path, "w") as f:
+#             json.dump(config, f, indent=2)
+
+
 def generate_config_if_none():
     config_folder = os.path.join(user_config_dir(), "hopfer")
     config_path = os.path.join(config_folder, "config.json")
 
-    print(config_path)
-    if not os.path.exists(config_path):
-        os.makedirs(config_folder, exist_ok=True)
-        config = {
-            "window": {"width": 1200, "height": 800, "maximized": False},
-            "paths": {
-                "open_path": user_pictures_dir(),
-                "save_path": user_pictures_dir(),
-            },
-        }
-        with open(config_path, "w") as f:
-            json.dump(config, f, indent=2)
+    DEFAULT_CONFIG = {
+        "window": {"width": 1200, "height": 800, "maximized": False},
+        "paths": {
+            "open_path": user_pictures_dir(),
+            "save_path": user_pictures_dir(),
+        },
+        "theme": "dark",
+    }
+
+    os.makedirs(config_folder, exist_ok=True)
+
+    config_to_write = DEFAULT_CONFIG.copy()
+
+    if os.path.exists(config_path):
+        try:
+            with open(config_path, "r") as f:
+                existing_config = json.load(f)
+
+            config_to_write = _recursive_merge_defaults(
+                existing_config, DEFAULT_CONFIG
+            )
+
+        except json.JSONDecodeError:
+            print(
+                f"Warning: Configuration file at {config_path} is invalid. Overwriting with defaults."
+            )
+        except Exception as e:
+            print(f"Error loading config file: {e}. Overwriting with defaults.")
+
+    with open(config_path, "w") as f:
+        json.dump(config_to_write, f, indent=2)
+
+
+def _recursive_merge_defaults(target_dict, defaults):
+    for k, v in defaults.items():
+        if k not in target_dict:
+            target_dict[k] = v
+        elif isinstance(target_dict[k], dict) and isinstance(v, dict):
+            target_dict[k] = _recursive_merge_defaults(target_dict[k], v)
+    return target_dict
 
 
 def main():

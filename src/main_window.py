@@ -95,11 +95,14 @@ class MainWindow(FramelessMainWindow):
             w = config["window"]["width"]
             h = config["window"]["height"]
             maximized = config["window"]["maximized"]
+            print("loaded")
+            theme = config["theme"]
 
         except Exception:
             w = 1200
             h = 800
             maximized = False
+            theme = "dark"
 
         self.resize(w, h)
         if maximized:
@@ -135,10 +138,10 @@ class MainWindow(FramelessMainWindow):
         self.setMenuWidget(self.titleBar)
         self.titleBar.focus.setFocus()
 
-        self.sidebar.image_tab.theme_button.clicked.connect(self.toggle_theme)
-
         # it says its needed in the docs, doesnt seem to actually be
         # self.titleBar.raise_()
+
+        self.set_theme(theme)
 
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
@@ -277,19 +280,19 @@ class MainWindow(FramelessMainWindow):
             "maximized": self.isMaximized(),
         }
 
+        theme = self.colors.theme
+
         with open(config_path(), "r") as f:
             config = json.load(f)
 
         config["window"] = window
+        config["theme"] = theme
 
         with open(config_path(), "w") as f:
             json.dump(config, f, indent=2)
 
-    def toggle_theme(self):
-        if self.colors.theme == "dark":
-            self.colors.set_theme("light")
-        else:
-            self.colors.set_theme("dark")
+    def set_theme(self, theme):
+        self.colors.set_theme(theme.lower())
         self.titleBar.change_theme()
         self.viewer.set_theme()
         load_qss(self.app, get_path("res/styles/style.css"), self.colors)
@@ -302,7 +305,8 @@ class MainWindow(FramelessMainWindow):
         self.clearFocus()
 
     def closeEvent(self, event):
-        # print(self.save_settings())
+        self.save_settings()
+        print("saved")
         self.close_shm()
         self.writer.close()
         self.daemon_process.join()
