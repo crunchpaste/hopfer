@@ -416,12 +416,12 @@ QScrollArea {
 QScrollBar:vertical {
     border: transparent;
     border-radius: 3px;
-    background: #202020;
+    background: @secondary;
     width: 8px;
 }
 
 QScrollBar::handle {
-    background: #313532;
+    background: @muted;
     border-radius: 3px;
     min-height: 30px;
 }

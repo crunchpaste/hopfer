@@ -28,6 +28,8 @@ def load_qss(app, qss_file_path, colors=None):
 
             titlebar_bg = colors.titlebar_bg
             titlebar_sh = colors.titlebar_sh
+            separator = colors.separator
+            muted = colors.muted
 
         else:
             # Default dark theme
@@ -39,6 +41,8 @@ def load_qss(app, qss_file_path, colors=None):
 
             titlebar_bg = "#202121"
             titlebar_sh = "#192020"
+            separator = "#282929"
+            muted = "#313532"
 
         # # Define colors
         # # primary_color = "#f0f6f0"  # Primary color in hex
@@ -65,6 +69,8 @@ def load_qss(app, qss_file_path, colors=None):
         qss_content = qss_content.replace("@disabled", disabled_color)
         qss_content = qss_content.replace("@titlebarBg", titlebar_bg)
         qss_content = qss_content.replace("@titlebarSh", titlebar_sh)
+        qss_content = qss_content.replace("@separator", separator)
+        qss_content = qss_content.replace("@muted", muted)
         qss_content = qss_content.replace("@theme", theme)
         qss_content = qss_content.replace("@ext", _ext)
 
