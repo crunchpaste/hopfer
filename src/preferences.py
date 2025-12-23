@@ -193,7 +193,7 @@ class PreferencesDialog(FramelessDialog):
         # with open(get_path("res/hash.txt"), "r") as file:
         #     hash = file.read()
 
-        self.version_label = QLabel("v0.11.3")
+        self.version_label = QLabel("v0.12.0")
         self.version_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(self.version_label)
 
@@ -214,7 +214,7 @@ class PreferencesDialog(FramelessDialog):
 
         self.tabs.addTab(self.about, "About")
         self.tabs.addTab(self.shortcuts, "Shortcuts")
-        self.tabs.addTab(self.preferences, "Preferences")
+        # self.tabs.addTab(self.preferences, "Preferences")
         layout.addWidget(self.tabs)
 
         self.setLayout(layout)

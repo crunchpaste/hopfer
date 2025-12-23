@@ -19,11 +19,9 @@ from controls.resize_dialog import ImageResizeDialog
 from controls.titlebar import HopferTitleBar
 from daemon import Daemon
 from helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
-from helpers.load_stylesheet import load_qss
 from helpers.paths import config_path
 from preferences import PreferencesDialog
 from queue_io import QueueReader, QueueWriter
-from res_loader import get_path
 from sidebar import SideBar
 from viewer import PhotoViewer
 
@@ -294,7 +292,7 @@ class MainWindow(FramelessMainWindow):
         self.colors.set_theme(theme.lower())
         self.titleBar.change_theme()
         self.viewer.set_theme()
-        load_qss(self.app, get_path("res/styles/style.css"), self.colors)
+        # load_qss(self.app, get_path("res/styles/style.css"), self.colors)
 
         # HACK: this is very very ugly, but superqt does not support qss styling so we have to manually update the slider color when the theme changes.
         try:
@@ -317,6 +315,7 @@ class MainWindow(FramelessMainWindow):
     def closeEvent(self, event):
         self.save_settings()
         self.close_shm()
+        self.writer.close()
         self.writer.close()
         self.daemon_process.join()
         super().closeEvent(event)

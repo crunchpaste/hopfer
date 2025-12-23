@@ -5,6 +5,9 @@ from PySide6.QtWidgets import QLabel, QVBoxLayout, QWidget
 class ProcessingIndicator(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
+
+        # TODO: I have to put a progress bar at some point
+
         self.setObjectName("processing-indicator")
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
         # Create a label

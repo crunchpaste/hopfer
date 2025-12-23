@@ -205,6 +205,10 @@ class ImageStorage(QObject):
 
             cv_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
+            if cv_image is None:
+                file_bytes = np.fromfile(image_path, dtype=np.uint8)
+                cv_image = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
+
             self._load(cv_image)
 
         except FileNotFoundError as e:
@@ -463,13 +467,21 @@ class ImageStorage(QObject):
         try:
             success = cv2.imwrite(save_path, output_image)
             if not success:
-                self.show_notification(
-                    f"Failed to save image to {save_path}. "
-                    "Check directory permissions or invalid image format.",
-                    duration=6000,
-                )
-                print("cv2.imwrite failed!", save_path)
-                return
+                # HACK: used numpy to bypass windows problems with non-latin encoding of folder and file names
+                ext = os.path.splitext(save_path)[1]
+                np_success, buffer = cv2.imencode(ext, output_image)
+
+                if np_success:
+                    buffer.tofile(save_path)
+                else:
+                    self.show_notification(
+                        f"Failed to save image to {save_path}. "
+                        "Check directory permissions or invalid image format.",
+                        duration=6000,
+                    )
+                    print("cv2.imwrite failed!", save_path)
+                    return
+
         except Exception as e:
             self.show_notification(f"Error: {e}", duration=10000)
 

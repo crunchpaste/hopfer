@@ -79,10 +79,7 @@ class Daemon:
                 self.storage.ignore_alpha = value
 
             # PROCESSOR RELATED
-            elif (
-                message["type"] == "process"
-                and self.storage.original_image is not None
-            ):
+            elif message["type"] == "process":
                 step = []
                 if message["g_mode"] is not None:
                     self.processor.grayscale_mode = message["g_mode"]
@@ -96,8 +93,8 @@ class Daemon:
                     self.processor.algorithm = message["h_algorithm"]
                     self.processor.settings = message["h_settings"]
                     step.append(2)
-
-                self.processor.start(step=min(step))
+                if self.storage.original_image is not None:
+                    self.processor.start(step=min(step))
 
             elif message["type"] == "exit":
                 del self.storage.shm_preview
