@@ -1,4 +1,4 @@
-from PySide6.QtCore import QObject, Slot, Signal, QUrl
+from PySide6.QtCore import QObject, Slot, Signal, QUrl, Property
 from hopfer.core.daemon import Daemon
 from hopfer.core.queue_io import QueueReader, QueueWriter
 from hopfer.helpers.image_conversion import numpy_to_pixmap
@@ -6,6 +6,7 @@ from multiprocessing import SimpleQueue, Process, shared_memory
 import pickle
 import numpy as np
 import json
+import platformdirs
 
 
 class Bridge(QObject):
@@ -16,6 +17,7 @@ class Bridge(QObject):
     showNotification = Signal(str, int)
     enableToolbar = Signal(bool)
     originalGrayscale = Signal(bool)
+    pathsChanged = Signal()
 
     def __init__(self, image_provider, parent=None):
         super().__init__(parent)
@@ -23,6 +25,8 @@ class Bridge(QObject):
         self.image_provider = image_provider
         self.processing = False
         self.has_image = False
+
+        self._initial_folder = platformdirs.user_videos_dir()
         self._init_components()
 
     def _init_components(self):
@@ -31,7 +35,7 @@ class Bridge(QObject):
         # the response queue
         self.res_queue = SimpleQueue()
 
-        self.paths = {"image_path": None, "save_path": None}
+        self._paths = {"image_path": None, "save_path": None}
 
         self.daemon = Daemon(response=self.res_queue, request=self.req_queue)
 
@@ -57,6 +61,10 @@ class Bridge(QObject):
         # WRITER SIGNALS
         # self.writer.rotate.connect(self.rotate_shm)
 
+    @Property(str)
+    def initial_folder_url(self):
+        return QUrl.fromLocalFile(self._initial_folder).toString()
+
     @Slot(str, str)
     def send_grayscale(self, algorithm, settings):
         print("gray")
@@ -81,10 +89,16 @@ class Bridge(QObject):
     @Slot(str)
     def open(self, path):
         path = QUrl(path).toLocalFile()
-        self.paths["image_path"] = path
-        print(self.paths)
+        self._paths["image_path"] = path
         self.writer.load_image(path)
         self.processingStarted.emit()
+
+    @Slot(str)
+    def save(self, path):
+        path = QUrl(path).toLocalFile()
+        self._paths["save_path"] = path
+        self.writer.save_image(path)
+        # self.processingStarted.emit()
 
     @Slot()
     def flip(self):
@@ -104,6 +118,7 @@ class Bridge(QObject):
         self.writer.send_invert()
         if self.has_image:
             self.processingStarted.emit()
+
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
@@ -148,7 +163,6 @@ class Bridge(QObject):
             self.resetView.emit()
 
         self.processing = False
-
 
     def exit(self):
         # self.save_settings()

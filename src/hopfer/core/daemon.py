@@ -46,7 +46,8 @@ class Daemon:
                 interpolation = message["interpolation"]
                 self.storage.resize_original(w, h, interpolation)
             elif message["type"] == "save_image":
-                self.storage.save_image()
+                path = message["path"]
+                self.storage.save_image(path)
             elif message["type"] == "save_to_clipboard":
                 self.storage.save_to_clipboard()
             elif message["type"] == "update_paths":

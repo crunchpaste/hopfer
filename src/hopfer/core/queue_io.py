@@ -77,7 +77,7 @@ class QueueReader(QObject):
 
             elif message["type"] == "update_paths":
                 paths = message["paths"]
-                self.bridge.paths = paths
+                self.bridge._paths = paths
 
             elif message["type"] == "image_size":
                 w = message["width"]
@@ -132,8 +132,8 @@ class QueueWriter(QObject):
         message = {"type": "load_from_url", "url": url}
         self.queue.put(message)
 
-    def save_image(self):
-        message = {"type": "save_image"}
+    def save_image(self, path):
+        message = {"type": "save_image", "path": path}
         self.queue.put(message)
 
     def save_to_clipboard(self):

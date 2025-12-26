@@ -386,7 +386,7 @@ class ImageStorage(QObject):
         except Exception as e:
             print(e)
 
-    def save_image(self):
+    def save_image(self, path):
         """
         Save the processed image to the disk. If the file already exists,
         it appends a counter to the filename to avoid overwriting.
@@ -400,7 +400,7 @@ class ImageStorage(QObject):
             )
             return
 
-        save_path = self.paths["save_path"]
+        save_path = path
 
         if not save_path:
             # If there is no save path, and this happens when an image is

@@ -333,7 +333,4 @@ Item {
 
     }
 
-    SnackBar {
-    }
-
 }

@@ -22,13 +22,12 @@ Rectangle {
         timer.stop();
     }
 
-    width: Math.min(parent.width * 0.8, 400)
-    height: 60
+    width: Math.min(parent.width * 0.8, 500)
+    height: row.implicitHeight + 20
+
     radius: 4
-    color: Qt.darker(Material.background, 1.1)
+    color: Qt.darker(Material.background, 1.2)
     anchors.horizontalCenter: parent.horizontalCenter
-    anchors.bottom: parent.bottom
-    anchors.bottomMargin: 46
     opacity: visibleSnackbar ? 1 : 0
 
     Timer {
@@ -40,20 +39,22 @@ Rectangle {
     }
 
     RowLayout {
+        id: row
         anchors.fill: parent
 
         Text {
             id: label
 
+            Layout.fillWidth: true
             Layout.leftMargin: 24
             text: ""
             color: Material.foreground
             font.pointSize: 11
+            wrapMode: Text.Wrap
         }
 
         Item {
-            Layout.fillWidth: true
-            Layout.minimumWidth: 24
+            width: 24
         }
 
         RoundButton {

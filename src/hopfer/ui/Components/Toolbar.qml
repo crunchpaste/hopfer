@@ -7,12 +7,13 @@ import QtQuick.Layouts
 Item {
     id: root
 
-    signal openClicked()
-    signal fitImage()
-    signal actual()
+    signal openClicked
+    signal saveAsClicked
+    signal saveClicked
+    signal fitImage
+    signal actual
     // signal tb()
-    signal openPreferences()
-
+    signal openPreferences
 
     function enable_toolbar(state) {
         open.enabled = state;
@@ -58,39 +59,32 @@ Item {
             ToolTip.text: "Open image"
 
             icon: Component {
-                Open {
-                }
-
+                Open {}
             }
-
         }
 
         SquareButton {
             id: save
 
+            onClicked: root.saveClicked()
             ToolTip.text: "Save image"
             enabled: false
 
             icon: Component {
-                Save {
-                }
-
+                Save {}
             }
-
         }
 
         SquareButton {
             id: save_as
 
+            onClicked: root.saveAsClicked()
             ToolTip.text: "Save image as"
             enabled: false
 
             icon: Component {
-                SaveAs {
-                }
-
+                SaveAs {}
             }
-
         }
 
         Item {
@@ -104,11 +98,8 @@ Item {
             enabled: false
 
             icon: Component {
-                Resize {
-                }
-
+                Resize {}
             }
-
         }
 
         SquareButton {
@@ -119,11 +110,8 @@ Item {
             enabled: false
 
             icon: Component {
-                Invert {
-                }
-
+                Invert {}
             }
-
         }
 
         SquareButton {
@@ -134,11 +122,8 @@ Item {
             enabled: false
 
             icon: Component {
-                RotR {
-                }
-
+                RotR {}
             }
-
         }
 
         SquareButton {
@@ -149,11 +134,8 @@ Item {
             enabled: false
 
             icon: Component {
-                RotL {
-                }
-
+                RotL {}
             }
-
         }
 
         SquareButton {
@@ -164,11 +146,8 @@ Item {
             enabled: false
 
             icon: Component {
-                Flip {
-                }
-
+                Flip {}
             }
-
         }
 
         Item {
@@ -183,15 +162,12 @@ Item {
             enabled: false
 
             onClicked: {
-                root.fitImage()
+                root.fitImage();
             }
 
             icon: Component {
-                Fit {
-                }
-
+                Fit {}
             }
-
         }
 
         SquareButton {
@@ -201,15 +177,12 @@ Item {
             enabled: true
 
             onClicked: {
-                root.actual()
+                root.actual();
             }
 
             icon: Component {
-                View {
-                }
-
+                View {}
             }
-
         }
 
         Item {
@@ -223,11 +196,8 @@ Item {
                 Preferences {}
             }
             onClicked: {
-                root.openPreferences()
+                root.openPreferences();
             }
-
         }
-
     }
-
 }

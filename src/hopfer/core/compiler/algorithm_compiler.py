@@ -752,4 +752,5 @@ def sharpen(image, str=1.0):
 
     return sharpened
 
+
 cc.compile()

@@ -4,6 +4,7 @@ import subprocess
 import sys
 from pathlib import Path
 
+
 def compile_algorithms():
     compiler = Path(__file__).parent / "src/hopfer/core/compiler/algorithm_compiler.py"
     if compiler.exists():
@@ -12,20 +13,24 @@ def compile_algorithms():
     else:
         print(f"\n--- WARNING: Compiler not found at {compiler} ---")
 
+
 class BuildPyCommand(build_py):
     def run(self):
         compile_algorithms()
         super().run()
 
+
 try:
     from setuptools.command.editable_wheel import editable_wheel
+
     class EditableWheelCommand(editable_wheel):
         def run(self):
             compile_algorithms()
             super().run()
-    CMD_CLASS = {'build_py': BuildPyCommand, 'editable_wheel': EditableWheelCommand}
+
+    CMD_CLASS = {"build_py": BuildPyCommand, "editable_wheel": EditableWheelCommand}
 except ImportError:
-    CMD_CLASS = {'build_py': BuildPyCommand}
+    CMD_CLASS = {"build_py": BuildPyCommand}
 
 setup(
     cmdclass=CMD_CLASS,
