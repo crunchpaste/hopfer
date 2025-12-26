@@ -39,6 +39,22 @@ ApplicationWindow {
             openDialog.open();
         }
     }
+    Shortcut {
+        sequence: StandardKey.SaveAs
+        onActivated: {
+            if (viewer.hasImage) {
+                saveDialog.open();
+            }
+        }
+    }
+    Shortcut {
+        sequence: StandardKey.Save
+        onActivated: {
+            if (viewer.hasImage) {
+                bridge.save(saveDialog.selectedFile);
+            }
+        }
+    }
 
     ThemeManager {
         id: theme

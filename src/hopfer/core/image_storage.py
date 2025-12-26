@@ -245,7 +245,7 @@ class ImageStorage(QObject):
 
                 else:
                     self.show_notification(
-                        f"Failed to retrieve image. Status code: {response.status_code}",
+                        f"{response.status_code}: Failed to retrieve image.",
                         duration=10000,
                     )
                     return None
@@ -477,8 +477,14 @@ class ImageStorage(QObject):
                 return
         except Exception as e:
             self.show_notification(f"Error: {e}", duration=10000)
+        filename = os.path.basename(save_path)
 
-        self.show_notification(f"Image saved to {save_path}", duration=3000)
+        folder = os.path.basename(os.path.dirname(save_path))
+
+        friendly_path = f".../{folder}/{filename}"
+
+        self.show_notification(f"Saved to {friendly_path}", duration=5000)
+        # self.show_notification(f"Image saved to {save_path}", duration=3000)
 
     def save_to_clipboard(self):
         if self.processed_image is not None:

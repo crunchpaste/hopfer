@@ -49,6 +49,7 @@ Rectangle {
             Layout.leftMargin: 24
             text: ""
             color: Material.foreground
+            font.family: "Jetbrains Mono"
             font.pointSize: 11
             wrapMode: Text.Wrap
         }
@@ -59,10 +60,11 @@ Rectangle {
 
         RoundButton {
             text: "Ok"
-            // font.weight: font.SemiBold
+            font.family: "Jetbrains Mono"
+            font.pointSize: 11
             Layout.rightMargin: 12
             Material.background: root.color
-            // color: Material.accentColor
+            // color: Material.accent
             onClicked: root.hide()
             Material.elevation: 0
         }
