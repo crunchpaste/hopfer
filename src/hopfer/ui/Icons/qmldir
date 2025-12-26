@@ -1,0 +1,18 @@
+module Icons
+Open 1.0 Open.qml
+Save 1.0 Save.qml
+SaveAs 1.0 SaveAs.qml
+Resize 1.0 Resize.qml
+Invert 1.0 Invert.qml
+RotL 1.0 RotL.qml
+RotR 1.0 RotR.qml
+Flip 1.0 Flip.qml
+Fit 1.0 Fit.qml
+View 1.0 View.qml
+Preferences 1.0 Preferences.qml
+Restore 1.0 Restore.qml
+TitlebarIcon 1.0 TitlebarIcon.qml
+Close 1.0 Close.qml
+Expand 1.0 Expand.qml
+Collapse 1.0 Collapse.qml
+Minimize 1.0 Minimize.qml

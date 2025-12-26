@@ -1,0 +1,21 @@
+module Components
+Titlebar 1.0 Titlebar.qml
+DialogTitlebar 1.0 DialogTitlebar.qml
+Viewer 1.0 Viewer.qml
+HalftonePanel 1.0 HalftonePanel.qml
+ImagePanel 1.0 ImagePanel.qml
+OutputPanel 1.0 OutputPanel.qml
+Toolbar 1.0 Toolbar.qml
+SnackBar 1.0 SnackBar.qml
+SquareButton 1.0 SquareButton.qml
+TitlebarButton 1.0 TitlebarButton.qml
+LabeledSlider 1.0 LabeledSlider.qml
+LabeledSliderNR 1.0 LabeledSliderNR.qml
+LabeledRange 1.0 LabeledRange.qml
+LabeledSwitch 1.0 LabeledSwitch.qml
+BackgroundLogo 1.0 BackgroundLogo.qml
+ColorPicker 1.0 ColorPicker.qml
+ColorControl 1.0 ColorControl.qml
+PreferencesDialog 1.0 PreferencesDialog.qml
+ThemeManager 1.0 ThemeManager.qml
+AccentSelector 1.0 AccentSelector.qml

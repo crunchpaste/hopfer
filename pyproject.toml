@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "numba", "numpy"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hopfer"
+version = "0.13.0"
+readme = "README.md"
+license = { text = "GPL-3.0-only" }
+requires-python = ">=3.13"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Topic :: Multimedia :: Graphics",
+]
+dependencies = [
+    "PySide6",
+    "numba",
+    "numpy",
+    "nuitka",
+    "opencv-python",
+    "setproctitle",
+    "platformdirs",
+    "setuptools"
+]
+
+[project.urls]
+Homepage = "https://github.com/crunchpaste/hopfer"
+Issues = "https://github.com/crunchpaste/hopfer/issues"
+Repository = "https://github.com/crunchpaste/hopfer.git"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# This section ensures QML, Icons, and Binaries are included in the install
+[tool.setuptools.package-data]
+"hopfer" = [
+    "ui/**/*.qml",
+    "ui/**/qmldir",
+    "ui/Fonts/*.ttf"
+]
+
+[project.scripts]
+hopfer-qml = "hopfer.main:main"
