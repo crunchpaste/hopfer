@@ -11,6 +11,7 @@ os.environ["QT_QUICK_CONTROLS_MATERIAL_VARIANT"] = "Dense"
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 # os.environ["QSG_RENDER_LOOP"] = "basic"
 
+BASE_DIR = Path(__file__).resolve().parent
 UI_PATH = BASE_DIR / "ui"
 
 ICON_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "MaterialSymbols.ttf")

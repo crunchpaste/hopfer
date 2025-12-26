@@ -78,6 +78,32 @@ class Bridge(QObject):
         settings_dict = json.loads(settings)
         self.writer.send_colors(settings_dict)
 
+    @Slot(str)
+    def open(self, path):
+        path = QUrl(path).toLocalFile()
+        self.paths["image_path"] = path
+        print(self.paths)
+        self.writer.load_image(path)
+        self.processingStarted.emit()
+
+    @Slot()
+    def flip(self):
+        self.writer.send_flip()
+        if self.has_image:
+            self.processingStarted.emit()
+
+    @Slot(bool)
+    def rotate(self, cw):
+        self.writer.send_rotate(cw)
+        if self.has_image:
+            self.rotate_shm(cw)
+            self.processingStarted.emit()
+
+    @Slot()
+    def invert(self):
+        self.writer.send_invert()
+        if self.has_image:
+            self.processingStarted.emit()
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
@@ -123,30 +149,6 @@ class Bridge(QObject):
 
         self.processing = False
 
-    @Slot(str)
-    def open(self, path):
-        path = QUrl(path).toLocalFile()
-        self.writer.load_image(path)
-        self.processingStarted.emit()
-
-    @Slot()
-    def flip(self):
-        self.writer.send_flip()
-        if self.has_image:
-            self.processingStarted.emit()
-
-    @Slot(bool)
-    def rotate(self, cw):
-        self.writer.send_rotate(cw)
-        if self.has_image:
-            self.rotate_shm(cw)
-            self.processingStarted.emit()
-
-    @Slot()
-    def invert(self):
-        self.writer.send_invert()
-        if self.has_image:
-            self.processingStarted.emit()
 
     def exit(self):
         # self.save_settings()
