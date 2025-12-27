@@ -115,10 +115,12 @@ class Bridge(QObject):
             else:
                 message = "Not a valid file location."
                 self.showNotification.emit(message, 5000)
+                self.loadFailed.emit()
 
         else:
             message = "No image data in clipboard."
             self.showNotification.emit(message, 5000)
+            self.loadFailed.emit()
 
     @Slot(QUrl)
     def open_url(self, url):
@@ -128,9 +130,11 @@ class Bridge(QObject):
             else:
                 message = "Can't open remote file."
                 self.showNotification.emit(message, 5000)
+                self.loadFailed.emit()
         else:
             message = "Not a valid file location."
             self.showNotification.emit(message, 5000)
+            self.loadFailed.emit()
 
     @Slot(str)
     def save(self, path):

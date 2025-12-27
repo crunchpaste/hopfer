@@ -56,6 +56,7 @@ ApplicationWindow {
         sequences: [StandardKey.Paste]
         onActivated: {
             bridge.open_clipboard()
+            busy_timer.restart()
         }
     }
     Shortcut {
@@ -362,6 +363,7 @@ ApplicationWindow {
                         anchors.fill: parent
                         onDroppedUrl: (url) => {
                             bridge.open_url(url)
+                            busy_timer.restart()
                         }
                     }
 

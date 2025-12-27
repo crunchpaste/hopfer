@@ -212,18 +212,19 @@ class ImageStorage(QObject):
             if cv_image is not None:
                 self._load(cv_image)
             else:
-                message = {"type": "load_failed"}
                 self.show_notification("Unsupported image format", duration=7000)
-                self.res_queue.put(message)
+                self.load_failed()
 
         except FileNotFoundError as e:
             self.show_notification(
                 f"Error: Unable to open image.\n{e!s}", duration=10000
             )
+            self.load_failed()
         except Exception as e:
             self.show_notification(
                 f"An unexpected error occurred: {e!s}", duration=10000
             )
+            self.load_failed()
 
     def load_from_pickle(self, data):
         buffer = pickle.loads(data)
@@ -255,9 +256,15 @@ class ImageStorage(QObject):
                         f"{response.status_code}: Failed to download image.",
                         duration=10000,
                     )
+                    self.load_failed()
                     return None
         else:
             self.show_notification("No image data in clipboard.", duration=10000)
+            self.load_failed()
+
+    def load_failed(self):
+        message = {"type": "load_failed"}
+        self.res_queue.put(message)
 
     @staticmethod
     def discard_alpha(alpha):
