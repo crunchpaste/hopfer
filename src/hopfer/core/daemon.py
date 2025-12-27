@@ -36,7 +36,8 @@ class Daemon:
                 self.storage.load_from_pickle(data)
             elif message["type"] == "load_from_url":
                 url = message["url"]
-                self.storage.load_from_url(url)
+                local = message["local"]
+                self.storage.load_from_url(url, local)
             elif message["type"] == "load_from_clipboard":
                 # data = message["data"]
                 self.storage.load_from_clipboard()

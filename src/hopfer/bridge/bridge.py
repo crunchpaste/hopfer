@@ -1,7 +1,8 @@
 from PySide6.QtCore import QObject, Slot, Signal, QUrl, Property
+from PySide6.QtGui import QGuiApplication
 from hopfer.core.daemon import Daemon
 from hopfer.core.queue_io import QueueReader, QueueWriter
-from hopfer.helpers.image_conversion import numpy_to_pixmap
+from hopfer.helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
 from multiprocessing import SimpleQueue, Process, shared_memory
 import pickle
 import numpy as np
@@ -26,6 +27,7 @@ class Bridge(QObject):
         self.processing = False
         self.has_image = False
 
+        self.clipboard = QGuiApplication.clipboard()
         self._initial_folder = platformdirs.user_videos_dir()
         self._init_components()
 
@@ -92,6 +94,40 @@ class Bridge(QObject):
         self._paths["image_path"] = path
         self.writer.load_image(path)
         self.processingStarted.emit()
+
+    @Slot()
+    def open_clipboard(self):
+        mime_data = self.clipboard.mimeData()
+        if mime_data.hasImage():
+            image = self.clipboard.image()
+            _image_np = qimage_to_numpy(image)
+            # using pickle mostly for simplicity as I dont want to deal
+            # with shared memory for an operation that happens so rarely.
+            pickled_data = pickle.dumps(_image_np)
+            self.writer.send_pickled_image(pickled_data)
+        elif mime_data.hasUrls():
+            url = mime_data.urls()[0]
+            if url.isValid():
+                if url.isLocalFile():
+                    self.writer.send_url(url.toString(), local=url.isLocalFile())
+                else:
+                    message = "Can't open remote file."
+                    self.showNotification.emit(message, 5000)
+            else:
+                message = "Not a valid file location."
+                self.showNotification.emit(message, 5000)
+        elif mime_data.hasText():
+            url = self.clipboard.text().strip().lower()
+            if url.startswith("http://") or url.startswith("https://"):
+                self.writer.send_url(url)
+            else:
+                message = "Not a valid file location."
+                self.showNotification.emit(message, 5000)
+
+        else:
+            message = "No image data in clipboard."
+            self.showNotification.emit(message, 5000)
+
 
     @Slot(str)
     def save(self, path):

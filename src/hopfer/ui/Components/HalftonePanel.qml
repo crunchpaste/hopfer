@@ -39,6 +39,9 @@ ColumnLayout {
         }
         root.halftoneChanged(algorithm, settings);
     }
+    function focusCombo() {
+        combo.forceActiveFocus();
+    }
 
     Layout.margins: 20
     spacing: 18

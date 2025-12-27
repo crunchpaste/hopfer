@@ -128,8 +128,8 @@ class QueueWriter(QObject):
         self.queue.put(message)
         # self.bridge.display_processing_label(True)
 
-    def send_url(self, url):
-        message = {"type": "load_from_url", "url": url}
+    def send_url(self, url, local=False):
+        message = {"type": "load_from_url", "url": url, "local": local}
         self.queue.put(message)
 
     def save_image(self, path):

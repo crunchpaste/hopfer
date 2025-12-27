@@ -234,9 +234,16 @@ class ImageStorage(QObject):
 
         self._load(image)
 
-    def load_from_url(self, url):
+    def load_from_url(self, url, local):
         if url != "":
-            try:
+            if local:
+                parsed_url = urlparse(url)
+                local_path = unquote(parsed_url.path)
+                if os.name == "nt":
+                    local_path = local_path.lstrip("/")
+                url = local_path
+                self.load_image(url)
+            else:
                 response = requests.get(url)
                 if response.status_code == 200:
                     image_data = np.frombuffer(response.content, np.uint8)
@@ -245,22 +252,12 @@ class ImageStorage(QObject):
 
                 else:
                     self.show_notification(
-                        f"{response.status_code}: Failed to retrieve image.",
+                        f"{response.status_code}: Failed to download image.",
                         duration=10000,
                     )
                     return None
-            except Exception as e:
-                # if this fails it is captured by the load_image method
-                print(f"Error: {e}")
-                if url.startswith("file:///"):
-                    parsed_url = urlparse(url)
-                    local_path = unquote(parsed_url.path)
-                    if os.name == "nt":
-                        local_path = local_path.lstrip("/")
-                    url = local_path
-                self.load_image(url)
         else:
-            self.show_notification("Error: No image data in clipboard.", duration=10000)
+            self.show_notification("No image data in clipboard.", duration=10000)
 
     @staticmethod
     def discard_alpha(alpha):

@@ -48,6 +48,10 @@ ColumnLayout {
         root.enhanceChanged(settings);
     }
 
+    function focusCombo() {
+        combo.forceActiveFocus();
+    }
+
     Layout.topMargin: 20
     spacing: 18
 

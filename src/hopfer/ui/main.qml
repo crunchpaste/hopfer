@@ -40,6 +40,14 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        sequence: StandardKey.Save
+        onActivated: {
+            if (viewer.hasImage) {
+                bridge.save(saveDialog.selectedFile);
+            }
+        }
+    }
+    Shortcut {
         sequence: StandardKey.SaveAs
         onActivated: {
             if (viewer.hasImage) {
@@ -48,11 +56,29 @@ ApplicationWindow {
         }
     }
     Shortcut {
-        sequence: StandardKey.Save
+        sequences: [StandardKey.Paste]
         onActivated: {
-            if (viewer.hasImage) {
-                bridge.save(saveDialog.selectedFile);
-            }
+            bridge.open_clipboard()
+        }
+    }
+    Shortcut {
+        sequence: (Qt.platform.os === "osx") ? "Cmd+I" : "Ctrl+I"
+        onActivated: {
+            bar.currentIndex = 0
+            image_panel.focusCombo()
+        }
+    }
+    Shortcut {
+        sequence: (Qt.platform.os === "osx") ? "Cmd+H" : "Ctrl+H"
+        onActivated: {
+            bar.currentIndex = 1
+            halftone_panel.focusCombo()
+        }
+    }
+    Shortcut {
+        sequence: (Qt.platform.os === "osx") ? "Cmd+E" : "Ctrl+E"
+        onActivated: {
+            bar.currentIndex = 2;
         }
     }
 
@@ -134,10 +160,13 @@ ApplicationWindow {
                 if (!saveFolder.endsWith("/")) {
                     saveFolder += "/";
                 }
-
-                saveDialog.selectedFile = Qt.resolvedUrl(saveFolder + fileName);
+                Qt.callLater(() => {
+                    saveDialog.selectedFile = Qt.resolvedUrl(saveFolder + fileName);
+                });
             } else {
-                saveDialog.selectedFile = selectedFile;
+                Qt.callLater(() => {
+                    saveDialog.selectedFile = selectedFile;
+                });
             }
         }
         onRejected: {
@@ -157,7 +186,7 @@ ApplicationWindow {
         modality: Qt.WindowModal
         defaultSuffix: "png"
         currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
-        currentFile: "hopfer.png"
+        selectedFile: currentFolder + "/hopfer.png"
         Component.onCompleted: {
             if (bridge.initial_folder_url !== "") {
                 currentFolder = bridge.initial_folder_url;
@@ -280,6 +309,7 @@ ApplicationWindow {
                                 // Item {}
 
                                 HalftonePanel {
+                                    id: halftone_panel
                                     onHalftoneChanged: function (algorithm, settings) {
                                         let settings_json = JSON.stringify(settings);
                                         bridge.send_halftone(algorithm, settings_json);
