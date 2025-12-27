@@ -53,24 +53,30 @@ ApplicationWindow {
         }
     }
     Shortcut {
+        sequence: StandardKey.Copy
+        onActivated: {
+            bridge.save_to_clipboard();
+        }
+    }
+    Shortcut {
         sequences: [StandardKey.Paste]
         onActivated: {
-            bridge.open_clipboard()
-            busy_timer.restart()
+            bridge.open_clipboard();
+            busy_timer.restart();
         }
     }
     Shortcut {
         sequence: (Qt.platform.os === "osx") ? "Cmd+I" : "Ctrl+I"
         onActivated: {
-            bar.currentIndex = 0
-            image_panel.focusCombo()
+            bar.currentIndex = 0;
+            image_panel.focusCombo();
         }
     }
     Shortcut {
         sequence: (Qt.platform.os === "osx") ? "Cmd+H" : "Ctrl+H"
         onActivated: {
-            bar.currentIndex = 1
-            halftone_panel.focusCombo()
+            bar.currentIndex = 1;
+            halftone_panel.focusCombo();
         }
     }
     Shortcut {
@@ -114,6 +120,8 @@ ApplicationWindow {
         function onLoadFailed() {
             busy_timer.stop();
             viewer.busy(false);
+            viewer.busy(false);
+            console.log("failed");
         }
 
         function onShowNotification(message, duration) {
@@ -362,12 +370,11 @@ ApplicationWindow {
 
                     Drop {
                         anchors.fill: parent
-                        onDroppedUrl: (url) => {
-                            bridge.open_url(url)
-                            busy_timer.restart()
+                        onDroppedUrl: url => {
+                            bridge.open_url(url);
+                            busy_timer.restart();
                         }
                     }
-
                 }
             }
         }

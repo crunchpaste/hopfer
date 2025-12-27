@@ -144,6 +144,12 @@ class Bridge(QObject):
         # self.processingStarted.emit()
 
     @Slot()
+    def save_to_clipboard(self):
+        print("saving")
+        self.writer.save_to_clipboard()
+        # self.processingStarted.emit()
+
+    @Slot()
     def flip(self):
         self.writer.send_flip()
         if self.has_image:
@@ -207,6 +213,15 @@ class Bridge(QObject):
             self.resetView.emit()
 
         self.processing = False
+
+    def store_in_clipboard(self, data):
+        image = pickle.loads(data)
+        print(image.dtype, image.ndim)
+        qimage = numpy_to_pixmap(image, qi=True)
+
+        self.clipboard.setImage(qimage)
+
+        # self.display_notification("Image stored in clipboard.")
 
     def exit(self):
         # self.save_settings()

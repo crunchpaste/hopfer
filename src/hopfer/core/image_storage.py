@@ -504,7 +504,7 @@ class ImageStorage(QObject):
             self.show_notification("Image stored in clipboard.")
         else:
             self.show_notification(
-                "Image? What image? You haven't opened one yet.", duration=5000
+                "You haven't opened an image ", duration=5000
             )
 
     def generate_unique_save_path(self, base_path, base_name):
@@ -683,10 +683,14 @@ class ImageStorage(QObject):
         else:
             try:
                 processed_img = np.ascontiguousarray(self.processed_image)
-                self.shm_preview[:, :, 0] = (processed_img * 255).astype(np.uint8)
-                self.res_queue.put(
-                    {"type": "display_image", "array": "gray", "reset": reset}
-                )
+                processed_img = (processed_img * 255).astype(np.uint8)
+                if not clipboard:
+                    self.shm_preview[:, :, 0] = processed_img
+                    self.res_queue.put(
+                        {"type": "display_image", "array": "gray", "reset": reset}
+                    )
+                else:
+                    processed_img = (processed_img * 255).astype(np.uint8)
             except Exception as e:
                 print(f"GENERATING PIXMAPS: {e}")
 
