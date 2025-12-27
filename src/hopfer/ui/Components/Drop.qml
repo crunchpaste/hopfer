@@ -71,15 +71,14 @@ DropArea {
                 font.bold: true
                 font.pointSize: 14
                 Layout.alignment: Qt.AlignHCenter
-                color: "white"
+                color: Material.foreground
             }
-
             Label {
                 text: "Drop a file here to upload it."
                 font.pointSize: 11
                 opacity: 0.7
                 Layout.alignment: Qt.AlignHCenter
-                color: "white"
+                color: Material.foreground
             }
         }
     }
