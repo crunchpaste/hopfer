@@ -59,14 +59,26 @@ Rectangle {
         }
 
         RoundButton {
+            id: ok
             text: "Ok"
             font.family: "Jetbrains Mono"
             font.pointSize: 11
             Layout.rightMargin: 12
             Material.background: root.color
-            // color: Material.accent
+            // text.color: Material.accent
+            flat: true
             onClicked: root.hide()
             Material.elevation: 0
+
+            // just so that it appears with the accent color.
+            contentItem: Text {
+                    text: ok.text
+                    font: ok.font
+                    opacity: enabled ? 1.0 : 0.3
+                    color: ok.down ? Material.foreground : Material.accent
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
         }
 
     }

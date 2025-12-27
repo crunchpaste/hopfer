@@ -323,7 +323,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
-            color: "black"
+            color: Material.background
             opacity: 0.5
             radius: 10
         }
@@ -339,6 +339,7 @@ Item {
             Label {
                 Layout.alignment: Qt.AlignHCenter
                 text: "Processing"
+                color: Material.foreground
             }
 
         }
