@@ -15,7 +15,8 @@ ColumnLayout {
     Component { id: sauvola; Sauvola {} }
     Component { id: phansalkar; Phansalkar {} }
     Component { id: mezzo; Mezzo {} }
-    Component { id: floydsteinberg; FloydSteinberg {} }
+    Component { id: errordiffusion; ErrorDiffusion {} }
+    Component { id: errordiffusion_s; ErrorDiffusion {serpentine: true} }
 
     property var componentMap: [
         none,
@@ -24,7 +25,20 @@ ColumnLayout {
         sauvola,
         phansalkar,
         mezzo,
-        floydsteinberg,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion,
+        errordiffusion_s,
+        errordiffusion_s,
+        errordiffusion_s,
+        errordiffusion_s,
     ]
 
     function emitChangeSignal(algorithm_name) {
@@ -48,7 +62,27 @@ ColumnLayout {
 
     ComboBox {
         id: combo
-        model: ["None", "Fixed threshold", "Niblack threshold", "Sauvola threshold", "Phansalkar threshold", "Mezzotint uniform", "Floyd-Steinberg"]
+        model: [
+            "None",
+            "Fixed threshold",
+            "Niblack threshold",
+            "Sauvola threshold",
+            "Phansalkar threshold",
+            "Mezzotint uniform",
+            "Floyd-Steinberg",
+            "False Floyd-Steinberg",
+            "Jarvis",
+            "Stucki",
+            "Stucki small",
+            "Stucki large",
+            "Atkinson",
+            "Burkes",
+            "Sierra",
+            "Sierra2",
+            "Sierra2 4A",
+            "Nakano",
+            "Ostromoukhov",
+            "Zhou-Fang"]
 
         onCurrentIndexChanged: {
             let new_algorithm = combo.valueAt(combo.currentIndex);

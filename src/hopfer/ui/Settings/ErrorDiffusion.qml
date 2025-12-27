@@ -9,6 +9,8 @@ ColumnLayout {
 
     signal settingsChanged()
 
+    property alias serpentine: serpentine.value
+
     function handleSliderInteraction() {
         root.settingsChanged();
     }

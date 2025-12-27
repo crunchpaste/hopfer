@@ -5,7 +5,7 @@ from .ved_data import OSTROMOUKHOV_COEFFN, ZF_COEFFN, ZF_PERT
 
 
 def variable_ed(img, algorithm, settings):
-    str = settings["diffusion_factor"] / 100
+    str = settings["diffusion_factor"]
     serpentine = settings["serpentine"]
     noise = settings["noise"]
     if noise:
