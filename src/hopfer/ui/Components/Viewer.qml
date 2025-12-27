@@ -17,10 +17,10 @@ Item {
         busy.visible = state;
     }
 
-    function actual() {
+    function to_scale(zoom) {
         let cx = Math.floor(mouseArea.width / 2)
         let cy = Math.floor(mouseArea.height / 2)
-        mouseArea.zoom_to_point(cx, cy, 1, 1)
+        mouseArea.zoom_to_point(cx, cy, 1, zoom)
     }
 
     clip: true
@@ -173,10 +173,16 @@ Item {
             // if ((current_scale < 1) && (new_scale > 1)) {
             //     new_scale = 1
             // }
+            var skip_min = false
+
             if (target_scale == undefined) {
-              new_scale = snap_to_int(current_scale, new_scale);
+                new_scale = snap_to_int(current_scale, new_scale);
             }
-            else { new_scale = target_scale }
+            else {
+                new_scale = target_scale
+                // if a target scale is sent skip the min_scale check
+                skip_min = true
+            }
 
             const w = image.width;
             const h = image.height;
@@ -184,15 +190,21 @@ Item {
             const vh = mouseArea.height;
             const w_ratio = vw / w;
             const h_ratio = vh / h;
-            var min_scale = Math.min(w_ratio, h_ratio) * zoom_out_f;
+
+            var min_scale = Math.min(Math.min(w_ratio, h_ratio), 1);
             // in case the new scale would result in an image smaller
             // than the viewport apply the minimum required to fit
             // the viewport
             if (new_scale.toFixed(3) <= min_scale.toFixed(3)) {
                 imageTranslate.x = 0;
                 imageTranslate.y = 0;
-                imageScale.xScale = min_scale;
-                imageScale.yScale = min_scale;
+                if (!skip_min) {
+                    imageScale.xScale = min_scale;
+                    imageScale.yScale = min_scale;
+                } else {
+                    imageScale.xScale = new_scale;
+                    imageScale.yScale = new_scale;
+                }
                 return ;
             }
             var local_point = mouseArea.mapToItem(image, center_x, center_y);

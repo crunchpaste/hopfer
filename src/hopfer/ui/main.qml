@@ -257,7 +257,7 @@ ApplicationWindow {
                             onSaveAsClicked: saveDialog.open()
                             onSaveClicked: bridge.save(saveDialog.selectedFile)
                             onFitImage: viewer.fit()
-                            onActual: viewer.actual()
+                            onActual: viewer.to_scale(1)
                             onOpenPreferences: {
                                 preferences.show();
                                 preferences.raise();
