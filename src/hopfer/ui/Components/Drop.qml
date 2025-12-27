@@ -29,13 +29,13 @@ DropArea {
     Rectangle {
         id: dropIndicator
         anchors.fill: parent
-        anchors.margins: 20
+        anchors.margins: 50
 
         radius: 10
 
         border.width: 3
         border.color: Qt.alpha(Material.accent, 0.5)
-        color: Qt.alpha(Material.background, 0.7)
+        color: Material.background
         z: 100
 
         visible: false

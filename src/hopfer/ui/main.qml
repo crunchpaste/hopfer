@@ -1,5 +1,5 @@
-// import QtQuick.Controls.Basic
 import Components
+import Icons
 import QtCore
 import QtQuick
 import QtQuick.Controls
@@ -13,7 +13,7 @@ ApplicationWindow {
     height: 800
     width: 1200
     minimumWidth: 850
-    minimumHeight: 600
+    minimumHeight: 650
 
     title: "hopfer"
 
@@ -330,10 +330,24 @@ ApplicationWindow {
                     SplitView.fillWidth: true
                     SplitView.minimumWidth: 400
 
-                    BackgroundLogo {
+                    ColumnLayout {
                         anchors.centerIn: parent
-                        fill: Material.foreground
-                        opacity: viewer.hasImage ? 0 : 0.05
+                        spacing: 30
+                        Watermark {
+                            // anchors.centerIn: parent
+                            fill: Material.foreground
+                            Layout.leftMargin: 10
+                            opacity: viewer.hasImage ? 0 : 0.05
+                        }
+
+                        Label {
+                            text: "Open image or drop files here"
+                            // anchors.fill: parent
+                            // anchors.horizontalCenter: parent.horizontalCenter
+                            // anchors.bottomMargin: 50
+                            // anchors.bottom: parent.bottom
+                            opacity: viewer.hasImage ? 0 : 0.15
+                        }
                     }
 
                     SnackBar {
