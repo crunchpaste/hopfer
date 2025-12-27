@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "numba", "numpy"]
+requires = ["setuptools>=61.0", "wheel", "numba", "numpy", "Cython"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -22,7 +22,8 @@ dependencies = [
     "opencv-python",
     "setproctitle",
     "platformdirs",
-    "setuptools"
+    "setuptools",
+    "Cython"
 ]
 
 [project.urls]

@@ -8,6 +8,16 @@ tree.py
 
 # C extensions
 *.so
+*.pyd
+
+# Cython intermediate files
+src/hopfer/helpers/*.c
+src/hopfer/helpers/*.html
+
+# Build directories
+build/
+dist/
+*.egg-info/
 
 # Ignoring Nuitka temp folders and files
 hopfer.*/

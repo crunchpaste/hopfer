@@ -174,6 +174,7 @@ class Bridge(QObject):
             self.shm_preview = np.rot90(self.shm_preview, k=1)
 
     def close_shm(self):
+        self.image_provider.image = None
         if self.shm_preview is not None:
             del self.shm_preview
         if self.shm is not None:
@@ -209,6 +210,7 @@ class Bridge(QObject):
 
     def exit(self):
         # self.save_settings()
+        self.image_provider.image = None
         self.close_shm()
         self.writer.close()
         self.daemon_process.join()

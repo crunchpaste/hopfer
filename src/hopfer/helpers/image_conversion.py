@@ -1,6 +1,7 @@
 import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
+from . import image_utils
 
 
 def qimage_to_numpy(qimage):
@@ -61,7 +62,7 @@ def boolean_pixmap(img_array, light, dark):
     return pixmap
 
 
-def numpy_to_pixmap(img_array, alpha=None, qi=False):
+def numpy_to_pixmap_np(img_array, alpha=None, qi=False):
     # Converts a NumPy array to a QPixmap or QImage.
     # A bit of a spaghetti monster, but alpha is only passed when the image
     # is stored into the clipboard, if that makes sense.
@@ -128,3 +129,35 @@ def _determine_format(image_array, alpha_array, c, alpha):
             return QImage.Format_RGBA8888, image_array  # RGB with alpha
 
     return QImage.Format_RGB888, image_array  # Fallback
+
+def numpy_to_pixmap(img_array, alpha=None, qi=False):
+    # A Cython replacement for the old numpy_to_pixmap now called numpy_to_pixmap_np. Should be 2-4 times faster on large images where the overhead of converting to a qimage was bigger than the actual halftoning
+    if img_array.ndim == 3 and img_array.shape[2] in [2, 4] and alpha is None:
+        img_array = img_array[:, :, 0]
+
+    # If its a uint make it contignous
+    if img_array.dtype == np.uint8:
+        buf = np.ascontiguousarray(img_array)
+        h, w = buf.shape[:2]
+        c = 1 if buf.ndim == 2 else buf.shape[2]
+
+        fmt = QImage.Format_Grayscale8 if c == 1 else QImage.Format_RGB888
+        qimage = QImage(buf.data, w, h, c * w, fmt)
+        qimage.ndarray = buf
+
+    else:
+        # In case its a float
+        if img_array.ndim == 2:
+            img_array = img_array[:, :, np.newaxis]
+
+        # the much faster part
+        buf, channels = image_utils.pack_to_qimage_buffer(img_array, alpha)
+        h, w = buf.shape[:2]
+        fmt = QImage.Format_RGBA8888 if channels == 4 else \
+              QImage.Format_RGB888 if channels == 3 else \
+              QImage.Format_Grayscale8
+
+        qimage = QImage(buf.data, w, h, channels * w, fmt)
+        qimage.ndarray = buf
+
+    return qimage if qi else QPixmap.fromImage(qimage)
