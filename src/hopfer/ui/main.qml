@@ -6,9 +6,6 @@ import QtQuick.Controls
 import QtQuick.Controls.Material
 import QtQuick.Dialogs
 import QtQuick.Layouts
-import QtQuick.Shapes
-import QtQuick.VectorImage
-import Settings
 
 ApplicationWindow {
     id: main_window
@@ -346,6 +343,14 @@ ApplicationWindow {
                         anchors.bottomMargin: 46
                         z: 100
                     }
+
+                    Drop {
+                        anchors.fill: parent
+                        onDroppedUrl: (url) => {
+                            bridge.open_url(url)
+                        }
+                    }
+
                 }
             }
         }

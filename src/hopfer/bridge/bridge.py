@@ -107,15 +107,7 @@ class Bridge(QObject):
             self.writer.send_pickled_image(pickled_data)
         elif mime_data.hasUrls():
             url = mime_data.urls()[0]
-            if url.isValid():
-                if url.isLocalFile():
-                    self.writer.send_url(url.toString(), local=url.isLocalFile())
-                else:
-                    message = "Can't open remote file."
-                    self.showNotification.emit(message, 5000)
-            else:
-                message = "Not a valid file location."
-                self.showNotification.emit(message, 5000)
+            self.open_url(url)
         elif mime_data.hasText():
             url = self.clipboard.text().strip().lower()
             if url.startswith("http://") or url.startswith("https://"):
@@ -128,6 +120,17 @@ class Bridge(QObject):
             message = "No image data in clipboard."
             self.showNotification.emit(message, 5000)
 
+    @Slot(QUrl)
+    def open_url(self, url):
+        if url.isValid():
+            if url.isLocalFile():
+                self.writer.send_url(url.toString(), local=url.isLocalFile())
+            else:
+                message = "Can't open remote file."
+                self.showNotification.emit(message, 5000)
+        else:
+            message = "Not a valid file location."
+            self.showNotification.emit(message, 5000)
 
     @Slot(str)
     def save(self, path):
