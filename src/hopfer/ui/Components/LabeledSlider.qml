@@ -41,7 +41,7 @@ ColumnLayout {
             // visible: slider.value !== root.default_value
             // Layout.hideOnInvisible: false
             // working with visible made the layout shift a bit and it was annoying
-            opacity: slider.value !== root.default_value ? 1 : 0
+            opacity: slider.value.toFixed(root.precision) != root.default_value.toFixed(root.precision) ? 1 : 0
 
             Rectangle {
                 id: hoverBg
@@ -94,15 +94,15 @@ ColumnLayout {
 
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                 cursorShape: Qt.PointingHandCursor
-                enabled: slider.value !== root.default_value
+                enabled: slider.value.toFixed(root.precision) != root.default_value.toFixed(root.precision)
             }
 
             TapHandler {
-                enabled: slider.value.toFixed(root.precision) !== root.default_value
+                enabled: slider.value.toFixed(root.precision) != root.default_value.toFixed(root.precision)
                 onTapped: {
                     slider.value = root.default_value;
                     root.interaction();
-                    
+
                 }
             }
 

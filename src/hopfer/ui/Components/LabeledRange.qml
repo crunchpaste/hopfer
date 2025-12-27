@@ -16,7 +16,7 @@ ColumnLayout {
     property alias value0: slider.first.value
     property alias value1: slider.second.value
     property int precision: 2
-    property var default_values: [0, 1]
+    property var default_values: [0.0, 1.0]
 
     signal interaction()
 
@@ -44,7 +44,8 @@ ColumnLayout {
             // visible: slider.value !== root.default_value
             // Layout.hideOnInvisible: false
             // working with visible made the layout shift a bit and it was annoying
-            opacity: (slider.first.value.toFixed(root.precision) !== root.default_values[0] || slider.second.value.toFixed(root.precision) !== root.default_values[1]) ? 1 : 0
+            // Slightly overkill but still, better than glitching
+            opacity: (slider.first.value.toFixed(root.precision) != root.default_values[0].toFixed(root.precision) || slider.second.value.toFixed(root.precision) != root.default_values[1].toFixed(root.precision)) ? 1 : 0
 
             Rectangle {
                 id: hoverBg
@@ -97,11 +98,11 @@ ColumnLayout {
 
                 acceptedDevices: PointerDevice.Mouse | PointerDevice.TouchPad
                 cursorShape: Qt.PointingHandCursor
-                enabled: (slider.first.value.toFixed(root.precision) !== root.default_values[0] || slider.second.value.toFixed(root.precision) !== root.default_values[1])
+                enabled: (slider.first.value.toFixed(root.precision) != root.default_values[0].toFixed(root.precision) || slider.second.value.toFixed(root.precision) != root.default_values[1].toFixed(root.precision))
             }
 
             TapHandler {
-                enabled: (slider.first.value.toFixed(root.precision) !== root.default_values[0] || slider.second.value.toFixed(root.precision) !== root.default_values[1])
+                enabled: (slider.first.value.toFixed(root.precision) != root.default_values[0].toFixed(root.precision) || slider.second.value.toFixed(root.precision) != root.default_values[1].toFixed(root.precision))
                 onTapped: {
                     slider.first.value = root.default_values[0];
                     slider.second.value = root.default_values[1];

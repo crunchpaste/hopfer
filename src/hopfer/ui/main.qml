@@ -131,6 +131,7 @@ ApplicationWindow {
     }
 
     FileDialog {
+        // TODO: Update the path even when image was dropped or pasted
         id: openDialog
 
         property url lastFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
