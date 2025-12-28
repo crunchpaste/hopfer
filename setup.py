@@ -7,6 +7,7 @@ from pathlib import Path
 
 from Cython.Build import cythonize
 
+
 def compile_algorithms():
     compiler = Path(__file__).parent / "src/hopfer/core/compiler/algorithm_compiler.py"
     if compiler.exists():
@@ -21,8 +22,9 @@ class BuildPyCommand(build_py):
         compile_algorithms()
         super().run()
 
+
 # Setup OpenMP flags
-openmp_arg = '/openmp' if sys.platform.startswith("win") else '-fopenmp'
+openmp_arg = "/openmp" if sys.platform.startswith("win") else "-fopenmp"
 
 # Define the Cython extensions
 # Note the name is the full package path 'hopfer.helpers.image_utils'
@@ -33,7 +35,7 @@ ext_modules = [
         extra_compile_args=[openmp_arg, "-O3", "-march=native", "-ffast-math"],
         extra_link_args=[openmp_arg],
         include_dirs=[np.get_include()],
-        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")]
+        define_macros=[("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION")],
     )
 ]
 

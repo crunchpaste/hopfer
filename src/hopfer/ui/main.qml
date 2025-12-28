@@ -53,7 +53,7 @@ ApplicationWindow {
         }
     }
     Shortcut {
-        sequence: StandardKey.Copy
+        sequences: [StandardKey.Copy]
         onActivated: {
             bridge.save_to_clipboard();
         }

@@ -130,6 +130,7 @@ def _determine_format(image_array, alpha_array, c, alpha):
 
     return QImage.Format_RGB888, image_array  # Fallback
 
+
 def numpy_to_pixmap(img_array, alpha=None, qi=False):
     # A Cython replacement for the old numpy_to_pixmap now called numpy_to_pixmap_np. Should be 2-4 times faster on large images where the overhead of converting to a qimage was bigger than the actual halftoning
     if img_array.ndim == 3 and img_array.shape[2] in [2, 4] and alpha is None:
@@ -153,9 +154,13 @@ def numpy_to_pixmap(img_array, alpha=None, qi=False):
         # the much faster part
         buf, channels = image_utils.pack_to_qimage_buffer(img_array, alpha)
         h, w = buf.shape[:2]
-        fmt = QImage.Format_RGBA8888 if channels == 4 else \
-              QImage.Format_RGB888 if channels == 3 else \
-              QImage.Format_Grayscale8
+        fmt = (
+            QImage.Format_RGBA8888
+            if channels == 4
+            else QImage.Format_RGB888
+            if channels == 3
+            else QImage.Format_Grayscale8
+        )
 
         qimage = QImage(buf.data, w, h, channels * w, fmt)
         qimage.ndarray = buf

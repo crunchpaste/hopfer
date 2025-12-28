@@ -1,4 +1,3 @@
-import json
 import os
 import pickle
 from multiprocessing.shared_memory import SharedMemory
@@ -13,7 +12,6 @@ from PySide6.QtGui import QPixmap
 
 # 1. Update the helper imports
 from hopfer.helpers.image_conversion import numpy_to_pixmap
-from hopfer.helpers.paths import config_path
 
 # 2. Update the algorithm fallback imports
 try:
@@ -430,7 +428,7 @@ class ImageStorage(QObject):
             success = cv2.imwrite(save_path, output_image)
             if not success:
                 self.show_notification(
-                    f"Failed to save image",
+                    "Failed to save image",
                     duration=6000,
                 )
                 return
@@ -447,8 +445,7 @@ class ImageStorage(QObject):
         # check if the file actually exists on disk. i've had some problems with false positives before, so better safe than sorry.
         if os.path.exists(save_path):
             message = (
-                f"Saved to <a href='file://{folder_path}'>"
-                f"<b>{friendly_path}</b></a>"
+                f"Saved to <a href='file://{folder_path}'><b>{friendly_path}</b></a>"
             )
             self.show_notification(message, duration=5000)
         else:
@@ -468,9 +465,7 @@ class ImageStorage(QObject):
             self.res_queue.put(message)
             self.show_notification("Image stored in clipboard")
         else:
-            self.show_notification(
-                "No image is loaded", duration=5000
-            )
+            self.show_notification("No image is loaded", duration=5000)
 
     def generate_unique_save_path(self, base_path, base_name):
         """
