@@ -11,10 +11,10 @@ RowLayout {
 
     property var colorList: [
         (Material.theme === Material.Dark ? "#f8f8ff" : "#393d47"),
-        (Material.theme === Material.Dark ? "salmon" : "#f63a32"),
-        (Material.theme === Material.Dark ? "#F48FB1" : "#E91E63"),
-        (Material.theme === Material.Dark ? "#A5D6A7" : "#4CAF50"),
-        (Material.theme === Material.Dark ? "#80CBC4" : "#009688"),
+        (Material.theme === Material.Dark ? "#fa8072" : "#e95044"),
+        (Material.theme === Material.Dark ? "#f48fb1" : "#e91e63"),
+        (Material.theme === Material.Dark ? "#a5d6a7" : "#4caf50"),
+        (Material.theme === Material.Dark ? "#80cbc4" : "#009688"),
     ]
     property int selectedIndex: 0
 

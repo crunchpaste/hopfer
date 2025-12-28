@@ -18,11 +18,11 @@ QtObject {
         return "#fffbfe"               // Your default Light
     }
 
-    readonly property color monochrome: dark ? "ghostwhite" : "#393d47"
+    readonly property color monochrome: dark ? "#f8f8ff" : "#393d47"
     readonly property color salmon: dark ?  "salmon" : "#e95044"
-    readonly property color pink: dark ? "#F48FB1" : "#E91E63"
-    readonly property color green: dark ? "#A5D6A7" : "#4CAF50"
-    readonly property color teal: dark ? "#80CBC4" : "#009688"
+    readonly property color pink: dark ? "#f48fb1" : "#e91e63"
+    readonly property color green: dark ? "#a5d6a7" : "#4caf50"
+    readonly property color teal: dark ? "#80cbc4" : "#009688"
 
     readonly property color currentAccent: {
         if (selectedIndex === 0) return monochrome;

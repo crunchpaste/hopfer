@@ -427,13 +427,17 @@ class ImageStorage(QObject):
         try:
             success = cv2.imwrite(save_path, output_image)
             if not success:
-                self.show_notification(
-                    "Failed to save image",
-                    duration=6000,
-                )
-                return
+                # HACK: used numpy to bypass windows problems with non-latin encoding of folder and file names
+                ext = os.path.splitext(save_path)[1]
+                np_success, buffer = cv2.imencode(ext, output_image)
+
+                if np_success:
+                    buffer.tofile(save_path)
+
         except Exception as e:
             self.show_notification(f"Error: {e}", duration=10000)
+            return
+
         filename = os.path.basename(save_path)
 
         folder = os.path.basename(os.path.dirname(save_path))
