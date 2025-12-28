@@ -10,6 +10,7 @@ DEFAULT_CONFIG = {
         "width": 1200,
         "height": 800,
         "maximized": False,
+        # TODO: connect this one 
         "native_frame": False,
         "sidebar_width": 400,
     },
@@ -64,12 +65,14 @@ def update_config():
 
     return config_to_write
 
+
 def get_config():
     try:
         with open(CONFIG_PATH, "r") as f:
             return json.load(f)
     except Exception:
         return DEFAULT_CONFIG.copy()
+
 
 def save_config(config):
     try:
@@ -81,7 +84,7 @@ def save_config(config):
             f.write(data)
 
         return True
-    except Exception as e:
+    except Exception:
         return False
 
 

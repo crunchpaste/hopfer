@@ -17,6 +17,7 @@ UI_PATH = BASE_DIR / "ui"
 ICON_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "MaterialSymbols.ttf")
 UI_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "JetBrainsMono.ttf")
 
+
 def main():
     app = QGuiApplication(sys.argv)
 
@@ -63,7 +64,6 @@ def main():
 
     if not engine.rootObjects():
         sys.exit(-1)
-
 
     sys.exit(app.exec())
 

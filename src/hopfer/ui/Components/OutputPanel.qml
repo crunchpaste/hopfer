@@ -63,12 +63,12 @@ ColumnLayout {
     LabeledSwitch{
         id: eq
         text: "Output like preview"
-        onInteraction: root.emitEnhanceSignal()
+        onInteraction: bridge.save_like_preview(value)
     }
     LabeledSwitch{
         id: norm
         text: "Discard alpha"
-        onInteraction: root.emitEnhanceSignal()
+        onInteraction: bridge.ignore_alpha(value)
     }
 
     Item {

@@ -152,7 +152,6 @@ class Bridge(QObject):
 
     @Slot()
     def save_to_clipboard(self):
-        print("saving")
         self.writer.save_to_clipboard()
         # self.processingStarted.emit()
 
@@ -174,6 +173,14 @@ class Bridge(QObject):
         self.writer.send_invert()
         if self.has_image:
             self.processingStarted.emit()
+
+    @Slot(bool)
+    def save_like_preview(self, state):
+        self.writer.save_like_preview(state)
+
+    @Slot(bool)
+    def save_ignore_alpha(self, state):
+        self.writer.save_ignore_alpha(state)
 
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
@@ -223,7 +230,6 @@ class Bridge(QObject):
 
     def store_in_clipboard(self, data):
         image = pickle.loads(data)
-        print(image.dtype, image.ndim)
         qimage = numpy_to_pixmap(image, qi=True)
 
         self.clipboard.setImage(qimage)
@@ -234,7 +240,6 @@ class Bridge(QObject):
         config["window"]["y"] = int(self._window.property("y"))
         config["window"]["width"] = int(self._window.property("width"))
         config["window"]["height"] = int(self._window.property("height"))
-        is_max = self._window.property("visibility") == 4
         config["window"]["maximized"] = int(self._window.property("maximized"))
         config["window"]["sidebar_width"] = int(self._window.property("sbw"))
 
@@ -242,7 +247,6 @@ class Bridge(QObject):
         config["style"]["accent"] = int(self._window.property("accent"))
 
         save_config(config)
-
 
     def exit(self):
         # self.save_settings()
