@@ -9,9 +9,6 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: root
 
-    // property color startColor: "ghostwhite"
-    // property alias currentColor: colorController.current_color
-
     title: "Preferences"
     width: 520
     height: 700
@@ -28,6 +25,8 @@ ApplicationWindow {
 
     property bool isNative: false
     property bool darkTheme: false
+    property int accent: 0
+    property string version: "0.13.0"
 
     signal toggleNative(bool state)
     signal toggleTheme(bool state)
@@ -54,19 +53,16 @@ ApplicationWindow {
 
         TitlebarIcon {
             id: logo
-            // 1. Force the visual size
             Layout.preferredHeight: 150
             Layout.preferredWidth: height * (81 / 40) // width = height * ratio
 
-            // 2. Center it vertically in the RowLayout
             Layout.alignment: Qt.AlignHCenter
 
-            // 3. Remove the 'scale: 10' property
             fill: Material.foreground
             opacity: 0.9
         }
         Label {
-            text: "v0.13.0"
+            text: `v${root.version}`
             Layout.alignment: Qt.AlignHCenter
             font.family: "Jetbrains Mono"
             font.pointSize: 11
@@ -106,6 +102,7 @@ ApplicationWindow {
               onInteraction: root.toggleTheme(value)
             }
             AccentSelector {
+                selectedIndex: root.accent
                 onAccentSelected: (index) => {root.accentSelected(index)}
             }
             LabeledSwitch {

@@ -8,6 +8,7 @@ RowLayout {
 
     signal accentSelected(int index)
     property string label: "Accent Color"
+    property int selectedIndex: 0
 
     property var colorList: [
         (Material.theme === Material.Dark ? "#f8f8ff" : "#393d47"),
@@ -16,7 +17,6 @@ RowLayout {
         (Material.theme === Material.Dark ? "#a5d6a7" : "#4caf50"),
         (Material.theme === Material.Dark ? "#80cbc4" : "#009688"),
     ]
-    property int selectedIndex: 0
 
     Label {
         text: root.label

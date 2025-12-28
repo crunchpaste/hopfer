@@ -10,89 +10,99 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: main_window
     visible: true
-    height: 800
-    width: 1200
+
+    x: config.window.x
+    y: config.window.y
+    width: config.window.width
+    height: config.window.height
+
     minimumWidth: 850
     minimumHeight: 650
 
+    visibility: config.window.maximized ? Window.Maximized : Window.Windowed
+
+
     title: "hopfer"
 
-    // property bool native: false
-    property bool isNative: false
-    property bool darkTheme: true
+    property bool isNative: config.window.native_frame
+    property bool themeIdx: config.style.theme
 
-    // readonly property color adaptiveColor: (Material.theme === Material.Dark) ? "ghostwhite" : "#393d47"
+    // used for the config
+    property int accent: theme.selectedIndex
+    property bool maximized: visibility == Window.Maximized
+    // this is the sidebar width
+    property alias sbw: sidebar.width
 
     flags: isNative ? Qt.Window : Qt.Window | Qt.FramelessWindowHint
     font.family: "Jetbrains Mono"
-    font.pointSize: 11
-    Material.theme: darkTheme ? Material.Dark : Material.Light
+    font.pointSize: config.style.font_size
+    Material.theme: themeIdx == 0 ? Material.Dark : Material.Light
     Material.roundedScale: Material.ExtraSmallScale
     Material.containerStyle: Material.Outlined
 
-    Shortcut {
-        sequence: StandardKey.Open
-        onActivated: {
-            openDialog.open();
-        }
-    }
-    Shortcut {
-        sequence: StandardKey.Save
-        onActivated: {
-            if (viewer.hasImage) {
-                bridge.save(saveDialog.selectedFile);
-            }
-        }
-    }
-    Shortcut {
-        sequence: StandardKey.SaveAs
-        onActivated: {
-            if (viewer.hasImage) {
-                saveDialog.open();
-            }
-        }
-    }
-    Shortcut {
-        sequences: [StandardKey.Copy]
-        onActivated: {
-            bridge.save_to_clipboard();
-        }
-    }
-    Shortcut {
-        sequences: [StandardKey.Paste]
-        onActivated: {
-            bridge.open_clipboard();
-        }
-    }
-    Shortcut {
-        sequence: (Qt.platform.os === "osx") ? "Cmd+I" : "Ctrl+I"
-        onActivated: {
-            bar.currentIndex = 0;
-            image_panel.focusCombo();
-        }
-    }
-    Shortcut {
-        sequence: (Qt.platform.os === "osx") ? "Cmd+H" : "Ctrl+H"
-        onActivated: {
-            bar.currentIndex = 1;
-            halftone_panel.focusCombo();
-        }
-    }
-    Shortcut {
-        sequence: (Qt.platform.os === "osx") ? "Cmd+E" : "Ctrl+E"
-        onActivated: {
-            bar.currentIndex = 2;
-        }
-    }
-
     ThemeManager {
         id: theme
-        dark: main_window.darkTheme
+        dark: main_window.themeIdx == 0
+        selectedIndex: config.style.accent
     }
 
-    Material.accent: theme.currentAccent
-    // Material.background: theme.windowBg
 
+    Material.accent: theme.currentAccent
+
+    Shortcut {
+      sequence: StandardKey.Open
+      onActivated: {
+        openDialog.open();
+      }
+    }
+    Shortcut {
+      sequence: StandardKey.Save
+      onActivated: {
+        if (viewer.hasImage) {
+          bridge.save(saveDialog.selectedFile);
+        }
+      }
+    }
+    Shortcut {
+      sequence: StandardKey.SaveAs
+      onActivated: {
+        if (viewer.hasImage) {
+          saveDialog.open();
+        }
+      }
+    }
+    Shortcut {
+      sequences: [StandardKey.Copy]
+      onActivated: {
+        bridge.save_to_clipboard();
+      }
+    }
+    Shortcut {
+      sequences: [StandardKey.Paste]
+      onActivated: {
+        bridge.open_clipboard();
+      }
+    }
+    Shortcut {
+      sequence: (Qt.platform.os === "osx") ? "Cmd+I" : "Ctrl+I"
+      onActivated: {
+        bar.currentIndex = 0;
+        image_panel.focusCombo();
+      }
+    }
+    Shortcut {
+      sequence: (Qt.platform.os === "osx") ? "Cmd+H" : "Ctrl+H"
+      onActivated: {
+        bar.currentIndex = 1;
+        halftone_panel.focusCombo();
+      }
+    }
+    Shortcut {
+      sequence: (Qt.platform.os === "osx") ? "Cmd+E" : "Ctrl+E"
+      onActivated: {
+        bar.currentIndex = 2;
+      }
+    }
     Connections {
         function onDisplayImage() {
             viewer.source = "image://preview/current?" + Date.now();
@@ -151,7 +161,9 @@ ApplicationWindow {
                 lastFolder = currentFolder;
             }
         }
-        nameFilters: ["Image files (*.png *.jpg *.jpeg *.tiff, *.tif, *.webp, *.gif)", "All files (*)"]
+        nameFilters: [
+            "Image files (*.png *.jpg *.jpeg *.tiff, *.tif, *.webp, *.gif)",
+            "All files (*)"]
         onAccepted: {
             bridge.open(selectedFile);
             currentFolder = selectedFile;
@@ -197,7 +209,10 @@ ApplicationWindow {
                 currentFolder = bridge.initial_folder_url;
             }
         }
-        nameFilters: ["PNG files (*.png)", "TIFF files (*.tif *.tiff)", "All files (*)"]
+        nameFilters: [
+            "PNG files (*.png. *.PNG)",
+            "TIFF files (*.tif *.tiff *.TIF *.TIFF)",
+            "All files (*)"]
 
         onAccepted: {
             bridge.save(selectedFile);
@@ -213,14 +228,17 @@ ApplicationWindow {
     PreferencesDialog {
         id: preferences
         modality: Qt.WindowModal
+        version: config.version
         isNative: main_window.isNative
-        darkTheme: main_window.darkTheme
+        darkTheme: main_window.themeIdx == 0
+        accent: main_window.accent
+
         onToggleNative: state => {
             main_window.isNative = state;
             raise();
         }
         onToggleTheme: state => {
-            main_window.darkTheme = state;
+            main_window.themeIdx = state ? 0 : 1;
             raise();
         }
         onAccentSelected: index => {
@@ -249,7 +267,9 @@ ApplicationWindow {
                 Layout.fillHeight: true
 
                 Item {
+                    id: sidebar
                     SplitView.minimumWidth: 400
+                    SplitView.preferredWidth: config.window.sidebar_width
                     SplitView.fillHeight: true
 
                     RowLayout {

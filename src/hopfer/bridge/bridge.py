@@ -2,6 +2,7 @@ from PySide6.QtCore import QObject, Slot, Signal, QUrl, Property
 from PySide6.QtGui import QGuiApplication
 from hopfer.core.daemon import Daemon
 from hopfer.core.queue_io import QueueReader, QueueWriter
+from hopfer.helpers.config import get_config, save_config
 from hopfer.helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
 from multiprocessing import SimpleQueue, Process, shared_memory
 import pickle
@@ -29,6 +30,9 @@ class Bridge(QObject):
 
         self.clipboard = QGuiApplication.clipboard()
         self._initial_folder = platformdirs.user_videos_dir()
+
+        self._window = None
+
         self._init_components()
 
     def _init_components(self):
@@ -60,8 +64,8 @@ class Bridge(QObject):
 
         self.writer = QueueWriter(self.req_queue, bridge=self)
 
-        # WRITER SIGNALS
-        # self.writer.rotate.connect(self.rotate_shm)
+    def set_window(self, window):
+        self._window = window
 
     @Property(str)
     def initial_folder_url(self):
@@ -224,10 +228,25 @@ class Bridge(QObject):
 
         self.clipboard.setImage(qimage)
 
-        # self.display_notification("Image stored in clipboard.")
+    def save_config(self):
+        config = get_config()
+        config["window"]["x"] = int(self._window.property("x"))
+        config["window"]["y"] = int(self._window.property("y"))
+        config["window"]["width"] = int(self._window.property("width"))
+        config["window"]["height"] = int(self._window.property("height"))
+        is_max = self._window.property("visibility") == 4
+        config["window"]["maximized"] = int(self._window.property("maximized"))
+        config["window"]["sidebar_width"] = int(self._window.property("sbw"))
+
+        config["style"]["theme"] = int(self._window.property("themeIdx"))
+        config["style"]["accent"] = int(self._window.property("accent"))
+
+        save_config(config)
+
 
     def exit(self):
         # self.save_settings()
+        self.save_config()
         self.image_provider.image = None
         self.close_shm()
         self.writer.close()
