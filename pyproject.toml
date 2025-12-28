@@ -18,12 +18,10 @@ dependencies = [
     "PySide6",
     "numba",
     "numpy",
-    "nuitka",
-    "opencv-python",
+    "opencv-python-headless",
     "setproctitle",
     "platformdirs",
-    "setuptools",
-    "Cython"
+    "requests"
 ]
 
 [project.urls]
@@ -34,7 +32,6 @@ Repository = "https://github.com/crunchpaste/hopfer.git"
 [tool.setuptools.packages.find]
 where = ["src"]
 
-# This section ensures QML, Icons, and Binaries are included in the install
 [tool.setuptools.package-data]
 "hopfer" = [
     "ui/**/*.qml",

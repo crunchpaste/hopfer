@@ -27,6 +27,8 @@ UI_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "JetBrainsMono.ttf")
 def main():
     app = QGuiApplication(sys.argv)
 
+    app.setDesktopFileName("hopfer")
+
     platform = app.platformName()
     if platform == "wayland":
         print("Running on Wayland")

@@ -19,6 +19,17 @@ build/
 dist/
 *.egg-info/
 
+# Flatpak related
+.flatpak-builder/
+build-dir/
+repo/
+.flatpak-helper/
+src/data/
+src/scripts/
+
+# Temporary Flatpak manifest
+com.thinkpaste.hopfer.yml
+
 # Ignoring Nuitka temp folders and files
 hopfer.*/
 *.bin

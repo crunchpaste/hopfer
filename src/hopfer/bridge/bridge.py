@@ -113,12 +113,12 @@ class Bridge(QObject):
             if url.startswith("http://") or url.startswith("https://"):
                 self.writer.send_url(url)
             else:
-                message = "Not a valid file location."
+                message = "Not a valid file location"
                 self.showNotification.emit(message, 5000)
                 self.loadFailed.emit()
 
         else:
-            message = "No image data in clipboard."
+            message = "No image data in clipboard"
             self.showNotification.emit(message, 5000)
             self.loadFailed.emit()
 
@@ -128,11 +128,11 @@ class Bridge(QObject):
             if url.isLocalFile():
                 self.writer.send_url(url.toString(), local=url.isLocalFile())
             else:
-                message = "Can't open remote file."
+                message = "Can't open remote file"
                 self.showNotification.emit(message, 5000)
                 self.loadFailed.emit()
         else:
-            message = "Not a valid file location."
+            message = "Not a valid file location"
             self.showNotification.emit(message, 5000)
             self.loadFailed.emit()
 

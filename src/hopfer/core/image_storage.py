@@ -49,17 +49,17 @@ class ImageStorage(QObject):
 
         # Defaulting the paths to the user Pictures directory and
         # hopfer.png as the filename for saving if config is not found
-        try:
-            with open(config_path(), "r") as f:
-                config = json.load(f)
-                image_path = config["paths"]["open_path"]
-                save_path = config["paths"]["save_path"]
-        except Exception:
-            image_path = user_pictures_dir()
-            save_path = os.path.join(user_pictures_dir(), "hopfer.png")
+        # try:
+        #     with open(config_path(), "r") as f:
+        #         config = json.load(f)
+        #         image_path = config["paths"]["open_path"]
+        #         save_path = config["paths"]["save_path"]
+        # except Exception:
+        #     image_path = user_pictures_dir()
+        #     save_path = os.path.join(user_pictures_dir(), "hopfer.png")
 
-        self.paths = {"image_path": image_path, "save_path": save_path}
-        self.update_paths()
+        # self.paths = {"image_path": image_path, "save_path": save_path}
+        # self.update_paths()
 
         self.save_path_edited = False  # Track if the save path has been altered
 
@@ -175,55 +175,12 @@ class ImageStorage(QObject):
         :param image_path: Path to the image file to load.
         """
 
-        try:
-            self.paths["image_path"] = image_path
+        cv_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
 
-            with open(config_path(), "r") as f:
-                config = json.load(f)
-
-            base_path = os.path.dirname(image_path)
-            config["paths"]["open_path"] = base_path
-
-            if (
-                config["paths"]["open_path"] == config["paths"]["save_path"]
-                and not self.save_path_edited
-            ):
-                # this should only happen if the user has not set a different folder
-                # for saving this time, or the peviously in the config. I may be a
-                # personal opinion but I quite prefer having independent input/output
-                # folders.
-                config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
-
-            else:
-                #
-                name_wo_ext = os.path.splitext(os.path.basename(image_path))[0]
-                old_image = os.path.basename(self.paths["save_path"])
-                self.paths["save_path"] = self.paths["save_path"].replace(
-                    old_image, f"{name_wo_ext}.png"
-                )
-
-            with open(config_path(), "w") as f:
-                json.dump(config, f, indent=2)
-
-            self.update_paths()
-
-            cv_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-
-            if cv_image is not None:
-                self._load(cv_image)
-            else:
-                self.show_notification("Unsupported image format", duration=7000)
-                self.load_failed()
-
-        except FileNotFoundError as e:
-            self.show_notification(
-                f"Error: Unable to open image.\n{e!s}", duration=10000
-            )
-            self.load_failed()
-        except Exception as e:
-            self.show_notification(
-                f"An unexpected error occurred: {e!s}", duration=10000
-            )
+        if cv_image is not None:
+            self._load(cv_image)
+        else:
+            self.show_notification("Unsupported image format", duration=7000)
             self.load_failed()
 
     def load_from_pickle(self, data):
@@ -253,13 +210,13 @@ class ImageStorage(QObject):
 
                 else:
                     self.show_notification(
-                        f"{response.status_code}: Failed to download image.",
+                        f"{response.status_code}: Failed to download image",
                         duration=10000,
                     )
                     self.load_failed()
                     return None
         else:
-            self.show_notification("No image data in clipboard.", duration=10000)
+            self.show_notification("No image data in clipboard", duration=10000)
             self.load_failed()
 
     def load_failed(self):
@@ -399,7 +356,7 @@ class ImageStorage(QObject):
         """
         if self.processed_image is None:
             self.show_notification(
-                "Oops! It seems like you haven't opened an image yet. Open an image and then you can save it.",
+                "No image is loaded",
                 duration=3000,
             )
             return
@@ -413,9 +370,9 @@ class ImageStorage(QObject):
             # so that the user can find it if they miss the notification.
             base_path = user_pictures_dir()
             save_path = os.path.join(base_path, "hopfer.png")
-            self.paths["save_path"] = save_path
+            # self.paths["save_path"] = save_path
 
-        self.update_paths()
+        # self.update_paths()
 
         # # TODO: Make it work with path edited. For now it just saves it
         # to the config. Path edited seems to never
@@ -423,14 +380,14 @@ class ImageStorage(QObject):
         # only if the path was actually edited save it to the confing
         # so that next time it should be the default with a hopfer.png
 
-        base_path = os.path.dirname(save_path)
-        with open(config_path(), "r") as f:
-            config = json.load(f)
+        # base_path = os.path.dirname(save_path)
+        # with open(config_path(), "r") as f:
+        #     config = json.load(f)
 
-        config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
+        # config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
 
-        with open(config_path(), "w") as f:
-            json.dump(config, f, indent=2)
+        # with open(config_path(), "w") as f:
+        #     json.dump(config, f, indent=2)
 
         base_path = os.path.dirname(save_path)
         base_name = os.path.basename(save_path)
@@ -473,11 +430,9 @@ class ImageStorage(QObject):
             success = cv2.imwrite(save_path, output_image)
             if not success:
                 self.show_notification(
-                    f"Failed to save image to {save_path}. "
-                    "Check directory permissions or invalid image format.",
+                    f"Failed to save image",
                     duration=6000,
                 )
-                print("cv2.imwrite failed!", save_path)
                 return
         except Exception as e:
             self.show_notification(f"Error: {e}", duration=10000)
@@ -487,8 +442,18 @@ class ImageStorage(QObject):
 
         friendly_path = f".../{folder}/{filename}"
 
-        self.show_notification(f"Saved to {friendly_path}", duration=5000)
-        # self.show_notification(f"Image saved to {save_path}", duration=3000)
+        folder_path = os.path.dirname(save_path)
+
+        # check if the file actually exists on disk. i've had some problems with false positives before, so better safe than sorry.
+        if os.path.exists(save_path):
+            message = (
+                f"Saved to <a href='file://{folder_path}'>"
+                f"<b>{friendly_path}</b></a>"
+            )
+            self.show_notification(message, duration=5000)
+        else:
+            message = "Failed to save image"
+            self.show_notification(message, duration=5000)
 
     def save_to_clipboard(self):
         if self.processed_image is not None:
@@ -501,10 +466,10 @@ class ImageStorage(QObject):
             pickled_image = pickle.dumps(img)
             message = {"type": "data_for_clipboard", "data": pickled_image}
             self.res_queue.put(message)
-            self.show_notification("Image stored in clipboard.")
+            self.show_notification("Image stored in clipboard")
         else:
             self.show_notification(
-                "You haven't opened an image ", duration=5000
+                "No image is loaded", duration=5000
             )
 
     def generate_unique_save_path(self, base_path, base_name):

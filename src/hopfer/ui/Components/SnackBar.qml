@@ -6,12 +6,13 @@ import QtQuick.Layouts
 Rectangle {
     id: root
 
-    property alias text: label.text
+    // property alias text: label.text
     property int duration: 5000 // milliseconds
+    property string message: ""
     property bool visibleSnackbar: false
 
-    function show(message, duration) {
-        text = message;
+    function show(msg, duration) {
+        message = msg;
         timer.interval = duration;
         visibleSnackbar = true;
         timer.restart();
@@ -42,16 +43,31 @@ Rectangle {
         id: row
         anchors.fill: parent
 
-        Text {
+        Label {
             id: label
 
             Layout.fillWidth: true
             Layout.leftMargin: 24
-            text: ""
-            color: Material.foreground
+            textFormat: Text.RichText
+            wrapMode: Text.Wrap
+            text: {
+                // maybe there is a cleaner way to do this
+                let accentColor = Material.accent.toString();
+                let decoration = label.hoveredLink ? "underline" : "none";
+                return `<html><style>a { color: ${accentColor}; text-decoration: ${decoration}; }</style><body>${root.message}</body></html>`
+            }
             font.family: "Jetbrains Mono"
             font.pointSize: 11
-            wrapMode: Text.Wrap
+
+            linkColor: Material.accent
+            onLinkActivated: (link) => Qt.openUrlExternally(link)
+
+            MouseArea {
+                anchors.fill: parent
+                acceptedButtons: Qt.NoButton
+                hoverEnabled: true
+                cursorShape: parent.hoveredLink ? Qt.PointingHandCursor : Qt.DefaultCursor
+            }
         }
 
         Item {

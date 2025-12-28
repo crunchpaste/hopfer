@@ -124,8 +124,8 @@ ApplicationWindow {
             console.log("failed");
         }
 
-        function onShowNotification(message, duration) {
-            snack.show(message, duration);
+        function onShowNotification(msg, duration) {
+            snack.show(msg, duration);
         }
 
         target: bridge
