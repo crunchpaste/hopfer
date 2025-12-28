@@ -62,7 +62,6 @@ ApplicationWindow {
         sequences: [StandardKey.Paste]
         onActivated: {
             bridge.open_clipboard();
-            busy_timer.restart();
         }
     }
     Shortcut {
@@ -119,7 +118,6 @@ ApplicationWindow {
 
         function onLoadFailed() {
             busy_timer.stop();
-            viewer.busy(false);
             viewer.busy(false);
             console.log("failed");
         }

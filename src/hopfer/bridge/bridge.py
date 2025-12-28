@@ -100,6 +100,7 @@ class Bridge(QObject):
         mime_data = self.clipboard.mimeData()
         if mime_data.hasImage():
             image = self.clipboard.image()
+            self.processingStarted.emit()
             _image_np = qimage_to_numpy(image)
             # using pickle mostly for simplicity as I dont want to deal
             # with shared memory for an operation that happens so rarely.
@@ -108,10 +109,12 @@ class Bridge(QObject):
         elif mime_data.hasUrls():
             url = mime_data.urls()[0]
             self.open_url(url)
+            self.processingStarted.emit()
         elif mime_data.hasText():
             url = self.clipboard.text().strip().lower()
             if url.startswith("http://") or url.startswith("https://"):
                 self.writer.send_url(url)
+                self.processingStarted.emit()
             else:
                 message = "Not a valid file location"
                 self.showNotification.emit(message, 5000)
