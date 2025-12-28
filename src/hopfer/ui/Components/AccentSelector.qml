@@ -10,13 +10,13 @@ RowLayout {
     property string label: "Accent Color"
 
     property var colorList: [
-        (Material.theme === Material.Light ? "#393d47" : "#f8f8ff"),
-        "salmon",
-        Material.color(Material.Pink),
-        Material.color(Material.Green),
-        Material.color(Material.Teal)
+        (Material.theme === Material.Dark ? "#f8f8ff" : "#393d47"),
+        (Material.theme === Material.Dark ? "salmon" : "#f63a32"),
+        (Material.theme === Material.Dark ? "#F48FB1" : "#E91E63"),
+        (Material.theme === Material.Dark ? "#A5D6A7" : "#4CAF50"),
+        (Material.theme === Material.Dark ? "#80CBC4" : "#009688"),
     ]
-    property int selectedIndex: 0 // Default to the first color
+    property int selectedIndex: 0
 
     Label {
         text: root.label
@@ -25,7 +25,7 @@ RowLayout {
     }
 
     Row {
-        spacing: 12 // A bit more space for the rings
+        spacing: 12
 
         Repeater {
             model: root.colorList
@@ -35,9 +35,8 @@ RowLayout {
                 width: 20
                 height: 20
                 radius: 10
-                color: modelData // Still use the hex for the color
+                color: modelData
 
-                // The "Ring" logic using index
                 Rectangle {
                     id: ring
                     anchors.fill: parent
@@ -47,14 +46,13 @@ RowLayout {
                     border.color: colorCircle.color
                     border.width: 2
 
-                    // Stay visible if this index is selected OR mouse is hovering
                     opacity: {
                         if (mouseArea.containsMouse) {
                             return 0.5;
                         }else if (root.selectedIndex === index) {
-                            return 1.0;          // Full visibility if selected
+                            return 1.0;
                         } else {
-                            return 0.0;          // Hidden otherwise
+                            return 0.0;
                         }
                     }
 
@@ -67,7 +65,7 @@ RowLayout {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
                     onClicked: {
-                        root.selectedIndex = index // Update by index
+                        root.selectedIndex = index
                         root.accentSelected(index)
                     }
                 }
