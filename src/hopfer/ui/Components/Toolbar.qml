@@ -25,6 +25,7 @@ Item {
         rot_l.enabled = state;
         flip.enabled = state;
         fit.enabled = state;
+        actual.enabled = state;
     }
 
     width: 60
@@ -171,10 +172,10 @@ Item {
         }
 
         SquareButton {
-            // id: fit
+            id: actual
 
             ToolTip.text: "Display at actual size"
-            enabled: true
+            enabled: false
 
             onClicked: {
                 root.actual();
