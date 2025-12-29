@@ -309,19 +309,16 @@ ApplicationWindow {
                         anchors.centerIn: parent
                         spacing: 30
                         Watermark {
-                            // anchors.centerIn: parent
                             fill: Material.foreground
                             Layout.leftMargin: 10
-                            opacity: viewer.hasImage ? 0 : 0.05
+                            property real op: main_window.themeIdx == 0 ? 0.05 : 0.1
+                            opacity: viewer.hasImage ? 0 : op
                         }
 
                         Label {
                             text: "Open image or drop files here"
-                            // anchors.fill: parent
-                            // anchors.horizontalCenter: parent.horizontalCenter
-                            // anchors.bottomMargin: 50
-                            // anchors.bottom: parent.bottom
-                            opacity: viewer.hasImage ? 0 : 0.15
+                            property real op: main_window.themeIdx == 0 ? 0.15 : 0.25
+                            opacity: viewer.hasImage ? 0 : op
                         }
                     }
 
