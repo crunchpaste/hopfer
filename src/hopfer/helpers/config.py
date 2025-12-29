@@ -10,7 +10,7 @@ DEFAULT_CONFIG = {
         "width": 1200,
         "height": 800,
         "maximized": False,
-        # TODO: connect this one 
+        # TODO: connect this one
         "native_frame": False,
         "sidebar_width": 400,
     },
@@ -27,9 +27,9 @@ DEFAULT_CONFIG = {
         "low_memory": False,
     },
     "paths": {
-        # TODO: Connect these
         "open_path": platformdirs.user_pictures_dir(),
         "save_path": platformdirs.user_pictures_dir(),
+        # TODO: Connect these
         "remember_open": True,
         "remember_save": False,
     },

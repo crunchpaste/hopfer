@@ -156,14 +156,15 @@ ApplicationWindow {
         modality: Qt.WindowModal
         currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
         Component.onCompleted: {
-            if (bridge.initial_folder_url !== "") {
-                currentFolder = bridge.initial_folder_url;
+            if (config.paths.open_path !== "") {
+                currentFolder = Qt.resolvedUrl("file:///" + config.paths.open_path);
                 lastFolder = currentFolder;
             }
         }
         nameFilters: [
-            "Image files (*.png *.jpg *.jpeg *.tiff, *.tif, *.webp, *.gif)",
-            "All files (*)"]
+            "Image files (*.png *.PNG *.jpg *.JPG *.jpeg *.JPEG *.tiff *.TIFF *.tif *.TIF *.webp *.WEBP *.gif *.GIF)",
+            "All files (*)"
+        ]
         onAccepted: {
             bridge.open(selectedFile);
             currentFolder = selectedFile;
@@ -205,8 +206,8 @@ ApplicationWindow {
         currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
         selectedFile: currentFolder + "/hopfer.png"
         Component.onCompleted: {
-            if (bridge.initial_folder_url !== "") {
-                currentFolder = bridge.initial_folder_url;
+            if (config.paths.save_path !== "") {
+                currentFolder = Qt.resolvedUrl("file:///" + config.paths.open_path);
             }
         }
         nameFilters: [

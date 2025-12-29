@@ -9,6 +9,7 @@ import pickle
 import numpy as np
 import json
 import platformdirs
+import os
 
 
 class Bridge(QObject):
@@ -41,7 +42,7 @@ class Bridge(QObject):
         # the response queue
         self.res_queue = SimpleQueue()
 
-        self._paths = {"image_path": None, "save_path": None}
+        self._paths = {"open_path": None, "save_path": None}
 
         self.daemon = Daemon(response=self.res_queue, request=self.req_queue)
 
@@ -73,7 +74,6 @@ class Bridge(QObject):
 
     @Slot(str, str)
     def send_grayscale(self, algorithm, settings):
-        print("gray")
         settings_dict = json.loads(settings)
         self.writer.send_grayscale(algorithm, settings_dict)
 
@@ -95,7 +95,7 @@ class Bridge(QObject):
     @Slot(str)
     def open(self, path):
         path = QUrl(path).toLocalFile()
-        self._paths["image_path"] = path
+        self._paths["open_path"] = self.get_dir(path)
         self.writer.load_image(path)
         self.processingStarted.emit()
 
@@ -133,6 +133,8 @@ class Bridge(QObject):
     def open_url(self, url):
         if url.isValid():
             if url.isLocalFile():
+                path = url.toLocalFile()
+                self._paths["open_path"] = self.get_dir(path)
                 self.writer.send_url(url.toString(), local=url.isLocalFile())
             else:
                 message = "Can't open remote file"
@@ -146,7 +148,7 @@ class Bridge(QObject):
     @Slot(str)
     def save(self, path):
         path = QUrl(path).toLocalFile()
-        self._paths["save_path"] = path
+        self._paths["save_path"] = self.get_dir(path)
         self.writer.save_image(path)
         # self.processingStarted.emit()
 
@@ -236,6 +238,7 @@ class Bridge(QObject):
 
     def save_config(self):
         config = get_config()
+        # window related
         config["window"]["x"] = int(self._window.property("x"))
         config["window"]["y"] = int(self._window.property("y"))
         config["window"]["width"] = int(self._window.property("width"))
@@ -243,10 +246,20 @@ class Bridge(QObject):
         config["window"]["maximized"] = int(self._window.property("maximized"))
         config["window"]["sidebar_width"] = int(self._window.property("sbw"))
 
+        # theme related
         config["style"]["theme"] = int(self._window.property("themeIdx"))
         config["style"]["accent"] = int(self._window.property("accent"))
 
+        # path related
+        if self._paths["open_path"] is not None:
+            config["paths"]["open_path"] = self._paths["open_path"]
+        if self._paths["save_path"] is not None:
+            config["paths"]["save_path"] = self._paths["save_path"]
         save_config(config)
+
+    @staticmethod
+    def get_dir(path):
+        return os.path.dirname(path)
 
     def exit(self):
         # self.save_settings()
