@@ -20,3 +20,4 @@ PreferencesDialog 1.0 PreferencesDialog.qml
 ThemeManager 1.0 ThemeManager.qml
 AccentSelector 1.0 AccentSelector.qml
 Drop 1.0 Drop.qml
+Shortcuts 1.0 Shortcuts.qml

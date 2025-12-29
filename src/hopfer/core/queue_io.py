@@ -30,10 +30,10 @@ class QueueReader(QObject):
                 self.received_array.emit(name, size)
 
             elif message["type"] == "has_image":
-                self.bridge.has_image = message["value"]
+                self.bridge._has_image = message["value"]
 
             elif message["type"] == "load_failed":
-                self.bridge.has_image = False
+                self.bridge._has_image = False
                 self.bridge.loadFailed.emit()
 
             elif message["type"] == "close_shm":
@@ -222,7 +222,7 @@ class QueueWriter(QObject):
             self.queue.put(message)
 
             # emit a signal to show a busy indicator only if the bridge has an image
-            if self.bridge.has_image:
+            if self.bridge._has_image:
                 self.bridge.processing = True
                 self.bridge.processingStarted.emit()
 

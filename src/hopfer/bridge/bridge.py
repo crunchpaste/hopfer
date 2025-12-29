@@ -21,13 +21,14 @@ class Bridge(QObject):
     enableToolbar = Signal(bool)
     originalGrayscale = Signal(bool)
     pathsChanged = Signal()
+    hasImage = Signal(bool)
 
     def __init__(self, image_provider, parent=None):
         super().__init__(parent)
         self.shm = None
         self.image_provider = image_provider
         self.processing = False
-        self.has_image = False
+        self._has_image = False
 
         self.clipboard = QGuiApplication.clipboard()
         self._initial_folder = platformdirs.user_videos_dir()
@@ -67,6 +68,10 @@ class Bridge(QObject):
 
     def set_window(self, window):
         self._window = window
+
+    @Property(bool, notify=hasImage)
+    def has_image(self):
+        return self._has_image
 
     @Property(str)
     def initial_folder_url(self):
@@ -160,20 +165,20 @@ class Bridge(QObject):
     @Slot()
     def flip(self):
         self.writer.send_flip()
-        if self.has_image:
+        if self._has_image:
             self.processingStarted.emit()
 
     @Slot(bool)
     def rotate(self, cw):
         self.writer.send_rotate(cw)
-        if self.has_image:
+        if self._has_image:
             self.rotate_shm(cw)
             self.processingStarted.emit()
 
     @Slot()
     def invert(self):
         self.writer.send_invert()
-        if self.has_image:
+        if self._has_image:
             self.processingStarted.emit()
 
     @Slot(bool)
@@ -223,6 +228,7 @@ class Bridge(QObject):
             self.resetView.emit()
 
         self.processing = False
+        self._has_image = True
 
     def display_processed_image_nt(self, array, reset=True):
         """Display the processed image in the photo viewer on windows."""
@@ -235,6 +241,7 @@ class Bridge(QObject):
             self.resetView.emit()
 
         self.processing = False
+        self._has_image = True
 
     def store_in_clipboard(self, data):
         image = pickle.loads(data)

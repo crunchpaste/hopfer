@@ -49,60 +49,13 @@ ApplicationWindow {
 
     Material.accent: theme.currentAccent
 
-    Shortcut {
-      sequence: StandardKey.Open
-      onActivated: {
-        openDialog.open();
-      }
+    Shortcuts {
+        openDialog: openDialog
+        saveDialog: saveDialog
+        tabBar: bar
+        viewer: viewer
     }
-    Shortcut {
-      sequence: StandardKey.Save
-      onActivated: {
-        if (viewer.hasImage) {
-          bridge.save(saveDialog.selectedFile);
-        }
-      }
-    }
-    Shortcut {
-      sequence: StandardKey.SaveAs
-      onActivated: {
-        if (viewer.hasImage) {
-          saveDialog.open();
-        }
-      }
-    }
-    Shortcut {
-      sequences: [StandardKey.Copy]
-      onActivated: {
-        bridge.save_to_clipboard();
-      }
-    }
-    Shortcut {
-      sequences: [StandardKey.Paste]
-      onActivated: {
-        bridge.open_clipboard();
-      }
-    }
-    Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+I" : "Ctrl+I"
-      onActivated: {
-        bar.currentIndex = 0;
-        image_panel.focusCombo();
-      }
-    }
-    Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+H" : "Ctrl+H"
-      onActivated: {
-        bar.currentIndex = 1;
-        halftone_panel.focusCombo();
-      }
-    }
-    Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+E" : "Ctrl+E"
-      onActivated: {
-        bar.currentIndex = 2;
-      }
-    }
+
     Connections {
         function onDisplayImage() {
             viewer.source = "image://preview/current?" + Date.now();
