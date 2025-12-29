@@ -10,6 +10,7 @@ Window {
 
     property color startColor: "ghostwhite"
     property alias currentColor: colorController.current_color
+    property bool isNative: config.window.native_frame
 
     signal colorAccepted(color newColor)
 
@@ -35,7 +36,7 @@ Window {
     minimumHeight: height
     maximumHeight: height
 
-    flags: Qt.FramelessWindowHint | Qt.SubWindow
+    flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
     color: Material.background
 
@@ -83,6 +84,7 @@ Window {
             title: "Select color"
             Layout.fillWidth: true
             Layout.preferredHeight: 45
+            visible: !root.isNative
         }
 
         RowLayout {

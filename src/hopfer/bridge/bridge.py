@@ -184,6 +184,12 @@ class Bridge(QObject):
     def save_ignore_alpha(self, state):
         self.writer.save_ignore_alpha(state)
 
+    @Slot(bool)
+    def toggle_native(self, state):
+        config = get_config()
+        config["window"]["native_frame"] = state
+        save_config(config)
+
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
@@ -255,6 +261,7 @@ class Bridge(QObject):
             config["paths"]["open_path"] = self._paths["open_path"]
         if self._paths["save_path"] is not None:
             config["paths"]["save_path"] = self._paths["save_path"]
+            
         save_config(config)
 
     @staticmethod

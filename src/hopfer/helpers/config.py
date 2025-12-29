@@ -10,7 +10,6 @@ DEFAULT_CONFIG = {
         "width": 1200,
         "height": 800,
         "maximized": False,
-        # TODO: connect this one
         "native_frame": False,
         "sidebar_width": 400,
     },

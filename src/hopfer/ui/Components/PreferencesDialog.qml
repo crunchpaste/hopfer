@@ -21,14 +21,13 @@ ApplicationWindow {
     minimumHeight: height
     maximumHeight: height
 
-    flags: Qt.FramelessWindowHint | Qt.SubWindow
+    flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
-    property bool isNative: false
+    property bool isNative: config.window.native_frame
     property bool darkTheme: false
     property int accent: 0
-    property string version: "0.13.0"
+    property string version: config.version
 
-    signal toggleNative(bool state)
     signal toggleTheme(bool state)
     signal accentSelected(int index)
 
@@ -45,6 +44,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         DialogTitlebar {
+            visible: !root.isNative
             window: root
             title: "Preferences"
             Layout.fillWidth: true
@@ -71,51 +71,87 @@ ApplicationWindow {
         Item {height:24}
 
         TabBar {
-          id: bar
-          currentIndex: stack.currentIndex
-          topPadding: 10
+            id: bar
+            currentIndex: stack.currentIndex
+            topPadding: 10
 
-          Layout.fillWidth: true
+            Layout.fillWidth: true
 
-          TabButton {
-            text: "Preferences"
-          }
+            TabButton {
+                text: "Preferences"
+            }
 
-          TabButton {
-            text: "Shortcuts"
-          }
+            TabButton {
+                text: "Shortcuts"
+            }
 
-          TabButton {
-            text: "About"
-          }
+            TabButton {
+                text: "About"
+            }
 
         }
         StackLayout {
-          id: stack
-          currentIndex: bar.currentIndex
-          Layout.margins: 20
-          ColumnLayout {
-            spacing: 10
-            LabeledSwitch {
-              text: "Dark theme"
-              value: root.darkTheme
-              onInteraction: root.toggleTheme(value)
+            id: stack
+            currentIndex: bar.currentIndex
+            Layout.margins: 20
+            ColumnLayout {
+                spacing: 10
+                LabeledSwitch {
+                    // visible: false
+                    text: "Use system frame"
+                    value: root.isNative
+                    onInteraction: {
+                        bridge.toggle_native(value)
+                        if (root.isNative != value) {
+                            alert.visible = true
+                        } else {
+                            alert.visible = false
+                        }
+                    }
+                }
+                LabeledSwitch {
+                    text: "Dark theme"
+                    value: root.darkTheme
+                    onInteraction: root.toggleTheme(value)
+                }
+
+                AccentSelector {
+                    Layout.topMargin: 5
+                    selectedIndex: root.accent
+                    onAccentSelected: (index) => {root.accentSelected(index)}
+                }
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+                Rectangle {
+                    id: alert
+                    visible: false
+                    height: 48
+                    radius: 5
+                    Layout.fillWidth: true
+                    color: Qt.darker(Material.background, 1.25)
+                    RowLayout {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        Label {
+                            text: "Changes will take effect after a restart"
+                            wrapMode: Text.WordWrap
+                        }
+                        Item {
+                            Layout.fillWidth: true
+                        }
+                        Label {
+                            font.family: "Material Icons"
+                            text: "\ue000"
+                            font.pointSize: 15
+                            color: Material.accent
+                        }
+                    }
+                }
             }
-            AccentSelector {
-                selectedIndex: root.accent
-                onAccentSelected: (index) => {root.accentSelected(index)}
-            }
-            LabeledSwitch {
-              visible: false
-              text: "Use system frame"
-              value: root.isNative
-              onInteraction: root.toggleNative(value)
-            }
-          }
-        }
-        Item {
-          Layout.fillWidth: true
-          Layout.fillHeight: true
         }
     }
 }

@@ -229,15 +229,9 @@ ApplicationWindow {
     PreferencesDialog {
         id: preferences
         modality: Qt.WindowModal
-        version: config.version
-        isNative: main_window.isNative
         darkTheme: main_window.themeIdx == 0
         accent: main_window.accent
 
-        onToggleNative: state => {
-            main_window.isNative = state;
-            raise();
-        }
         onToggleTheme: state => {
             main_window.themeIdx = state ? 0 : 1;
             raise();
