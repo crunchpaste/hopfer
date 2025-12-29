@@ -100,7 +100,6 @@ ApplicationWindow {
     }
 
     FileDialog {
-        // TODO: Update the path even when image was dropped or pasted
         id: openDialog
 
         property url lastFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
@@ -110,7 +109,7 @@ ApplicationWindow {
         currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
         Component.onCompleted: {
             if (config.paths.open_path !== "") {
-                currentFolder = Qt.resolvedUrl("file:///" + config.paths.open_path);
+                currentFolder = Qt.resolvedUrl(config.paths.open_path);
                 lastFolder = currentFolder;
             }
         }
@@ -160,7 +159,7 @@ ApplicationWindow {
         selectedFile: currentFolder + "/hopfer.png"
         Component.onCompleted: {
             if (config.paths.save_path !== "") {
-                currentFolder = Qt.resolvedUrl("file:///" + config.paths.open_path);
+                currentFolder = Qt.resolvedUrl(config.paths.open_path);
             }
         }
         nameFilters: [

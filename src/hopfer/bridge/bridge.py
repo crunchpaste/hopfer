@@ -265,9 +265,11 @@ class Bridge(QObject):
 
         # path related
         if self._paths["open_path"] is not None:
-            config["paths"]["open_path"] = self._paths["open_path"]
+            path = os.path.normpath(self._paths["open_path"])
+            config["paths"]["open_path"] = path
         if self._paths["save_path"] is not None:
-            config["paths"]["save_path"] = self._paths["save_path"]
+            path = os.path.normpath(self._paths["save_path"])
+            config["paths"]["save_path"] = path
 
         save_config(config)
 

@@ -47,9 +47,9 @@ def main():
 
     engine.addImageProvider("preview", image_provider)
 
-    engine.rootContext().setContextProperty("config", config)
-
     engine.rootContext().setContextProperty("bridge", bridge)
+
+    engine.rootContext().setContextProperty("config", config)
 
     engine.addImportPath(os.fspath(UI_PATH))
 
