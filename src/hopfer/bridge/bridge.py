@@ -261,7 +261,7 @@ class Bridge(QObject):
             config["paths"]["open_path"] = self._paths["open_path"]
         if self._paths["save_path"] is not None:
             config["paths"]["save_path"] = self._paths["save_path"]
-            
+
         save_config(config)
 
     @staticmethod

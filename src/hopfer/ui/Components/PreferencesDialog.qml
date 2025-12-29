@@ -146,7 +146,7 @@ ApplicationWindow {
                         Label {
                             font.family: "Material Icons"
                             text: "\ue000"
-                            font.pointSize: 15
+                            font.pointSize: 18
                             color: Material.accent
                         }
                     }
