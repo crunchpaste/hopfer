@@ -16,7 +16,7 @@ RowLayout {
 
         text: "Serpentine"
         font.family: "Jetbrains Mono"
-        font.pointSize: 11
+        // font.pointSize: 11
     }
 
     Item {

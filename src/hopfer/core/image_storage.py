@@ -45,34 +45,20 @@ class ImageStorage(QObject):
         self.shm = None
         self.shm_preview = None
 
-        # Defaulting the paths to the user Pictures directory and
-        # hopfer.png as the filename for saving if config is not found
-        # try:
-        #     with open(config_path(), "r") as f:
-        #         config = json.load(f)
-        #         image_path = config["paths"]["open_path"]
-        #         save_path = config["paths"]["save_path"]
-        # except Exception:
-        #     image_path = user_pictures_dir()
-        #     save_path = os.path.join(user_pictures_dir(), "hopfer.png")
-
-        # self.paths = {"image_path": image_path, "save_path": save_path}
-        # self.update_paths()
-
         self.save_path_edited = False  # Track if the save path has been altered
 
         self.save_like_preview = False
         self.save_like_alpha = False
 
-        self._original_image = None
+        self.original_image = None  # uint8
         self.original_grayscale = False
-        self.resized = None
-        self._grayscale_image = None
-        self._enhanced_image = None
-        self.alpha = None
+        self.resized = None  # uint8
+        self.grayscale_image = None  # uint8
+        self.enhanced_image = None  # uint8
+        self.alpha = None  # uint8
         self.ignore_alpha = False
         self.edited_image = None
-        self._processed_image = None
+        self.processed_image = None  # bool
 
         self.color_dark = np.array((28, 27, 31)).astype(np.uint8)
         self.color_light = np.array((255, 255, 255)).astype(np.uint8)
@@ -236,33 +222,33 @@ class ImageStorage(QObject):
         Assumes image was loaded with cv2.IMREAD_UNCHANGED.
         """
 
-        np_image_float = self.image_to_float(image)
-        if len(np_image_float.shape) == 2:
+        np_image_uint16 = self.image_to_uint16(image)
+        if len(np_image_uint16.shape) == 2:
             num_channels = 1
         else:
-            num_channels = np_image_float.shape[-1]
+            num_channels = np_image_uint16.shape[-1]
 
-        h, w = np_image_float.shape[0], np_image_float.shape[1]
+        h, w = np_image_uint16.shape[0], np_image_uint16.shape[1]
 
         self.res_queue.put(
             {"type": "image_size", "height": h, "width": w, "ratio": h / w}
         )
 
         if num_channels == 1:
-            L = np_image_float
+            L = np_image_uint16
             A = None
             self.original_grayscale = True
             return L, A
 
         elif num_channels == 2:
-            L = np_image_float[:, :, 0]
-            A = self.discard_alpha(np_image_float[:, :, 1])
+            L = np_image_uint16[:, :, 0]
+            A = self.discard_alpha(np_image_uint16[:, :, 1])
 
             self.original_grayscale = True
             return L, A
 
         elif num_channels == 3:
-            BGR = np_image_float
+            BGR = np_image_uint16
             RGB = self.bgr_to_rgb(BGR)
             A = None
 
@@ -273,18 +259,17 @@ class ImageStorage(QObject):
             return RGB, A  # Color_BGR is (H, W, 3), A is None
 
         elif num_channels == 4:
-            BGR = np_image_float[:, :, :3]
+            BGR = np_image_uint16[:, :, :3]
             RGB = self.bgr_to_rgb(BGR)
-            A = self.discard_alpha(np_image_float[:, :, 3])
+            A = self.discard_alpha(np_image_uint16[:, :, 3])
 
             # Check for grayscale conversion and status update
             RGB, is_gray = self.check_grayscale(RGB)
 
             self.original_grayscale = is_gray
-            return RGB, A  # Color_BGR is (H, W, 3), A is (H, W)
+            return RGB, A
 
         else:
-            # raise ValueError(f"Unsupported number of channels: {num_channels}. Image cannot be processed.")
             self.show_notification("Unsupported number of channels")
 
     @staticmethod
@@ -293,12 +278,12 @@ class ImageStorage(QObject):
         return RGB
 
     @staticmethod
-    def image_to_float(image):
+    def image_to_uint16(image):
         image_dtype = image.dtype
+
         if image_dtype == np.uint8:
-            image = (image / 255).astype(np.float16)
-        elif image_dtype == np.uint16:
-            image = (image / 65535).astype(np.float16)
+            image = image.astype(np.uint16) << 8
+
         return image
 
     @staticmethod
@@ -362,30 +347,8 @@ class ImageStorage(QObject):
         save_path = path
 
         if not save_path:
-            # If there is no save path, and this happens when an image is
-            # pasted from clipboard, save it to the user Pictures directory
-            # as hopfer.png and set the Pictures directory as the save path
-            # so that the user can find it if they miss the notification.
             base_path = user_pictures_dir()
             save_path = os.path.join(base_path, "hopfer.png")
-            # self.paths["save_path"] = save_path
-
-        # self.update_paths()
-
-        # # TODO: Make it work with path edited. For now it just saves it
-        # to the config. Path edited seems to never
-
-        # only if the path was actually edited save it to the confing
-        # so that next time it should be the default with a hopfer.png
-
-        # base_path = os.path.dirname(save_path)
-        # with open(config_path(), "r") as f:
-        #     config = json.load(f)
-
-        # config["paths"]["save_path"] = os.path.join(base_path, "hopfer.png")
-
-        # with open(config_path(), "w") as f:
-        #     json.dump(config, f, indent=2)
 
         base_path = os.path.dirname(save_path)
         base_name = os.path.basename(save_path)
@@ -394,12 +357,12 @@ class ImageStorage(QObject):
         if self.save_like_preview and self.daemon.processor.algorithm != "None":
             image = style_image(self.processed_image, self.color_dark, self.color_light)
         else:
-            image = (self.processed_image * 255).astype(np.uint8)
+            image = self.processed_image
 
         if self.ignore_alpha or self.alpha is None:
             output_image = image
         else:
-            alpha = (self.alpha * 255).astype(np.uint8)
+            alpha = self.alpha
             output_image = np.dstack((image, alpha))
 
         # this part handles the RGB to BGR conversion needed for cv2.
@@ -491,93 +454,6 @@ class ImageStorage(QObject):
 
         return save_path
 
-    @staticmethod
-    def f32(image):
-        if image.dtype == np.float32:
-            return image
-        else:
-            return image.astype(np.float32)
-
-    @staticmethod
-    def f16(image):
-        if image.dtype == np.float16:
-            return image
-        else:
-            return image.astype(np.float16)
-
-    @staticmethod
-    def b1(image):
-        if image.dtype == np.bool:
-            return image
-        else:
-            return image.astype(np.bool)
-
-    @property
-    def original_image(self):
-        """
-        Return the original image as a NumPy array (normalized to [0, 1]).
-        """
-        if self._original_image is not None:
-            return self.f32(self._original_image)
-
-    @original_image.setter
-    def original_image(self, image):
-        if image is not None:
-            self._original_image = self.f16(image)
-
-    @property
-    def grayscale_image(self):
-        """
-        Return the original image as a NumPy array (normalized to [0, 1]).
-
-        :return: Original image array.
-        """
-        if self._grayscale_image is not None:
-            return self.f32(self._grayscale_image)
-
-    @grayscale_image.setter
-    def grayscale_image(self, image):
-        if image is not None:
-            self._grayscale_image = self.f16(image)
-
-    @property
-    def enhanced_image(self):
-        """
-        Return the original image as a NumPy array (normalized to [0, 1]).
-
-        :return: Original image array.
-        """
-        if self._enhanced_image is not None:
-            return self.f32(self._enhanced_image)
-        return self.grayscale_image
-
-    @enhanced_image.setter
-    def enhanced_image(self, image):
-        if image is not None:
-            self._enhanced_image = self.f16(image)
-
-    @property
-    def processed_image(self):
-        """
-        Return the original image as a NumPy array (normalized to [0, 1]).
-
-        :return: Original image array.
-        """
-        if self._processed_image is not None:
-            if self.algorithm != "None":
-                return self.b1(self._processed_image)
-            else:
-                return self._processed_image
-        return self.enhanced_image
-
-    @processed_image.setter
-    def processed_image(self, image):
-        if image is not None:
-            if self.algorithm != "None":
-                self._processed_image = self.b1(image)
-            else:
-                self._processed_image = self.f16(image)
-
     def get_original_pixmap(self):
         """
         Convert the original image to a QPixmap.
@@ -647,14 +523,11 @@ class ImageStorage(QObject):
         else:
             try:
                 processed_img = np.ascontiguousarray(self.processed_image)
-                processed_img = (processed_img * 255).astype(np.uint8)
                 if not clipboard:
                     self.shm_preview[:, :, 0] = processed_img
                     self.res_queue.put(
                         {"type": "display_image", "array": "gray", "reset": reset}
                     )
-                else:
-                    processed_img = (processed_img * 255).astype(np.uint8)
             except Exception as e:
                 print(f"GENERATING PIXMAPS: {e}")
 
@@ -679,8 +552,8 @@ class ImageStorage(QObject):
         if compositing:
             try:
                 return style_alpha(
-                    self.processed_image.astype(np.float32),
-                    self.alpha.astype(np.float32),
+                    self.processed_image,
+                    self.alpha,
                     color_dark,
                     color_light,
                     color_alpha,
@@ -689,15 +562,15 @@ class ImageStorage(QObject):
                 print(e)
 
         styled_img = style_image(self.processed_image, color_dark, color_light)
-        alpha = (self.alpha * 255).astype(np.uint8)
+        alpha = self.alpha
         return np.dstack((styled_img, alpha))
 
     def _convert_to_uint8(self):
         # Cenverts to uint8 and adds alpha
-        img_uint8 = (self.processed_image * 255).astype(np.uint8)
+        img_uint8 = self.processed_image.astype(np.uint8) * 255
 
         if self.alpha is not None:
-            alpha = (self.alpha * 255).astype(np.uint8)
+            alpha = self.alpha
             return np.dstack((img_uint8, img_uint8, img_uint8, alpha))
 
         return img_uint8
@@ -770,11 +643,11 @@ class ImageStorage(QObject):
         # the halftoning would be accurate again on the next reprocess.
 
     def invert_image(self):
-        self.original_image = 1 - self.original_image
-        self.resized = 1 - self.resized
-        self.grayscale_image = 1 - self.grayscale_image
-        self.enhanced_image = 1 - self.enhanced_image
-        self.processed_image = 1 - self.processed_image
+        self.original_image = 255 - self.original_image
+        self.resized = 255 - self.resized
+        self.grayscale_image = 255 - self.grayscale_image
+        self.enhanced_image = 255 - self.enhanced_image
+        np.logical_not(self.processed_image, out=self.processed_image)
 
         # It may be a bit of a personal preference, but i don't believe
         # the view should be reset after inverting the colors.

@@ -28,8 +28,8 @@ ColumnLayout {
         from: 2
         to: 500
         step: 1
-        value: 5
-        default_value: 5
+        value: 25
+        default_value: 25
         precision: 0
         onInteraction: root.settingsChanged()
     }

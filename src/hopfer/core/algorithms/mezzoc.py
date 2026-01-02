@@ -7,10 +7,15 @@ def mezzo(img, settings, mode="uniform"):
     seed = settings["seed"]
     h, w = img.shape
     rng = np.random.default_rng(seed)
+    # no need to use uint16 as results are not better at all
+    img = (img >> 8).astype(np.uint8)
 
     if mode == "uniform":
-        r_min, r_max = settings["range"]
-        noise = rng.uniform(r_min, r_max, (h, w))
+        # the GUI still works in floats, while i've switched to ints internally
+        r_min_f, r_max_f = settings["range"]
+        r_min, r_max = int(r_min_f * 255), int(r_max_f * 255)
+        noise = rng.integers(r_min, r_max + 1, (h, w), dtype=np.uint8)
+
     elif mode == "gauss":
         loc = settings["location"] / 100
         std = settings["std"] / 200

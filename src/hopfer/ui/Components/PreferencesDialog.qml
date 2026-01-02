@@ -96,6 +96,20 @@ ApplicationWindow {
             Layout.margins: 20
             ColumnLayout {
                 spacing: 10
+
+                // LabeledSlider {
+                //     text: "Font size"
+                //     from: 8
+                //     to: 14
+                //     step: 0.1
+                //     value: 11
+                //     default_value: 11
+                //     precision: 1
+                //     onInteraction: (value) => {
+                //       main_window.font.pointSize = value;
+                //       root.font.pointSize = value;
+                //     }
+                // }
                 LabeledSwitch {
                     // visible: false
                     text: "Use system frame"

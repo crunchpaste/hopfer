@@ -18,7 +18,7 @@ ColumnLayout {
     property real default_value: 0
     property int precision: 0
 
-    signal interaction()
+    signal interaction(real value)
     signal moved()
     signal valueChange()
 
@@ -31,7 +31,7 @@ ColumnLayout {
 
             text: "Local threshold"
             font.family: "Jetbrains Mono"
-            font.pointSize: 11
+            // font.pointSize: 11
         }
 
         Item {
@@ -101,7 +101,7 @@ ColumnLayout {
                 enabled: slider.value.toFixed(root.precision) != root.default_value.toFixed(root.precision)
                 onTapped: {
                     slider.value = root.default_value;
-                    root.interaction();
+                    root.interaction(root.value);
 
                 }
             }
@@ -117,7 +117,7 @@ ColumnLayout {
 
             text: slider.value.toFixed(root.precision)
             font.family: "Jetbrains Mono"
-            font.pointSize: 11
+            // font.pointSize: 11
         }
 
     }
@@ -134,7 +134,7 @@ ColumnLayout {
         Layout.fillWidth: true
         onPressedChanged: {
             if (!pressed)
-                root.interaction();
+                root.interaction(root.value);
         }
         onMoved: {
           root.moved()

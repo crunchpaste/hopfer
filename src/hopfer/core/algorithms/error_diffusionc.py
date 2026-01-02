@@ -18,7 +18,11 @@ def error_diffusion(img, kernel, settings):
     serpentine = settings["serpentine"]
     noise = settings["noise"]
     if noise:
-        noise_array = np.random.random((20, img.shape[1])).astype(np.float32)
+        rng = np.random.default_rng(12345)
+        noise_array = rng.integers(low=0, high=32768, size=(20, img.shape[1])).astype(
+            np.uint16
+        )
+
         img = np.vstack((noise_array, img))
     if serpentine:
         output_img = eds(img, kernel, str)

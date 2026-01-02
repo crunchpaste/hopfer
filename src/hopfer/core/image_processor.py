@@ -2,10 +2,8 @@ import time
 import cv2
 import numpy as np
 
-# 1. Update the helper import
 from hopfer.helpers.kernels import get_kernel
 
-# 2. Update all algorithm imports with 'hopfer.core.'
 try:
     from hopfer.core.algorithms.thresholdc import (
         niblack_threshold,
@@ -119,6 +117,7 @@ class ImageProcessor:
         then stores the result in the ImageStorage instance.
         """
         self.processing = True
+        start = time.perf_counter()
 
         if self.storage.resized is None:
             self.processing = False
@@ -129,8 +128,6 @@ class ImageProcessor:
 
             # Determine the processing step based on grayscale mode and enhancement settings.
             step = self._determine_processing_step(step)
-
-            start_time = time.perf_counter()
 
             # Perform processing steps sequentially.
             self._process_grayscale(step)
@@ -143,8 +140,7 @@ class ImageProcessor:
             self._handle_processing_error()
             processed_image = self.storage.processed_image
 
-        # print(f"PROCESSING: {time.perf_counter() - start_time:.6f} seconds")
-
+        print(f"Done in: {time.perf_counter() - start:.4f}s")
         self._send_result(processed_image)
 
     # --- Helper Methods ---
@@ -190,7 +186,7 @@ class ImageProcessor:
             return self._apply_algorithm(
                 self.storage.enhanced_image, self.algorithm, self.settings
             )
-        return self.storage.enhanced_image
+        return (self.storage.enhanced_image >> 8).astype(np.uint8)
 
     def _handle_processing_error(self):
         """Handles exceptions during processing."""
@@ -244,26 +240,27 @@ class ImageProcessor:
         _contrast += 1
 
         if im_settings["normalize"]:
-            min_val = np.min(image)
-            max_val = np.max(image)
-            image = (image - min_val) / (max_val - min_val)
+            low = np.min(image)
+            high = np.max(image)
+
+            if high > low:
+                # LUT and equalizeHist require uint8
+                img8 = (image >> 8).astype(np.uint8)
+                lut = (np.arange(256) - (low >> 8)) * (255.0 / ((high - low) >> 8))
+                lut = np.clip(lut, 0, 255).astype(np.uint8)
+                img8 = cv2.LUT(img8, lut)
+                image = img8.astype(np.uint16) << 8
+
         if im_settings["equalize"]:
-            # cv wants the image to be uint8 for histogram
-            # equalization
-            _image = (image * 255).astype(np.uint8)
-            image = (cv2.equalizeHist(_image) / 255).astype(np.float32)
+            img8 = (image >> 8).astype(np.uint8)
+            img8 = cv2.equalizeHist(img8)
+            image = img8.astype(np.uint16) << 8
 
         if im_settings["bc_t"]:
-            if _brightness != 1.0:
-                # TODO: when brightness is high and some filters are applied opencv fails. must investigate.
-                image = image * _brightness
-
-            if _contrast != 1.0:
+            if _brightness != 1.0 or _contrast != 1.0:
                 alpha = float(_contrast)
-                beta = 0.5 * (1.0 - alpha)
-                image = alpha * image + beta
-
-            image = np.clip(image, 0.0, 1.0)
+                beta = 32767.5 * (1.0 - alpha) + (_brightness - 1.0) * 65535.0
+                image = cv2.addWeighted(image, alpha, image, 0, beta)
 
         if im_settings["blur_t"]:
             _blur = im_settings["blur"]
@@ -271,32 +268,41 @@ class ImageProcessor:
             if _blur > 0:
                 image = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=_blur)
             if _median > 1:
-                # cv wants the image to be uint8 for median
-                # blurring
-                _image = (image * 255).astype(np.uint8)
-                image = (cv2.medianBlur(_image, ksize=_median) / 255).astype(np.float32)
+                # medianBlur only supports uint8 or float32
+                img8 = (image >> 8).astype(np.uint8)
+                img8 = cv2.medianBlur(img8, ksize=_median)
+                image = img8.astype(np.uint16) << 8
+
         if im_settings["unsharp_t"]:
             radius = im_settings["u_radius"] + 0.01
             strength = im_settings["u_strength"] * 2
-            thresh = im_settings["u_thresh"] / 10
+            thresh = (im_settings["u_thresh"] / 10) * 65535
 
             blurred = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=radius)
 
-            unsharp_mask = image - blurred
+            unsharp_mask = image.astype(np.int32) - blurred.astype(np.int32)
 
             if thresh > 0:
-                bool_mask = np.abs(unsharp_mask) >= thresh
-                unsharp_mask[~bool_mask] = 0
+                bool_mask = np.abs(unsharp_mask) < thresh
+                unsharp_mask[bool_mask] = 0
 
-            image = cv2.addWeighted(image, 1.0, unsharp_mask, strength, 0)
-
-            image = np.clip(image, 0.0, 1.0)
+            res = cv2.addWeighted(
+                image.astype(np.float32),
+                1.0,
+                unsharp_mask.astype(np.float32),
+                strength,
+                0,
+            )
+            image = np.clip(res, 0, 65535).astype(np.uint16)
 
         if im_settings["laplacian_t"]:
             strength = im_settings["l_strength"]
-            laplacian_mask = cv2.Laplacian(image, ddepth=cv2.CV_32F)
-            image = image - (strength * laplacian_mask)
-            image = np.clip(image, 0.0, 1.0)
+
+            laplacian_mask = cv2.Laplacian(image, ddepth=cv2.CV_32F, ksize=1)
+
+            res = image.astype(np.float32) - (strength * laplacian_mask)
+
+            image = np.clip(res, 0, 65535).astype(np.uint16)
 
         return image
 
@@ -305,15 +311,23 @@ class ImageProcessor:
         """Apply the selected halftoning algorithm to the image via worker_h."""
 
         if algorithm == "Fixed threshold":
+            # demote to uint8. no visual differences found.
+            image = (image >> 8).astype(np.uint8)
             processed_image = threshold(image, settings)
 
         elif algorithm == "Niblack threshold":
+            # demote to uint8. no visual differences found.
+            image = (image >> 8).astype(np.uint8)
             processed_image = niblack_threshold(image, settings)
 
         elif algorithm == "Sauvola threshold":
+            # demote to uint8. no visual differences found.
+            image = (image >> 8).astype(np.uint8)
             processed_image = sauvola_threshold(image, settings)
 
         elif algorithm == "Phansalkar threshold":
+            # demote to uint8. no visual differences found.
+            image = (image >> 8).astype(np.uint8)
             processed_image = phansalkar_threshold(image, settings)
 
         elif algorithm == "Mezzotint uniform":
@@ -349,7 +363,7 @@ class ImageProcessor:
 
             processed_image = error_diffusion(image, kernel, settings)
 
-        elif algorithm == "Ostromoukhov" or algorithm == "Zhou-Fang":
+        elif algorithm in ["Ostromoukhov", "Zhou-Fang"]:
             processed_image = variable_ed(image, algorithm, settings)
 
         elif algorithm == "Levien":

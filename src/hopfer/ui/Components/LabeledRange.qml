@@ -34,7 +34,7 @@ ColumnLayout {
 
             text: "Local threshold"
             font.family: "Jetbrains Mono"
-            font.pointSize: 11
+            // font.pointSize: 11
         }
 
         Item {
@@ -121,7 +121,7 @@ ColumnLayout {
 
             text: slider.first.value.toFixed(root.precision) + " → " + slider.second.value.toFixed(root.precision)
             font.family: "Jetbrains Mono"
-            font.pointSize: 11
+            // font.pointSize: 11
         }
 
     }
