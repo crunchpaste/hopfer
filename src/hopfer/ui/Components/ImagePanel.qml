@@ -221,7 +221,17 @@ ColumnLayout {
                 Layout.margins: 10
                 Layout.fillWidth: true
 
-
+                LabeledSlider {
+                    id: median
+                    text: "Median filter"
+                    from: 1
+                    to: 50
+                    step: 1
+                    value: 1
+                    default_value: 1
+                    precision: 1
+                    onInteraction: root.emitEnhanceSignal()
+                }
                 LabeledSlider {
                     id: box
                     text: "Box blur"
@@ -242,17 +252,6 @@ ColumnLayout {
                     value: 0
                     default_value: 0
                     precision: 0
-                    onInteraction: root.emitEnhanceSignal()
-                }
-                LabeledSlider {
-                    id: median
-                    text: "Median filter"
-                    from: 1
-                    to: 50
-                    step: 1
-                    value: 1
-                    default_value: 1
-                    precision: 1
                     onInteraction: root.emitEnhanceSignal()
                 }
             }

@@ -266,6 +266,11 @@ class ImageProcessor:
             _box = int(im_settings["box"] * 2 - 1)
             _blur = int(im_settings["blur"] * 2 - 1)
             _median = int(im_settings["median"] * 2 - 1)
+            if _median > 1:
+                # medianBlur only supports uint8 or float32
+                if image.dtype != np.uint8:
+                    image = (image >> 8).astype(np.uint8)
+                    image = cv2.medianBlur(image, ksize=_median)
             if _box > 0:
                 if image.dtype != np.uint8:
                     image = (image >> 8).astype(np.uint8)
@@ -274,11 +279,6 @@ class ImageProcessor:
                 if image.dtype != np.uint8:
                     image = (image >> 8).astype(np.uint8)
                 image = cv2.stackBlur(image, ksize=(_blur, _blur))
-            if _median > 1:
-                # medianBlur only supports uint8 or float32
-                if image.dtype != np.uint8:
-                    image = (image >> 8).astype(np.uint8)
-                image = cv2.medianBlur(image, ksize=_median)
             if image.dtype != np.uint16:
                 image = image.astype(np.uint16) << 8
 
