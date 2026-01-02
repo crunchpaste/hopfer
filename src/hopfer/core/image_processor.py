@@ -263,15 +263,24 @@ class ImageProcessor:
                 image = cv2.addWeighted(image, alpha, image, 0, beta)
 
         if im_settings["blur_t"]:
-            _blur = im_settings["blur"]
+            _box = int(im_settings["box"] * 2 - 1)
+            _blur = int(im_settings["blur"] * 2 - 1)
             _median = int(im_settings["median"] * 2 - 1)
+            if _box > 0:
+                if image.dtype != np.uint8:
+                    image = (image >> 8).astype(np.uint8)
+                image = cv2.blur(image, ksize=(_box, _box))
             if _blur > 0:
-                image = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=_blur)
+                if image.dtype != np.uint8:
+                    image = (image >> 8).astype(np.uint8)
+                image = cv2.stackBlur(image, ksize=(_blur, _blur))
             if _median > 1:
                 # medianBlur only supports uint8 or float32
-                img8 = (image >> 8).astype(np.uint8)
-                img8 = cv2.medianBlur(img8, ksize=_median)
-                image = img8.astype(np.uint16) << 8
+                if image.dtype != np.uint8:
+                    image = (image >> 8).astype(np.uint8)
+                image = cv2.medianBlur(image, ksize=_median)
+            if image.dtype != np.uint16:
+                image = image.astype(np.uint16) << 8
 
         if im_settings["unsharp_t"]:
             radius = im_settings["u_radius"] + 0.01

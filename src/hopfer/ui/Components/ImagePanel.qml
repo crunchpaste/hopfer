@@ -37,6 +37,7 @@ ColumnLayout {
             "laplacian_t": lap.value,
             "brightness": brightness.value,
             "contrast": contrast.value,
+            "box": box.value,
             "blur": gauss.value,
             "median": median.value,
             "u_radius": um_rad.value,
@@ -220,15 +221,27 @@ ColumnLayout {
                 Layout.margins: 10
                 Layout.fillWidth: true
 
+
+                LabeledSlider {
+                    id: box
+                    text: "Box blur"
+                    from: 0
+                    to: 50
+                    step: 1
+                    value: 0
+                    default_value: 0
+                    precision: 0
+                    onInteraction: root.emitEnhanceSignal()
+                }
                 LabeledSlider {
                     id: gauss
                     text: "Gaussian filter"
                     from: 0
-                    to: 50
-                    step: 0.1
+                    to: 150
+                    step: 1
                     value: 0
                     default_value: 0
-                    precision: 1
+                    precision: 0
                     onInteraction: root.emitEnhanceSignal()
                 }
                 LabeledSlider {
