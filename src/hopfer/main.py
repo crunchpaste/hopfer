@@ -1,15 +1,21 @@
 import os
 import sys
 from pathlib import Path
+import argparse
+import textwrap
+import logging
 
 from hopfer.bridge.image_provider import ImageProvider
 from hopfer.bridge.bridge import Bridge
 from hopfer.helpers.config import update_config
+from hopfer import VERSION
 from PySide6.QtGui import QFontDatabase, QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
 
 os.environ["QT_QUICK_CONTROLS_MATERIAL_VARIANT"] = "Dense"
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
+
+LOG_FORMAT = "%(levelname)s: %(message)s"
 
 BASE_DIR = Path(__file__).resolve().parent
 UI_PATH = BASE_DIR / "ui"
@@ -19,25 +25,66 @@ UI_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "JetBrainsMono.ttf")
 
 
 def main():
+    # desc =
+    parser = argparse.ArgumentParser(
+        prog="hopfer-qml",
+        # description="""GUI for halftoning images. \n Source code: https://github.com/crunchpaste/hopfer"""
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description=textwrap.dedent(f"""\
+        A specialized toolkit providing experimental halftoning for print.
+        Version: {VERSION}
+
+        Supported formats: .jpg, .png, .tiff, .webp, .jp2, .gif, .bmp
+        Source code: https://github.com/crunchpaste/hopfer
+
+        Usage: hopfer-qml [options] [file]
+        """),
+        usage=argparse.SUPPRESS,
+    )
+    parser.add_argument(
+        "-d", "--debug", action="store_true", help="enable debug logging"
+    )
+    parser.add_argument(
+        "-v", "--version", action="version", version=f"%(prog)s {VERSION}"
+    )
+    parser.add_argument("file", nargs="?", default=None, help=argparse.SUPPRESS)
+
+    args = parser.parse_args()
+
+    logger = logging.getLogger("hopfer")
+    log_level = logging.DEBUG if args.debug else logging.INFO
+    logging.basicConfig(level=log_level, format=LOG_FORMAT)
+
+    if args.debug:
+        logger.debug(f"Hopfer {VERSION} starting in DEBUG mode")
+
+    config = update_config()
+
     app = QGuiApplication(sys.argv)
 
     app.setDesktopFileName("hopfer")
 
-    config = update_config()
-
     platform = app.platformName()
+    logger.debug(f"Running on {platform}")
     # if platform == "wayland":
     #     print("Running on Wayland")
     # elif platform == "xcb":
     #     print("Running on X11")
     # print(platform)
 
-    font_id = QFontDatabase.addApplicationFont(ICON_FONT_PATH)
-    font_id = QFontDatabase.addApplicationFont(UI_FONT_PATH)
+    icon_font_id = QFontDatabase.addApplicationFont(ICON_FONT_PATH)
+    if icon_font_id == -1:
+        logger.error("Failed to load Material Icons")
+        # You might not want to sys.exit here if the app is still usable
+    else:
+        logger.debug("Material Icons loaded successfully.")
 
-    if font_id == -1:
-        print(f"ERROR: Could not load font from {ICON_FONT_PATH}. Check file path.")
-        sys.exit(-1)
+    # Load UI Font
+    ui_font_id = QFontDatabase.addApplicationFont(UI_FONT_PATH)
+    if ui_font_id == -1:
+        logger.warning("Failed to load JetBrains Mono")
+    else:
+        logger.debug("JetBrains Mono loaded successfully.")
 
     engine = QQmlApplicationEngine()
 
@@ -61,6 +108,12 @@ def main():
     bridge.set_window(window)
 
     app.aboutToQuit.connect(bridge.exit)
+
+    if args.file:
+        full_path = os.path.abspath(os.path.expanduser(args.file))
+        logger.debug(f"Opening {full_path}")
+        bridge.open_path(full_path)
+        # print(f"File argument received: {args.file}")
 
     if not engine.rootObjects():
         sys.exit(-1)

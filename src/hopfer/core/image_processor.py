@@ -1,6 +1,7 @@
 import time
 import cv2
 import numpy as np
+import logging
 
 from hopfer.helpers.kernels import get_kernel
 
@@ -62,6 +63,8 @@ except ImportError:
         manual,
         value,
     )
+
+logger = logging.getLogger(__name__)
 
 
 class ImageProcessor:
@@ -140,7 +143,7 @@ class ImageProcessor:
             self._handle_processing_error()
             processed_image = self.storage.processed_image
 
-        print(f"Done in: {time.perf_counter() - start:.4f}s")
+        logger.debug(f"Processed in {time.perf_counter() - start:.3f}s")
         self._send_result(processed_image)
 
     # --- Helper Methods ---
@@ -159,6 +162,7 @@ class ImageProcessor:
                 self.grayscale_mode,
                 self.grayscale_settings,
             )
+        logger.debug("Converted to grayscale")
 
     def _process_enhancement(self, step):
         """Enhances the image based on the provided settings."""
@@ -179,6 +183,8 @@ class ImageProcessor:
             )
         elif step <= 1:
             self.storage.enhanced_image = self.storage.grayscale_image
+
+        logger.debug("Finished image adjustments")
 
     def _process_algorithm(self):
         """Applies the processing algorithm if selected."""

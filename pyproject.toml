@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hopfer"
-version = "0.13.0"
+dynamic = ["version"]
 readme = "README.md"
 license = { text = "GPL-3.0-only" }
 requires-python = ">=3.13"
@@ -38,6 +38,8 @@ where = ["src"]
     "ui/**/qmldir",
     "ui/Fonts/*.ttf"
 ]
+[tool.setuptools.dynamic]
+version = {attr = "hopfer.VERSION"}
 
 [project.scripts]
 hopfer-qml = "hopfer.main:main"

@@ -10,6 +10,9 @@ import numpy as np
 import json
 import platformdirs
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Bridge(QObject):
@@ -81,25 +84,36 @@ class Bridge(QObject):
     def send_grayscale(self, algorithm, settings):
         settings_dict = json.loads(settings)
         self.writer.send_grayscale(algorithm, settings_dict)
+        logger.debug("Sending grayscale signal to daemon")
 
     @Slot(str)
     def send_enhance(self, settings):
         settings_dict = json.loads(settings)
         self.writer.send_enhance(settings_dict)
+        logger.debug("Sending enhance signal to daemon")
 
     @Slot(str, str)
     def send_halftone(self, algorithm, settings):
         settings_dict = json.loads(settings)
         self.writer.send_halftone(algorithm, settings_dict)
+        logger.debug("Sending halftone signal to daemon")
 
     @Slot(str)
     def send_colors(self, settings):
         settings_dict = json.loads(settings)
         self.writer.send_colors(settings_dict)
+        logger.debug("Sending new colors to daemon")
 
     @Slot(str)
     def open(self, path):
         path = QUrl(path).toLocalFile()
+        logger.debug(f"Opening {path}")
+        self._paths["open_path"] = self.get_dir(path)
+        self.writer.load_image(path)
+        self.processingStarted.emit()
+
+    def open_path(self, path):
+        logger.debug(f"Opening {path}")
         self._paths["open_path"] = self.get_dir(path)
         self.writer.load_image(path)
         self.processingStarted.emit()

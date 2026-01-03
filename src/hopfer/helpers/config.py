@@ -1,9 +1,10 @@
 import platformdirs
 import os
 import json
+from hopfer import VERSION
 
 DEFAULT_CONFIG = {
-    "version": "0.13.0",
+    "version": VERSION,
     "window": {
         "x": 0,
         "y": 0,

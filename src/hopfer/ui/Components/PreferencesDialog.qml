@@ -96,7 +96,7 @@ ApplicationWindow {
             Layout.margins: 20
             ColumnLayout {
                 spacing: 10
-
+                // TODO: Implement UI scaling
                 // LabeledSlider {
                 //     text: "Font size"
                 //     from: 8
