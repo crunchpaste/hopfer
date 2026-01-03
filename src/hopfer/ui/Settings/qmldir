@@ -1,4 +1,5 @@
 module Settings
+BlankSettings 1.0 BlankSettings.qml
 Threshold 1.0 Threshold.qml
 Niblack 1.0 Niblack.qml
 Sauvola 1.0 Sauvola.qml

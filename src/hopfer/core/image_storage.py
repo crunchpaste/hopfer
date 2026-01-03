@@ -2,6 +2,7 @@ import os
 import pickle
 from multiprocessing.shared_memory import SharedMemory
 from urllib.parse import unquote, urlparse
+import logging
 
 import cv2
 import numpy as np
@@ -10,14 +11,14 @@ from platformdirs import user_pictures_dir
 from PySide6.QtCore import QObject
 from PySide6.QtGui import QPixmap
 
-# 1. Update the helper imports
 from hopfer.helpers.image_conversion import numpy_to_pixmap
 
-# 2. Update the algorithm fallback imports
 try:
     from hopfer.core.algorithms.static import style_alpha, style_image
 except ImportError:
     from hopfer.core.algorithms.style_preview import style_alpha, style_image
+
+logger = logging.getLogger(__name__)
 
 
 class ImageStorage(QObject):
@@ -26,7 +27,6 @@ class ImageStorage(QObject):
     Handles the original and processed image, as well as varous conversions.
     """
 
-    # Constants for image processing and saving
     MAX_SAVE_ATTEMPTS = 100
 
     def __init__(self, daemon):
@@ -126,7 +126,7 @@ class ImageStorage(QObject):
             try:
                 self.create_shm(h, w)
             except Exception as e:
-                print(f"CREATING SHM: {e}")
+                logger.error(f"Failed creating SHM: {e}")
 
         message = {
             "type": "original_grayscale",
@@ -147,7 +147,7 @@ class ImageStorage(QObject):
         try:
             self.daemon.processor.start(step=0)
         except Exception as e:
-            print(e)
+            logger.warning(f"Failed processing: {e}")
 
         message = {"type": "enable_toolbox", "state": True}
         self.res_queue.put(message)
@@ -319,7 +319,7 @@ class ImageStorage(QObject):
             try:
                 self.create_shm(h, w)
             except Exception as e:
-                print(f"CREATING SHM: {e}")
+                logger.error(f"Failed creating SHM: {e}")
 
         if self.original_grayscale:
             self.grayscale_image = self.resized
@@ -328,7 +328,7 @@ class ImageStorage(QObject):
             self.daemon.processor.reset = True
             self.daemon.processor.start(step=0)
         except Exception as e:
-            print(e)
+            logger.error(f"Failed processing: {e}")
 
     def save_image(self, path):
         """
@@ -529,7 +529,7 @@ class ImageStorage(QObject):
                         {"type": "display_image", "array": "gray", "reset": reset}
                     )
             except Exception as e:
-                print(f"GENERATING PIXMAPS: {e}")
+                logger.error(f"Failed generating pixmaps: {e}")
 
         return processed_img if clipboard else None
 
@@ -559,7 +559,7 @@ class ImageStorage(QObject):
                     color_alpha,
                 )
             except Exception as e:
-                print(e)
+                logger.error(f"Failed compositing {e}")
 
         styled_img = style_image(self.processed_image, color_dark, color_light)
         alpha = self.alpha

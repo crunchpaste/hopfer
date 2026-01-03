@@ -226,6 +226,7 @@ class Bridge(QObject):
             del self.shm_preview
         if self.shm is not None:
             self.shm.close()
+        logger.debug("Closed shared memory")
 
     def display_processed_image(self, array, reset=True):
         """Display the processed image in the photo viewer."""
@@ -286,15 +287,16 @@ class Bridge(QObject):
             config["paths"]["save_path"] = path
 
         save_config(config)
+        logger.debug("Saved config")
 
     @staticmethod
     def get_dir(path):
         return os.path.dirname(path)
 
     def exit(self):
-        # self.save_settings()
         self.save_config()
         self.image_provider.image = None
         self.close_shm()
         self.writer.close()
         self.daemon_process.join()
+        logger.debug("Killed daemon")

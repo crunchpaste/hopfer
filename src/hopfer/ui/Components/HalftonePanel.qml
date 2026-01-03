@@ -9,7 +9,7 @@ ColumnLayout {
 
     signal halftoneChanged(string algorithm, var settings)
 
-    Component { id: none; Item {} }
+    Component { id: none; BlankSettings {} }
     Component { id: threshold; Threshold {} }
     Component { id: niblack; Niblack {} }
     Component { id: sauvola; Sauvola {} }

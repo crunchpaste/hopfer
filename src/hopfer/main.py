@@ -66,16 +66,10 @@ def main():
 
     platform = app.platformName()
     logger.debug(f"Running on {platform}")
-    # if platform == "wayland":
-    #     print("Running on Wayland")
-    # elif platform == "xcb":
-    #     print("Running on X11")
-    # print(platform)
 
     icon_font_id = QFontDatabase.addApplicationFont(ICON_FONT_PATH)
     if icon_font_id == -1:
-        logger.error("Failed to load Material Icons")
-        # You might not want to sys.exit here if the app is still usable
+        logger.warning("Failed to load Material Icons")
     else:
         logger.debug("Material Icons loaded successfully.")
 
@@ -111,7 +105,6 @@ def main():
 
     if args.file:
         full_path = os.path.abspath(os.path.expanduser(args.file))
-        logger.debug(f"Opening {full_path}")
         bridge.open_path(full_path)
         # print(f"File argument received: {args.file}")
 
