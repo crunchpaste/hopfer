@@ -1,7 +1,7 @@
 import numpy as np
 import logging
 
-from .static import levien, nakano
+from .static import levien, nakano, noise_gen
 
 logger = logging.getLogger(__name__)
 
@@ -12,11 +12,7 @@ def edodf(img, algorithm, settings):
     serpentine = settings["serpentine"]
     noise = settings["noise"]
     if noise:
-        rng = np.random.default_rng()
-        noise_array = rng.integers(low=0, high=32768, size=(20, img.shape[1])).astype(
-            np.uint16
-        )
-
+        noise_array = noise_gen(np.uint16(img.shape[1]))
         img = np.vstack((noise_array, img))
 
     if algorithm == "Levien":

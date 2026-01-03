@@ -163,7 +163,7 @@ class ImageProcessor:
                 self.grayscale_mode,
                 self.grayscale_settings,
             )
-        logger.debug("Converted to grayscale")
+            logger.debug("Converted to grayscale")
 
     def _process_enhancement(self, step):
         """Enhances the image based on the provided settings."""
@@ -182,10 +182,9 @@ class ImageProcessor:
             self.storage.enhanced_image = self._enhance_image(
                 self.storage.grayscale_image, im_settings
             )
+            logger.debug("Finished image adjustments")
         elif step <= 1:
             self.storage.enhanced_image = self.storage.grayscale_image
-
-        logger.debug("Finished image adjustments")
 
     def _process_algorithm(self):
         """Applies the processing algorithm if selected."""

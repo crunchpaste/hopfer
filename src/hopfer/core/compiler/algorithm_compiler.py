@@ -1376,6 +1376,41 @@ def manual(img, rf, gf, bf):
     return out
 
 
+@cc.export("noise_gen", "u2[:,:](u2)")
+def noise_gen(w):
+    # slightly faster than generating the noise for priming with numpy, still quality of noise is of absolutely no importance here. also its nice havin a short function for this.
+    h = 20
+
+    noise = np.zeros((h, w), dtype=np.uint16)
+    mcg_state = np.uint64(0xCAFEF00DD15EA5E5)
+    MULT = np.uint64(6364136223846793005)
+
+    for y in range(h):
+        for x in range(w):
+            # Generate a random float using pcg32_fast (https://en.wikipedia.org/wiki/Permuted_congruential_generator)
+            # This seems to be almost twice as fast as numpy's random module and produces noise that to me looks just as nice.
+
+            x_bits = mcg_state
+
+            count = np.uint32(x_bits >> np.uint32(61))
+
+            # advance
+            mcg_state = x_bits * MULT
+
+            x_bits ^= x_bits >> np.uint32(22)
+
+            rng_val_u32 = np.uint32(x_bits >> (np.uint32(22) + count))
+
+            # getting the random number as a float seems to be just as fast, then again i think its cleaner to just get the in the range we already nee it.
+            # rand_float = np.float64(rng_val_u32) * 2.3283064365386963e-10
+
+            value = np.uint16(rng_val_u32 >> 16)
+
+            noise[y, x] = value
+
+    return noise
+
+
 # The IMAGE PROCESSING fuctions should go here if i decide to implement them from scratch instead of using pillow
 @cc.export("sharpen", "f4[:,:](f4[:,:],f8)")
 def sharpen(image, str=1.0):
