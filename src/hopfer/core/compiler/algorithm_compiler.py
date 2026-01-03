@@ -698,7 +698,7 @@ def ostromoukhov_s_u16(img_u16, coeff_array, str_value):
 
 
 @cc.export("zhou_fang_float", "f4[:,:](f4[:,:], f8[:,:], f8[:], f8)")
-def zhou_fang(img, coeff_array, pert_array, str):
+def zhou_fang_float(img, coeff_array, pert_array, str):
     h, w = img.shape
 
     for y in range(h):
@@ -721,7 +721,7 @@ def zhou_fang(img, coeff_array, pert_array, str):
 
 
 @cc.export("zhou_fang", "b1[:,:](u2[:,:], f8[:,:], f8[:], f8)")
-def zhou_fang(img_u16, coeff_array, pert_array, str_value):
+def zhou_fang_slow(img_u16, coeff_array, pert_array, str_value):
     h, w = img_u16.shape
     img = img_u16.astype(np.int32)
     output = np.zeros((h, w), dtype=np.bool)
@@ -766,7 +766,7 @@ def zhou_fang(img_u16, coeff_array, pert_array, str_value):
 
 
 @cc.export("zhou_fang_s_float", "f4[:,:](f4[:,:], f8[:,:], f8[:], f8)")
-def zhou_fang_s(img, coeff_array, pert_array, str):
+def zhou_fang_s_float(img, coeff_array, pert_array, str):
     h, w = img.shape
 
     for y in range(h):
@@ -793,7 +793,7 @@ def zhou_fang_s(img, coeff_array, pert_array, str):
 
 
 @cc.export("zhou_fang_s", "b1[:,:](u2[:,:], f8[:,:], f8[:], f8)")
-def zhou_fang_s(img_u16, coeff_array, pert_array, str_value):
+def zhou_fang_s_slow(img_u16, coeff_array, pert_array, str_value):
     h, w = img_u16.shape
     img = img_u16.astype(np.int32)
     output = np.zeros((h, w), dtype=np.bool)
@@ -910,7 +910,7 @@ def zhou_fang_fast(img_u16, coeff_array, pert_array, str_value):
 
 
 @cc.export("zhou_fang_fast_s", "b1[:,:](u2[:,:], f8[:,:], f8[:], f8)")
-def zhou_fang_s(img_u16, coeff_array, pert_array, str_value):
+def zhou_fang_fast_s(img_u16, coeff_array, pert_array, str_value):
     h, w = img_u16.shape
     img = img_u16.astype(np.int32)
     output = np.zeros((h, w), dtype=np.bool)
