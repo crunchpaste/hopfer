@@ -44,6 +44,7 @@ def main():
     parser.add_argument(
         "-d", "--debug", action="store_true", help="enable debug logging"
     )
+    parser.add_argument("-c", "--clean", action="store_true", help="reset to defaults")
     parser.add_argument(
         "-v", "--version", action="version", version=f"%(prog)s {VERSION}"
     )
@@ -58,7 +59,7 @@ def main():
     if args.debug:
         logger.debug(f"Hopfer {VERSION} starting in DEBUG mode")
 
-    config = update_config()
+    config = update_config(args.clean)
 
     app = QGuiApplication(sys.argv)
 

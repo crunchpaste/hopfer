@@ -39,10 +39,13 @@ CONFIG_FOLDER = os.path.join(platformdirs.user_config_dir(), "hopfer")
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "config.json")
 
 
-def update_config():
+def update_config(clean=False):
     os.makedirs(CONFIG_FOLDER, exist_ok=True)
 
     config_to_write = DEFAULT_CONFIG.copy()
+
+    if clean:
+        return config_to_write
 
     if os.path.exists(CONFIG_PATH):
         try:
