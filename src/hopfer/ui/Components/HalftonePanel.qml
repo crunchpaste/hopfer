@@ -17,6 +17,7 @@ ColumnLayout {
     Component { id: mezzo; Mezzo {} }
     Component { id: errordiffusion; ErrorDiffusion {} }
     Component { id: errordiffusion_s; ErrorDiffusion {serpentine: true} }
+    Component { id: levien; Levien {serpentine: true} }
     Component { id: nakano; Nakano {serpentine: true} }
 
     property var componentMap: [
@@ -39,6 +40,7 @@ ColumnLayout {
         errordiffusion_s,
         errordiffusion_s,
         errordiffusion_s,
+        levien,
         nakano,
     ]
 
@@ -83,6 +85,7 @@ ColumnLayout {
             "Sierra2 4A",
             "Ostromoukhov",
             "Zhou-Fang",
+            "Levien",
             "Nakano",
             ]
 

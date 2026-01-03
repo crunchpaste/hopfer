@@ -1054,19 +1054,29 @@ def nakano(img_u16, str_value, hysteresis_c, serpentine):
 
             hysteresis = 0
 
-            # get the hysteresis value here. if hysteresis is 0 there is absolutely no need to hit these indeces up and waste time.
             if hysteresis_c > 0:
+                # using rotated Floyd-Steinberg kernel
+                # precomputed constants for the maximum uint16 value
+                VAL_7 = 28671  # (65535 * 7) >> 4
+                VAL_5 = 20479  # (65535 * 5) >> 4
+                VAL_3 = 12287  # (65535 * 3) >> 4
+                VAL_1 = 4095  # 65535 >> 4
+
                 # current row
                 if x - 1 >= 0:
-                    hysteresis += (img[y, x - 1] * 7) >> 4  # x - 1
+                    if output[y, x - 1]:
+                        hysteresis += VAL_7  # x - 1
 
                 # row above
                 if y - 1 >= 0:
-                    hysteresis += (img[y - 1, x] * 5) >> 4  # current x
+                    if output[y - 1, x]:
+                        hysteresis += VAL_5  # current x
                     if x - 1 >= 0:
-                        hysteresis += img[y - 1, x - 1] >> 4  # x - 1
+                        if output[y - 1, x - 1]:
+                            hysteresis += VAL_1  # x - 1
                     if x + 1 < w:
-                        hysteresis += (img[y - 1, x + 1] * 3) >> 4  # x + 1
+                        if output[y - 1, x + 1]:
+                            hysteresis += VAL_3  # x + 1
 
             hysteresis = np.int32(hysteresis * hysteresis_c)
 
@@ -1076,12 +1086,9 @@ def nakano(img_u16, str_value, hysteresis_c, serpentine):
             else:
                 new_value = 0
 
-            # update the value of the pixel. this is very much needed for edodf
-            img[y, x] = new_value
-
             error = np.int32((old_value - new_value) * str_value)
 
-            # as the sum of the kernel is 64, bitshifts were used. this shaved about 0.1s from the execution. i'm sorry if someone ever reads the following.
+            # as the sum of the kernel is 64, bitshifts were used. this shaved about 0.1s from the execution. i'm sorry if someone ever reads the following:
 
             # current row
             if x + 2 < w:
@@ -1133,8 +1140,8 @@ def nakano(img_u16, str_value, hysteresis_c, serpentine):
     return output
 
 
-@cc.export("levien", "f4[:,:](f4[:,:], f8, f8)")
-def levien(img, hysteresis_c, str):
+@cc.export("levien_float", "f4[:,:](f4[:,:], f8, f8)")
+def levien_float(img, hysteresis_c, str):
     h, w = img.shape
 
     for y in range(h):
@@ -1195,6 +1202,65 @@ def levien_s(img, hysteresis_c, str):
     if h % 2 != 0:
         img = np.fliplr(img)
     return img
+
+
+@cc.export("levien", "b1[:,:](u2[:,:], f8, f8, b1)")
+def levien(img_u16, str_value, hysteresis_c, serpentine):
+    # Nakano was so slow using loops through the kernel, that i decided to just hardcode it. this ways it dropped from 2.5s for 25mp image to about 0.5s
+    h, w = img_u16.shape
+    img = img_u16.astype(np.int32)
+    output = np.zeros((h, w), dtype=np.bool)
+
+    THRESHOLD = 32768
+    HVAL = 65535 >> 1  # this is the value of the hysteresis per pixel
+
+    for y in range(h):
+        # fliplr seems to be just as fast as reversing the index
+        if serpentine:
+            img = np.fliplr(img)
+            output = np.fliplr(output)
+
+        for x in range(w):
+            old_value = img[y, x]
+
+            hysteresis = 0
+
+            # get the hysteresis value here. if hysteresis is 0 there is absolutely no need to hit these indeces up and waste time.
+
+            if hysteresis_c != 0:
+                # current row
+                if x - 1 >= 0 and output[y, x - 1]:
+                    hysteresis += HVAL  # x - 1
+
+                # row above
+                if y - 1 >= 0 and output[y - 1, x]:
+                    hysteresis += HVAL  # current x
+
+            hysteresis = np.int32(hysteresis * hysteresis_c)
+
+            if old_value + hysteresis >= THRESHOLD:
+                new_value = 65535
+                output[y, x] = True
+            else:
+                new_value = 0
+
+            error = np.int32((old_value - new_value) * str_value)
+
+            # as the sum of the kernel is 2, bitshifts were used.
+
+            # current row
+            if x + 1 < w:
+                img[y, x + 1] += error >> 1  # x + 1
+
+            # row bellow
+            if y + 1 < h:
+                img[y + 1, x] += error >> 1
+
+    if serpentine:
+        if h % 2 != 0:
+            output = np.fliplr(output)
+
+    return output
 
 
 # GRAYSCALE CONVERSION functions follow.
