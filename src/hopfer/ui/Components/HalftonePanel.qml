@@ -17,6 +17,7 @@ ColumnLayout {
     Component { id: mezzo; Mezzo {} }
     Component { id: errordiffusion; ErrorDiffusion {} }
     Component { id: errordiffusion_s; ErrorDiffusion {serpentine: true} }
+    Component { id: nakano; Nakano {serpentine: true} }
 
     property var componentMap: [
         none,
@@ -38,7 +39,7 @@ ColumnLayout {
         errordiffusion_s,
         errordiffusion_s,
         errordiffusion_s,
-        errordiffusion_s,
+        nakano,
     ]
 
     function emitChangeSignal(algorithm_name) {
@@ -80,9 +81,10 @@ ColumnLayout {
             "Sierra",
             "Sierra2",
             "Sierra2 4A",
-            "Nakano",
             "Ostromoukhov",
-            "Zhou-Fang"]
+            "Zhou-Fang",
+            "Nakano",
+            ]
 
         onCurrentIndexChanged: {
             let new_algorithm = combo.valueAt(combo.currentIndex);

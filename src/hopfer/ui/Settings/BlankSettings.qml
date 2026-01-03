@@ -1,10 +1,7 @@
-import Components
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Controls.Material
-import QtQuick.Layouts
 
 Item {
+    // this only exist so that Qt wont nag me about the missing signal
     id: root
     signal settingsChanged()
 }

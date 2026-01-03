@@ -53,6 +53,7 @@ try:
         luminance,
         manual,
         value,
+        sierra24a,
     )
 except ImportError:
     from hopfer.core.algorithms.grayscale import (
@@ -325,6 +326,8 @@ class ImageProcessor:
     def _apply_algorithm(image, algorithm, settings):
         """Apply the selected halftoning algorithm to the image via worker_h."""
 
+        logger.debug(f"Chose {algorithm}")
+
         if algorithm == "Fixed threshold":
             # demote to uint8. no visual differences found.
             image = (image >> 8).astype(np.uint8)
@@ -371,17 +374,19 @@ class ImageProcessor:
             "Burkes",
             "Sierra",
             "Sierra2",
-            "Sierra2 4A",
-            "Nakano",
         ]:
             kernel = get_kernel(algorithm)
-
             processed_image = error_diffusion(image, kernel, settings)
+
+        elif algorithm == "Sierra2 4A":
+            processed_image = sierra24a(
+                image, settings["diffusion_factor"], settings["serpentine"]
+            )
 
         elif algorithm in ["Ostromoukhov", "Zhou-Fang"]:
             processed_image = variable_ed(image, algorithm, settings)
 
-        elif algorithm == "Levien":
+        elif algorithm in ["Levien", "Nakano"]:
             processed_image = edodf(image, algorithm, settings)
 
         elif algorithm == "None":

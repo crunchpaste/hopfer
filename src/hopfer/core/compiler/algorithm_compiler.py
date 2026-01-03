@@ -562,6 +562,51 @@ def eds_u16(img_u16, kernel, str_value):
     return output  # return the image in a dithered form
 
 
+@cc.export("sierra24a", "b1[:,:](u2[:,:], f8, b1)")
+def sierra24a(img_u16, str_value, serpentine):
+    # Hardcoding Sierra2 4A just for fun, it fast even with kernel looping.
+    h, w = img_u16.shape
+    img = img_u16.astype(np.int32)
+    output = np.zeros((h, w), dtype=np.bool)
+
+    THRESHOLD = 32768
+
+    for y in range(h):
+        # fliplr seems to be just as fast as reversing the index
+        if serpentine:
+            img = np.fliplr(img)
+            output = np.fliplr(output)
+
+        for x in range(w):
+            old_value = img[y, x]
+
+            if old_value >= THRESHOLD:
+                new_value = 65535
+                output[y, x] = True
+            else:
+                new_value = 0
+
+            error = np.int32((old_value - new_value) * str_value)
+
+            # as the sum of the kernel is 4, bitshifts were used.
+
+            # current row
+            if x + 1 < w:
+                img[y, x + 1] += error >> 1  # x + 1
+
+            # row + 1
+            if y + 1 < h:
+                img[y + 1, x] += error >> 2  # current x
+                if x - 1 >= 0:
+                    img[y + 1, x - 1] += error >> 2  # x - 1
+
+    if serpentine:
+        if h % 2 != 0:
+            output = np.fliplr(output)
+
+    return output
+
+
 @cc.export("ostromoukhov_float", "f4[:,:](f4[:,:], f8[:,:], f8)")
 def ostromoukhov_float(img, coeff_array, str):
     h, w = img.shape
@@ -985,6 +1030,105 @@ def zhou_fang_fast_s(img_u16, coeff_array, pert_array, str_value):
             # Vertical always uses c2
             if y + 1 < h:
                 img[y + 1, x] += np.int32(e_int * c2)
+
+    return output
+
+
+@cc.export("nakano", "b1[:,:](u2[:,:], f8, f8, b1)")
+def nakano(img_u16, str_value, hysteresis_c, serpentine):
+    # Nakano was so slow using loops through the kernel, that i decided to just hardcode it. this ways it dropped from 2.5s for 25mp image to about 0.5s
+    h, w = img_u16.shape
+    img = img_u16.astype(np.int32)
+    output = np.zeros((h, w), dtype=np.bool)
+
+    THRESHOLD = 32768
+
+    for y in range(h):
+        # fliplr seems to be just as fast as reversing the index
+        if serpentine:
+            img = np.fliplr(img)
+            output = np.fliplr(output)
+
+        for x in range(w):
+            old_value = img[y, x]
+
+            hysteresis = 0
+
+            # get the hysteresis value here. if hysteresis is 0 there is absolutely no need to hit these indeces up and waste time.
+            if hysteresis_c > 0:
+                # current row
+                if x - 1 >= 0:
+                    hysteresis += (img[y, x - 1] * 7) >> 4  # x - 1
+
+                # row above
+                if y - 1 >= 0:
+                    hysteresis += (img[y - 1, x] * 5) >> 4  # current x
+                    if x - 1 >= 0:
+                        hysteresis += img[y - 1, x - 1] >> 4  # x - 1
+                    if x + 1 < w:
+                        hysteresis += (img[y - 1, x + 1] * 3) >> 4  # x + 1
+
+            hysteresis = np.int32(hysteresis * hysteresis_c)
+
+            if old_value + hysteresis >= THRESHOLD:
+                new_value = 65535
+                output[y, x] = True
+            else:
+                new_value = 0
+
+            # update the value of the pixel. this is very much needed for edodf
+            img[y, x] = new_value
+
+            error = np.int32((old_value - new_value) * str_value)
+
+            # as the sum of the kernel is 64, bitshifts were used. this shaved about 0.1s from the execution. i'm sorry if someone ever reads the following.
+
+            # current row
+            if x + 2 < w:
+                img[y, x + 2] += (error * 6) >> 6  # x + 2
+            if x + 3 < w:
+                img[y, x + 3] += (error * 4) >> 6  # x + 3
+
+            # row + 1
+            if y + 1 < h:
+                if x - 2 >= 0:
+                    img[y + 1, x - 2] += (error * 1) >> 6  # x - 2
+                if x - 1 >= 0:
+                    img[y + 1, x - 1] += (error * 6) >> 6  # x - 1
+                if x + 2 < w:
+                    img[y + 1, x + 2] += (error * 5) >> 6  # x + 2
+                if x + 3 < w:
+                    img[y + 1, x + 3] += (error * 3) >> 6  # x + 3
+
+            # row + 2
+            if y + 2 < h:
+                if x - 1 >= 0:
+                    img[y + 2, x - 1] += (error * 4) >> 6  # x - 1
+                # no checks, x is directly bellow
+                img[y + 2, x] += (error * 7) >> 6
+                if x + 1 < w:
+                    img[y + 2, x + 1] += (error * 3) >> 6  # x + 1
+                if x + 2 < w:
+                    img[y + 2, x + 2] += (error * 5) >> 6  # x + 2
+                if x + 3 < w:
+                    img[y + 2, x + 3] += (error * 3) >> 6  # x + 3
+
+            # row + 3
+            if y + 3 < h:
+                if x - 1 >= 0:
+                    img[y + 3, x - 1] += (error * 3) >> 6  # x - 1
+                # no checks, same reason
+                img[y + 3, x] += (error * 5) >> 6
+                if x + 1 < w:
+                    img[y + 3, x + 1] += (error * 3) >> 6  # x + 1
+                if x + 2 < w:
+                    img[y + 3, x + 2] += (error * 4) >> 6  # x + 2
+                if x + 3 < w:
+                    img[y + 3, x + 3] += (error * 2) >> 6  # x + 3
+
+    if serpentine:
+        if h % 2 != 0:
+            output = np.fliplr(output)
 
     return output
 
