@@ -11,7 +11,7 @@ ApplicationWindow {
 
     title: "Preferences"
     width: 520
-    height: 700
+    height: 740
 
     font.family: "Jetbrains Mono"
     font.pointSize: 11
@@ -94,78 +94,16 @@ ApplicationWindow {
             id: stack
             currentIndex: bar.currentIndex
             Layout.margins: 20
-            ColumnLayout {
-                spacing: 10
-                // TODO: Implement UI scaling
-                // LabeledSlider {
-                //     text: "Font size"
-                //     from: 8
-                //     to: 14
-                //     step: 0.1
-                //     value: 11
-                //     default_value: 11
-                //     precision: 1
-                //     onInteraction: (value) => {
-                //       main_window.font.pointSize = value;
-                //       root.font.pointSize = value;
-                //     }
-                // }
-                LabeledSwitch {
-                    // visible: false
-                    text: "Use system frame"
-                    value: root.isNative
-                    onInteraction: {
-                        bridge.toggle_native(value)
-                        if (root.isNative != value) {
-                            alert.visible = true
-                        } else {
-                            alert.visible = false
-                        }
-                    }
-                }
-                LabeledSwitch {
-                    text: "Dark theme"
-                    value: root.darkTheme
-                    onInteraction: root.toggleTheme(value)
-                }
+            PreferencesTab {
+                isNative: root.isNative
+                darkTheme: root.darkTheme
+                accent: root.accent
 
-                AccentSelector {
-                    Layout.topMargin: 5
-                    selectedIndex: root.accent
-                    onAccentSelected: (index) => {root.accentSelected(index)}
-                }
-                Item {
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                }
-                Rectangle {
-                    id: alert
-                    visible: false
-                    height: 48
-                    radius: 5
-                    Layout.fillWidth: true
-                    color: Qt.darker(Material.background, 1.25)
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.margins: 10
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 16
-                        Label {
-                            text: "Changes will take effect after a restart"
-                            wrapMode: Text.WordWrap
-                        }
-                        Item {
-                            Layout.fillWidth: true
-                        }
-                        Label {
-                            font.family: "Material Icons"
-                            text: "\ue000"
-                            font.pointSize: 18
-                            color: Material.accent
-                        }
-                    }
-                }
+                onToggleTheme: (state) => root.toggleTheme(state)
+                onAccentSelected: (index) => root.accentSelected(index)
             }
+            Item {}
+            AboutTab {}
         }
     }
 }
