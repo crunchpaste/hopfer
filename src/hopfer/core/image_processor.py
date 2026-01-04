@@ -325,8 +325,6 @@ class ImageProcessor:
     def _apply_algorithm(image, algorithm, settings):
         """Apply the selected halftoning algorithm to the image via worker_h."""
 
-        logger.debug(f"Chose {algorithm}")
-
         if algorithm == "Fixed threshold":
             # demote to uint8. no visual differences found.
             image = (image >> 8).astype(np.uint8)
@@ -393,8 +391,7 @@ class ImageProcessor:
             processed_image = image
 
         else:
-            # Default case: No processing applied if algorithm is unknown
-            print(f"Algorithm {algorithm} not recognized, no processing applied.")
+            logger.debug(f"{algorithm} not recognized, no processing applied.")
             processed_image = image
 
         return processed_image

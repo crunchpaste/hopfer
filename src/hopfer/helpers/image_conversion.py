@@ -136,6 +136,10 @@ def numpy_to_pixmap(img_array, alpha=None, qi=False):
     if img_array.ndim == 3 and img_array.shape[2] in [2, 4] and alpha is None:
         img_array = img_array[:, :, 0]
 
+    # if it is uint16 just bitshift it and treat it as an uint8
+    if img_array.dtype == np.uint16:
+        img_array = (img_array >> 8).astype(np.uint8)
+
     # If its a uint make it contignous
     if img_array.dtype == np.uint8:
         buf = np.ascontiguousarray(img_array)
@@ -147,7 +151,6 @@ def numpy_to_pixmap(img_array, alpha=None, qi=False):
         qimage.ndarray = buf
 
     else:
-        # In case its a float
         if img_array.ndim == 2:
             img_array = img_array[:, :, np.newaxis]
 

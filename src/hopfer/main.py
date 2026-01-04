@@ -1,13 +1,13 @@
 import os
 import sys
 from pathlib import Path
-import argparse
-import textwrap
 import logging
 
 from hopfer.bridge.image_provider import ImageProvider
 from hopfer.bridge.bridge import Bridge
 from hopfer.helpers.config import update_config
+from hopfer.helpers.parse import parse_args
+from hopfer.helpers.logfile import get_handlers
 from hopfer import VERSION
 from PySide6.QtGui import QFontDatabase, QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
@@ -15,7 +15,7 @@ from PySide6.QtQml import QQmlApplicationEngine
 os.environ["QT_QUICK_CONTROLS_MATERIAL_VARIANT"] = "Dense"
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
-LOG_FORMAT = "%(levelname)s: %(message)s"
+LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
 
 BASE_DIR = Path(__file__).resolve().parent
 UI_PATH = BASE_DIR / "ui"
@@ -25,36 +25,17 @@ UI_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "JetBrainsMono.ttf")
 
 
 def main():
-    # desc =
-    parser = argparse.ArgumentParser(
-        prog="hopfer-qml",
-        # description="""GUI for halftoning images. \n Source code: https://github.com/crunchpaste/hopfer"""
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        description=textwrap.dedent(f"""\
-        A specialized toolkit providing experimental halftoning for print.
-        Version: {VERSION}
-
-        Supported formats: .jpg, .png, .tiff, .webp, .jp2, .gif, .bmp
-        Source code: https://github.com/crunchpaste/hopfer
-
-        Usage: hopfer-qml [options] [file]
-        """),
-        usage=argparse.SUPPRESS,
-    )
-    parser.add_argument(
-        "-d", "--debug", action="store_true", help="enable debug logging"
-    )
-    parser.add_argument("-c", "--clean", action="store_true", help="reset to defaults")
-    parser.add_argument(
-        "-v", "--version", action="version", version=f"%(prog)s {VERSION}"
-    )
-    parser.add_argument("file", nargs="?", default=None, help=argparse.SUPPRESS)
-
-    args = parser.parse_args()
+    args = parse_args(VERSION)
 
     logger = logging.getLogger("hopfer")
+
+    handlers = get_handlers(args.logfile)
+
     log_level = logging.DEBUG if args.debug else logging.INFO
-    logging.basicConfig(level=log_level, format=LOG_FORMAT)
+
+    logging.basicConfig(
+        level=log_level, format=LOG_FORMAT, datefmt="%H:%M:%S", handlers=handlers
+    )
 
     if args.debug:
         logger.debug(f"Hopfer {VERSION} starting in DEBUG mode")

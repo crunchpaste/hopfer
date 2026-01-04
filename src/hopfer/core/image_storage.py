@@ -523,6 +523,7 @@ class ImageStorage(QObject):
         else:
             try:
                 processed_img = np.ascontiguousarray(self.processed_image)
+                logger.debug(f"Processed: {processed_img.dtype}")
                 if not clipboard:
                     self.shm_preview[:, :, 0] = processed_img
                     self.res_queue.put(
@@ -643,11 +644,19 @@ class ImageStorage(QObject):
         # the halftoning would be accurate again on the next reprocess.
 
     def invert_image(self):
-        self.original_image = 255 - self.original_image
-        self.resized = 255 - self.resized
-        self.grayscale_image = 255 - self.grayscale_image
-        self.enhanced_image = 255 - self.enhanced_image
-        np.logical_not(self.processed_image, out=self.processed_image)
+        self.original_image = 65535 - self.original_image
+        logger.debug(f"Original image: {self.original_image.dtype}")
+        self.resized = 65535 - self.resized
+        logger.debug(f"Resized image: {self.resized.dtype}")
+        self.grayscale_image = 65535 - self.grayscale_image
+        logger.debug(f"Grayscale image: {self.grayscale_image.dtype}")
+        self.enhanced_image = 65535 - self.enhanced_image
+        logger.debug(f"Enhanced image: {self.enhanced_image.dtype}")
+        logger.debug(f"Processed image: {self.processed_image.dtype}")
+        if self.processed_image.dtype == np.uint8:
+            self.processed_image = 255 - self.processed_image
+        elif self.processed_image.dtype in [np.bool, np.bool_]:
+            np.logical_not(self.processed_image, out=self.processed_image)
 
         # It may be a bit of a personal preference, but i don't believe
         # the view should be reset after inverting the colors.

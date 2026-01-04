@@ -35,7 +35,7 @@ DEFAULT_CONFIG = {
     },
 }
 
-CONFIG_FOLDER = os.path.join(platformdirs.user_config_dir(), "hopfer")
+CONFIG_FOLDER = platformdirs.user_config_dir("hopfer")
 CONFIG_PATH = os.path.join(CONFIG_FOLDER, "config.json")
 
 
