@@ -73,12 +73,14 @@ ColumnLayout {
     RoundButton {
         Layout.alignment: Qt.AlignHCenter
         radius: 5
-        topInset: 0
-        bottomInset: 0
-        leftInset: 0
-        rightInset: 0
+        // topInset: 0
+        // bottomInset: 0
+        // leftInset: 0
+        // rightInset: 0
+        // highlighted: true
         icon.source: "../Icons/github.svg"
-        icon.color: Material.accent
+        // icon.color: Material.accent
+        padding: 15
         text: "Source code"
         onClicked: {
         Qt.openUrlExternally("https://github.com/crunchpaste/hopfer")
