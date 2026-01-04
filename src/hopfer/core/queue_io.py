@@ -1,4 +1,7 @@
 from PySide6.QtCore import QObject, QTimer, Signal
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class QueueReader(QObject):
@@ -82,8 +85,11 @@ class QueueReader(QObject):
             elif message["type"] == "image_size":
                 w = message["width"]
                 h = message["height"]
-                self.bridge.h = h
-                self.bridge.w = w
+                self.bridge._w = w
+                self.bridge._h = h
+                self.bridge._ratio = h / w
+                logger.debug(f"New dimensions: {h}, {w}, {h / w}")
+                self.bridge.sizeChanged.emit()
 
 
 class QueueWriter(QObject):

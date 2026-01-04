@@ -6,6 +6,7 @@ Item {
     property var saveDialog
     property var tabBar
     property var viewer
+    property var toolbar
 
     Shortcut {
       sequence: StandardKey.Open
@@ -43,34 +44,59 @@ Item {
       }
     }
     Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+I" : "Ctrl+I"
+      sequences: ["Cmd+I", "Ctrl+I"]
       onActivated: {
         bar.currentIndex = 0;
         image_panel.focusCombo();
       }
     }
     Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+H" : "Ctrl+H"
+      sequences: ["Cmd+H", "Ctrl+H"]
       onActivated: {
         bar.currentIndex = 1;
         halftone_panel.focusCombo();
       }
     }
     Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+E" : "Ctrl+E"
+      sequences: ["Cmd+E", "Ctrl+E"]
       onActivated: {
         bar.currentIndex = 2;
       }
     }
     Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+P" : "Ctrl+P"
+      sequences: ["Cmd+P", "Ctrl+P"]
       onActivated: {
         preferences.show();
         preferences.raise();
       }
     }
     Shortcut {
-      sequence: (Qt.platform.os === "osx") ? "Cmd+0" : "Ctrl+0"
+      sequences: ["Cmd+Shift+I", "Ctrl+Shift+I"]
+      onActivated: {
+        toolbar.resizeDialog.show();
+        toolbar.resizeDialog.raise();
+      }
+    }
+    Shortcut {
+      sequences: ["Cmd+Shift+N", "Ctrl+Shift+N"]
+      onActivated: {
+        bridge.invert()
+      }
+    }
+    Shortcut {
+      sequences: ["Cmd+R", "Ctrl+R"]
+      onActivated: {
+        bridge.rotate(true)
+      }
+    }
+    Shortcut {
+      sequences: ["Cmd+Shift+R", "Ctrl+Shift+R"]
+      onActivated: {
+        bridge.rotate(false)
+      }
+    }
+    Shortcut {
+      sequences: ["Cmd+0", "Ctrl+0"]
       onActivated: {
         viewer.fit()
       }
@@ -81,9 +107,7 @@ Item {
         Shortcut {
             readonly property int scaleValue: index + 1
 
-            sequence: (Qt.platform.os === "osx") ?
-                      "Cmd+" + scaleValue :
-                      "Ctrl+" + scaleValue
+            sequences: ["Cmd+" + scaleValue, "Ctrl+" + scaleValue]
 
             context: Qt.WindowShortcut
 

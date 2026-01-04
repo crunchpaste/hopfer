@@ -1,0 +1,324 @@
+import Components
+import Icons
+import QtCore
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Controls.Material
+import QtQuick.Layouts
+
+ApplicationWindow {
+    id: root
+
+    title: "Resize image"
+    width: 600
+    height: 380
+
+    font.family: "Jetbrains Mono"
+    font.pointSize: 11
+
+    minimumWidth: width
+    maximumWidth: width
+    minimumHeight: height
+    maximumHeight: height
+
+    flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
+
+    property bool isNative: config.window.native_frame
+    property int pixelW: bridge.width
+    property int pixelH: bridge.height
+    property real ratio: bridge.ratio
+    property int res: 150
+
+    color: Material.background
+
+    function getUnitFactor() {
+        let unit = unitCombo.currentText
+        let resType = resCombo.currentText
+
+        if (unit === "px") return 1.0
+
+        let dpi = root.res
+
+        let effectiveDpi = dpi
+
+        if (resType === "px/cm") {
+            effectiveDpi = dpi * 2.54
+        } else if (resType === "px/mm") {
+            effectiveDpi = dpi * 25.4
+        }
+
+        if (unit === "inch") return effectiveDpi
+        if (unit === "cm") return effectiveDpi / 2.54
+        if (unit === "mm") return effectiveDpi / 25.4
+
+        return 1.0
+    }
+
+    Connections {
+        target: bridge
+        function onSizeChanged() {
+            root.pixelW = bridge.width
+            root.pixelH = bridge.height
+            root.ratio = bridge.ratio
+        }
+    }
+
+    Shortcut {
+        sequence: "Esc"
+        onActivated: {
+            root.close()
+        }
+    }
+
+    Shortcut {
+        sequences: ["Enter", "Return"]
+        onActivated: {
+            acceptButton.clicked()
+        }
+    }
+
+    ColumnLayout {
+        anchors.fill: parent
+
+        DialogTitlebar {
+            visible: !root.isNative
+            window: root
+            title: root.title
+            Layout.fillWidth: true
+            Layout.preferredHeight: 45
+        }
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+        }
+        GridLayout {
+            columns: 4
+            rows: 4
+            uniformCellHeights: true
+            rowSpacing: 10
+            columnSpacing: 10
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            Layout.margins: 20
+
+            // THE LABELS
+            Label {
+                text: "Width"
+                Layout.column: 0
+                Layout.row: 0
+            }
+            Label {
+                text: "Height"
+                Layout.column: 0
+                Layout.row: 1
+            }
+            Label {
+                text: "Resolution"
+                Layout.column: 0
+                Layout.row: 2
+            }
+            Label {
+                text: "Interpolation"
+                Layout.column: 0
+                Layout.row: 3
+            }
+            // SPINBOXES HERE
+            SpinBox {
+                id: widthSpin
+
+                property int decimals: unitCombo.model.get(unitCombo.currentIndex).decimals
+                property real factor: Math.pow(10, decimals)
+
+                from: 1
+                to: 1000000
+
+                value: Math.round((root.pixelW / getUnitFactor()) * factor)
+
+                Layout.column: 1
+                Layout.row: 0
+                Layout.fillWidth: true
+                editable: true
+                onValueModified: {
+                    let currentFactor = getUnitFactor()
+
+                    root.pixelW = Math.round((value / factor) * currentFactor)
+
+                    if (ratioLockButton.isLocked) {
+                        root.pixelH = Math.round(root.pixelW * root.ratio)
+                    }
+                }
+                textFromValue: function(value, locale) {
+                    return (value / factor).toLocaleString(locale, 'f', decimals)
+                }
+
+                valueFromText: function(text, locale) {
+                    return Number.fromLocaleString(locale, text) * factor
+                }
+            }
+            SpinBox {
+                id: heightSpin
+
+                property int decimals: unitCombo.model.get(unitCombo.currentIndex).decimals
+                property real factor: Math.pow(10, decimals)
+
+                from: 1
+                to: 1000000
+                value: Math.round((root.pixelH / getUnitFactor()) * factor)
+                Layout.column: 1
+                Layout.row: 1
+                Layout.fillWidth: true
+                editable: true
+                onValueModified: {
+                    let currentFactor = getUnitFactor()
+
+                    // INPUT: Units -> Pixels
+                    // 1.00 inch * 150dpi = 150px
+                    root.pixelH = Math.round((value / factor) * currentFactor)
+
+                    if (ratioLockButton.isLocked) {
+                        // Keep Height in sync using the image ratio
+                        root.pixelW = Math.round(root.pixelH / root.ratio)
+                    }
+                }
+                textFromValue: function(value, locale) {
+                    return (value / factor).toLocaleString(locale, 'f', decimals)
+                }
+
+                valueFromText: function(text, locale) {
+                    return Number.fromLocaleString(locale, text) * factor
+                }
+            }
+            SpinBox {
+                id: resSpin
+                from: 1
+                to: 10000
+                value: root.res
+                Layout.column: 1
+                Layout.row: 2
+                Layout.fillWidth: true
+                editable: true
+                onValueModified: {
+                    root.res = value
+                }
+            }
+            RoundButton {
+                id: ratioLockButton
+                property bool isLocked: true
+                Layout.column: 2
+                Layout.row: 0
+                Layout.rowSpan: 2
+                Layout.preferredWidth: 50
+                Layout.alignment: Qt.AlignVCenter
+
+                width: 50
+                height: 50
+
+                flat: true
+                checkable: true
+                checked: isLocked
+
+                contentItem: Label {
+                    text: ratioLockButton.checked ? "\ue897" : "\uf656"
+                    font.pixelSize: 18
+                    font.family: "Material Icons"
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: isLocked = !isLocked
+            }
+            // COMBOS
+            ComboBox {
+                id: unitCombo
+                Layout.column: 3
+                Layout.row: 0
+                Layout.rowSpan: 2
+                Layout.preferredWidth: 100
+
+                textRole: "unit"
+
+                model: ListModel {
+                    ListElement { unit: "px";   decimals: 0 }
+                    ListElement { unit: "inch"; decimals: 3 }
+                    ListElement { unit: "cm";   decimals: 3 }
+                    ListElement { unit: "mm";   decimals: 2 }
+                }
+            }
+            ComboBox {
+                id: resCombo
+                Layout.column: 3
+                Layout.row: 2
+                Layout.preferredWidth: 100
+
+                textRole: "unit"
+
+                model: ListModel {
+                    ListElement { unit: "px/in" }
+                    ListElement { unit: "px/cm" }
+                    ListElement { unit: "px/mm" }
+                }
+            }
+            ComboBox {
+                id: interpolationCombo
+                Layout.column: 1
+                Layout.row: 3
+                Layout.columnSpan: 3
+                Layout.fillWidth: true
+
+                textRole: "unit"
+
+                model: ListModel {
+                    ListElement {
+                      unit: "Nearest neighbor";
+                    }
+                    ListElement {
+                      unit: "Bilinear";
+                    }
+                    ListElement {
+                      unit: "Bicubic";
+                    }
+                    ListElement {
+                      unit: "Lanczos";
+                    }
+                }
+            }
+        }
+        RowLayout{
+            Layout.margins: 20
+            Layout.topMargin: 0
+            spacing: 20
+            Item {
+                Layout.fillWidth: true
+            }
+            RoundButton {
+                radius: 5
+                implicitHeight: 40
+                implicitWidth: 120
+                text: "Cancel"
+                topInset: 0
+                bottomInset: 0
+                leftInset: 0
+                rightInset: 0
+                onClicked: root.close()
+            }
+            RoundButton {
+                id: acceptButton
+                radius: 5
+                implicitHeight: 40
+                implicitWidth: 120
+                text: "Resize"
+                topInset: 0
+                bottomInset: 0
+                leftInset: 0
+                rightInset: 0
+                onClicked: {
+                    bridge.send_resize(
+                        root.pixelW,
+                        root.pixelH,
+                        interpolationCombo.currentText
+                    )
+                    root.close()
+                }
+            }
+        }
+    }
+}

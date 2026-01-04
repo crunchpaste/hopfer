@@ -25,6 +25,7 @@ class Bridge(QObject):
     originalGrayscale = Signal(bool)
     pathsChanged = Signal()
     hasImage = Signal(bool)
+    sizeChanged = Signal()
 
     def __init__(self, image_provider, parent=None):
         super().__init__(parent)
@@ -32,6 +33,9 @@ class Bridge(QObject):
         self.image_provider = image_provider
         self.processing = False
         self._has_image = False
+        self._w = 0
+        self._h = 0
+        self._ratio = 1
 
         self.clipboard = QGuiApplication.clipboard()
         self._initial_folder = platformdirs.user_videos_dir()
@@ -76,6 +80,20 @@ class Bridge(QObject):
     def has_image(self):
         return self._has_image
 
+    # You can call this like a method in Python,
+    # but QML sees it as a property.
+    @Property(int, notify=sizeChanged)
+    def width(self):
+        return self._w
+
+    @Property(int, notify=sizeChanged)
+    def height(self):
+        return self._h
+
+    @Property(float, notify=sizeChanged)
+    def ratio(self):
+        return self._ratio
+
     @Property(str)
     def initial_folder_url(self):
         return QUrl.fromLocalFile(self._initial_folder).toString()
@@ -97,6 +115,11 @@ class Bridge(QObject):
         settings_dict = json.loads(settings)
         self.writer.send_halftone(algorithm, settings_dict)
         logger.debug("Sending halftone signal to daemon")
+
+    @Slot(int, int, str)
+    def send_resize(self, w, h, interpolation):
+        self.writer.resize(w, h, interpolation)
+        logger.debug(f"Sending resize: {w}x{h} {interpolation}")
 
     @Slot(str)
     def send_colors(self, settings):

@@ -50,11 +50,11 @@ class ImageStorage(QObject):
         self.save_like_preview = False
         self.save_like_alpha = False
 
-        self.original_image = None  # uint8
+        self.original_image = None  # uint16
         self.original_grayscale = False
-        self.resized = None  # uint8
-        self.grayscale_image = None  # uint8
-        self.enhanced_image = None  # uint8
+        self.resized = None  # uint16
+        self.grayscale_image = None  # uint16
+        self.enhanced_image = None  # uint16
         self.alpha = None  # uint8
         self.ignore_alpha = False
         self.edited_image = None

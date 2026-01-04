@@ -12,8 +12,9 @@ Item {
     signal saveClicked
     signal fitImage
     signal actual
-    // signal tb()
     signal openPreferences
+
+    property alias resizeDialog: resizeDialog
 
     function enable_toolbar(state) {
         open.enabled = state;
@@ -30,11 +31,8 @@ Item {
 
     width: 60
 
-    ColorPicker {
-        id: color_picker
-        // transientParent: app_window
-        modality: Qt.WindowModal
-        // onAccepted: console.log("User acknowledged the error.")
+    ResizeDialog {
+        id: resizeDialog
     }
 
     Rectangle {
@@ -46,7 +44,6 @@ Item {
         anchors.fill: parent
         anchors.margins: 10
         anchors.topMargin: 5
-        // Apply the specific margins here
         spacing: 10
 
         Item {
@@ -57,7 +54,7 @@ Item {
             id: open
 
             onClicked: root.openClicked()
-            ToolTip.text: "Open image"
+            ToolTip.text: "Open image (Ctrl+0)"
 
             icon: Component {
                 Open {}
@@ -68,7 +65,7 @@ Item {
             id: save
 
             onClicked: root.saveClicked()
-            ToolTip.text: "Save image"
+            ToolTip.text: "Save image (Ctrl+S)"
             enabled: false
 
             icon: Component {
@@ -80,7 +77,7 @@ Item {
             id: save_as
 
             onClicked: root.saveAsClicked()
-            ToolTip.text: "Save image as"
+            ToolTip.text: "Save image as (Ctrl+Shift+S)"
             enabled: false
 
             icon: Component {
@@ -95,11 +92,15 @@ Item {
         SquareButton {
             id: resize
 
-            ToolTip.text: "Resize image"
+            ToolTip.text: "Resize image (Ctrl+Shift+I)"
             enabled: false
 
             icon: Component {
                 Resize {}
+            }
+            onClicked: {
+              resizeDialog.show()
+              resizeDialog.raise()
             }
         }
 
@@ -107,7 +108,7 @@ Item {
             id: invert
 
             onClicked: bridge.invert()
-            ToolTip.text: "Invert values"
+            ToolTip.text: "Invert values (Ctrl+Shift+N)"
             enabled: false
 
             icon: Component {
@@ -119,7 +120,7 @@ Item {
             id: rot_r
 
             onClicked: bridge.rotate(true)
-            ToolTip.text: "Rotate CW"
+            ToolTip.text: "Rotate CW (Ctrl+R)"
             enabled: false
 
             icon: Component {
@@ -131,7 +132,7 @@ Item {
             id: rot_l
 
             onClicked: bridge.rotate(false)
-            ToolTip.text: "Rotate CCW"
+            ToolTip.text: "Rotate CCW (Ctrl+Shift+R)"
             enabled: false
 
             icon: Component {
@@ -142,9 +143,10 @@ Item {
         SquareButton {
             id: flip
 
-            onClicked: bridge.flip()
-            ToolTip.text: "Flip horizontally"
+            ToolTip.text: "Flip horizontally (Ctrl+F)"
             enabled: false
+
+            onClicked: bridge.flip()
 
             icon: Component {
                 Flip {}
@@ -158,8 +160,7 @@ Item {
         SquareButton {
             id: fit
 
-            // onClicked: bridge.flip()
-            ToolTip.text: "Fit image to viewbox"
+            ToolTip.text: "Fit image to viewbox (Ctrl+0)"
             enabled: false
 
             onClicked: {
@@ -174,7 +175,7 @@ Item {
         SquareButton {
             id: actual
 
-            ToolTip.text: "Display at actual size"
+            ToolTip.text: "Display at actual size (Ctrl+1)"
             enabled: false
 
             onClicked: {
@@ -191,7 +192,7 @@ Item {
         }
 
         SquareButton {
-            ToolTip.text: "Preferences"
+            ToolTip.text: "Preferences (Ctrl+P)"
 
             icon: Component {
                 Preferences {}

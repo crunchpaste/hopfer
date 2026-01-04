@@ -17,6 +17,7 @@ BackgroundLogo 1.0 BackgroundLogo.qml
 ColorPicker 1.0 ColorPicker.qml
 ColorControl 1.0 ColorControl.qml
 PreferencesDialog 1.0 PreferencesDialog.qml
+ResizeDialog 1.0 ResizeDialog.qml
 ThemeManager 1.0 ThemeManager.qml
 AccentSelector 1.0 AccentSelector.qml
 Drop 1.0 Drop.qml

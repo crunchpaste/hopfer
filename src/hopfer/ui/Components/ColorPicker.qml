@@ -315,6 +315,11 @@ Window {
                 RoundButton {
                   id: acceptButton
                   text: "Accept"
+                  implicitHeight: 40
+                  topInset: 0
+                  bottomInset: 0
+                  leftInset: 0
+                  rightInset: 0
                   Layout.fillWidth: true
                   radius: 5
                   font.family: "Jetbrains Mono"

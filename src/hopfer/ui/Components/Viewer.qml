@@ -31,6 +31,7 @@ Item {
         smooth: false
         mipmap: (imageScale.xScale % 1 !== 0) && (imageScale.xScale < 2)
         anchors.centerIn: parent
+        retainWhileLoading: true
         transform: [
             Scale {
                 id: imageScale

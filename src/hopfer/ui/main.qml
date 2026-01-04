@@ -54,6 +54,7 @@ ApplicationWindow {
         saveDialog: saveDialog
         tabBar: bar
         viewer: viewer
+        toolbar: toolbar
     }
 
     Connections {
