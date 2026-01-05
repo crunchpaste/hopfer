@@ -14,6 +14,8 @@ Item {
     signal actual
     signal openPreferences
 
+    property alias resizeDialog: resizeDialog
+
     function enable_toolbar(state) {
         open.enabled = state;
         save.enabled = state;
