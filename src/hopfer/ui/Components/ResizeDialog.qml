@@ -24,6 +24,7 @@ ApplicationWindow {
     flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
     property bool isNative: config.window.native_frame
+    property int memThresh: 1024
     property int pixelW: bridge.width
     property int pixelH: bridge.height
     property real ratio: bridge.ratio
@@ -93,7 +94,6 @@ ApplicationWindow {
         id: dialog
         modal: true
         standardButtons: Dialog.Ok | Dialog.Cancel
-        parent: root
         anchors.centerIn: parent
         width: parent.width * 0.9
         title: "Memory warning"
@@ -366,13 +366,13 @@ ApplicationWindow {
                 rightInset: 0
                 onClicked: {
                     // let free_ram = bridge.get_free_ram()
-                    // console.log(free_ram)
                     let estimate = root.getMemoryEstimate()
-                    if (estimate > 1000) {
+                    let thresh = root.memThresh
+                    if (estimate > thresh && thresh > 0) {
                         dialog.open()
-                  } else {
+                    } else {
                         root.sendResize()
-                  }
+                    }
                 }
             }
         }

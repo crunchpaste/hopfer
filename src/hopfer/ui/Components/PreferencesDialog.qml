@@ -30,6 +30,7 @@ ApplicationWindow {
 
     signal toggleTheme(bool state)
     signal accentSelected(int index)
+    signal memChanged(int value)
 
     color: Material.background
 
@@ -101,6 +102,7 @@ ApplicationWindow {
 
                 onToggleTheme: (state) => root.toggleTheme(state)
                 onAccentSelected: (index) => root.accentSelected(index)
+                onMemChanged: (value) => root.memChanged(value)
             }
             Item {}
             AboutTab {}

@@ -22,6 +22,7 @@ DEFAULT_CONFIG = {
         "font_size": 11,
     },
     "options": {
+        "memory_warning_threshold": 1024,
         # to be used in the future
         "short_shortcuts": False,
         "low_memory": False,

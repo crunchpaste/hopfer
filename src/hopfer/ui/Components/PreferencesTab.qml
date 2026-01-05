@@ -14,6 +14,7 @@ ColumnLayout {
 
     signal toggleTheme(bool state)
     signal accentSelected(int index)
+    signal memChanged(int value)
 
     spacing: 10
     // TODO: Implement UI scaling
@@ -53,6 +54,11 @@ ColumnLayout {
         Layout.topMargin: 5
         selectedIndex: root.accent
         onAccentSelected: (index) => {root.accentSelected(index)}
+    }
+    MemoryButtons {
+        Layout.fillWidth: true
+        Layout.topMargin: 8
+        onMemChanged: (value) => root.memChanged(value)
     }
     Item {
         Layout.fillWidth: true

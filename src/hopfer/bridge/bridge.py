@@ -310,6 +310,12 @@ class Bridge(QObject):
         config["style"]["theme"] = int(self._window.property("themeIdx"))
         config["style"]["accent"] = int(self._window.property("accent"))
 
+        # options related
+
+        config["options"]["memory_warning_threshold"] = int(
+            self._window.property("memThresh")
+        )
+
         # path related
         if self._paths["open_path"] is not None:
             path = os.path.normpath(self._paths["open_path"])

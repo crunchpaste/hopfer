@@ -11,10 +11,12 @@ ColumnLayout {
     id: root
 
     property alias text: label.text
+    property alias valueText: valueDisplay.text
     property alias from: slider.from
     property alias to: slider.to
     property alias step: slider.stepSize
     property alias value: slider.value
+    property alias snapMode: slider.snapMode
     property real default_value: 0
     property int precision: 0
 
