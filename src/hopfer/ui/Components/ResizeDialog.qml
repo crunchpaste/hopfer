@@ -54,6 +54,25 @@ ApplicationWindow {
         return 1.0
     }
 
+    function sendResize() {
+        bridge.send_resize(
+            root.pixelW,
+            root.pixelH,
+            interpolationCombo.currentText
+        )
+        root.close()
+    }
+
+    function getMemoryEstimate() {
+        let w = root.pixelW
+        let h = root.pixelH
+        let channels = 3
+        let bytesPerPixel = (channels * 2) + 5
+        let totalBytes = w * h * bytesPerPixel
+        let conservativeMB = (totalBytes * 2) / (1024 * 1024)
+        return conservativeMB
+    }
+
     Connections {
         target: bridge
         function onSizeChanged() {
@@ -70,10 +89,45 @@ ApplicationWindow {
         }
     }
 
-    Shortcut {
-        sequences: ["Enter", "Return"]
-        onActivated: {
-            acceptButton.clicked()
+    Dialog {
+        id: dialog
+        modal: true
+        standardButtons: Dialog.Ok | Dialog.Cancel
+        parent: root
+        anchors.centerIn: parent
+        width: parent.width * 0.9
+        title: "Memory warning"
+
+        onAccepted: {
+            root.sendResize()
+            root.close()
+        }
+        ColumnLayout {
+            spacing: 15
+            width: parent.width
+
+            Label {
+                text: "The requested dimensions will take up a significant amount of memory:"
+                Layout.maximumWidth: parent.width
+                // font.bold: true
+                wrapMode: Text.WordWrap
+            }
+
+            Label {
+                property real mb: root.getMemoryEstimate()
+                text: `Estimated peak memory usage: ${mb.toFixed(1)} MB`
+                Layout.maximumWidth: parent.width
+                color: Material.accent
+                wrapMode: Text.WordWrap
+            }
+
+            Label {
+                text: "Please ensure your system has enough free memory before continuing. Exceeding your available RAM can lead to a system freeze."
+                Layout.maximumWidth: parent.width
+                wrapMode: Text.WordWrap
+                Layout.fillWidth: true
+                opacity: 0.7
+            }
         }
     }
 
@@ -311,12 +365,14 @@ ApplicationWindow {
                 leftInset: 0
                 rightInset: 0
                 onClicked: {
-                    bridge.send_resize(
-                        root.pixelW,
-                        root.pixelH,
-                        interpolationCombo.currentText
-                    )
-                    root.close()
+                    // let free_ram = bridge.get_free_ram()
+                    // console.log(free_ram)
+                    let estimate = root.getMemoryEstimate()
+                    if (estimate > 1000) {
+                        dialog.open()
+                  } else {
+                        root.sendResize()
+                  }
                 }
             }
         }

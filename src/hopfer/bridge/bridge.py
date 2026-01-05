@@ -11,6 +11,8 @@ import json
 import platformdirs
 import os
 import logging
+# still not sure if i want to check available ram
+# from psutil import virtual_memory
 
 logger = logging.getLogger(__name__)
 
@@ -231,6 +233,13 @@ class Bridge(QObject):
         config = get_config()
         config["window"]["native_frame"] = state
         save_config(config)
+
+    # TODECIDE: not sure if i want to check the system memory and include a dependency. i'm leaving it like that for now.
+    # @Slot(result=float)
+    # def get_free_ram(self):
+    #     # this one is mostly used to warn the user that memory getting low when resizing an image
+    #     available = virtual_memory().available
+    #     return available / (1024 * 1024)
 
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
