@@ -11,18 +11,35 @@ ApplicationWindow {
     id: main_window
     visible: true
 
+    title: "hopfer"
+
     x: config.window.x
     y: config.window.y
+    // update them in the config
+    onXChanged: config.window.x = x
+    onYChanged: config.window.y = y
+
     width: config.window.width
     height: config.window.height
+    // update them in the config
+    onWidthChanged: config.window.width = width
+    onHeightChanged: config.window.height = height
 
     minimumWidth: 850
     minimumHeight: 650
 
-    visibility: config.window.maximized ? Window.Maximized : Window.Windowed
-
-
-    title: "hopfer"
+    visibility: {
+        if (config.window.maximized) return Window.Maximized
+        return Window.Windowed
+    }
+    // update it in the config
+    onVisibilityChanged: (visibiity) => {
+        if (visibility === Window.Maximized) {
+            config.window.maximized = true
+        } else if (visibility === Window.Windowed) {
+            config.window.maximized = false
+        }
+    }
 
     property bool isNative: config.window.native_frame
     property bool themeIdx: config.style.theme
@@ -197,7 +214,6 @@ ApplicationWindow {
                 id: tb
                 z: 5
                 app_window: main_window
-                // width: main_window.width
                 Layout.fillWidth: true
                 visible: !main_window.isNative
             }
@@ -211,6 +227,12 @@ ApplicationWindow {
                     SplitView.minimumWidth: 400
                     SplitView.preferredWidth: config.window.sidebar_width
                     SplitView.fillHeight: true
+                    onWidthChanged: {
+                      // when instantiated the sidebar is assigned it's minimum width. if we dont ignore this assignment it is never updated properly.
+                      if (width != SplitView.minimumWidth) {
+                        config.window.sidebar_width = width
+                      }
+                    }
 
                     RowLayout {
                         anchors.fill: parent
@@ -303,13 +325,13 @@ ApplicationWindow {
                         Watermark {
                             fill: Material.foreground
                             Layout.leftMargin: 10
-                            property real op: main_window.themeIdx == 0 ? 0.05 : 0.1
+                            property real op: config.style.theme == 0 ? 0.05 : 0.1
                             opacity: bridge.has_image ? 0 : op
                         }
 
                         Label {
                             text: "Open image or drop files here"
-                            property real op: main_window.themeIdx == 0 ? 0.15 : 0.25
+                            property real op: config.style.theme == 0 ? 0.15 : 0.25
                             opacity: bridge.has_image ? 0 : op
                         }
                     }
