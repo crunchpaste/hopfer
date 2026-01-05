@@ -44,6 +44,12 @@ Item {
       }
     }
     Shortcut {
+      sequences: ["Ctrl+Q", "Cmd+Q"]
+      onActivated: {
+        onActivated: Qt.quit()
+      }
+    }
+    Shortcut {
       sequences: ["Ctrl+Shift+Q", "Cmd+Shift+Q"]
       onActivated: {
         bridge.send_reset();
