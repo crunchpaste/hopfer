@@ -33,6 +33,7 @@ Item {
 
     ResizeDialog {
         id: resizeDialog
+        modality: Qt.ApplicationModal
     }
 
     Rectangle {

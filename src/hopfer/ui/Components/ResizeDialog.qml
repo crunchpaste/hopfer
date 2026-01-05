@@ -144,7 +144,7 @@ ApplicationWindow {
                     root.pixelW = Math.round((value / factor) * currentFactor)
 
                     if (ratioLockButton.isLocked) {
-                        root.pixelH = Math.round(root.pixelW * root.ratio)
+                        root.pixelH = Math.floor(root.pixelW * root.ratio)
                     }
                 }
                 textFromValue: function(value, locale) {
@@ -177,7 +177,7 @@ ApplicationWindow {
 
                     if (ratioLockButton.isLocked) {
                         // Keep Height in sync using the image ratio
-                        root.pixelW = Math.round(root.pixelH / root.ratio)
+                        root.pixelW = Math.floor(root.pixelH / root.ratio)
                     }
                 }
                 textFromValue: function(value, locale) {
