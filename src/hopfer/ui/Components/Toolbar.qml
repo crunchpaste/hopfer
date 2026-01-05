@@ -14,9 +14,6 @@ Item {
     signal actual
     signal openPreferences
 
-    property alias resizeDialog: resizeDialog
-    property int memThresh: 1024
-
     function enable_toolbar(state) {
         open.enabled = state;
         save.enabled = state;
@@ -35,7 +32,6 @@ Item {
     ResizeDialog {
         id: resizeDialog
         modality: Qt.ApplicationModal
-        memThresh: root.memThresh
     }
 
     Rectangle {

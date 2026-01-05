@@ -1,6 +1,7 @@
 import numpy as np
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QImage, QPixmap
+
 from . import image_utils
 
 

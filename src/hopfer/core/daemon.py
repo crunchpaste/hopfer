@@ -4,7 +4,6 @@ from setproctitle import setproctitle
 
 from hopfer.core.image_processor import ImageProcessor
 from hopfer.core.image_storage import ImageStorage
-
 from hopfer.helpers.hex_rgb import hex_to_numpy
 
 

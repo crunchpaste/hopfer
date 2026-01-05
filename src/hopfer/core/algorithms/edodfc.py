@@ -1,5 +1,6 @@
-import numpy as np
 import logging
+
+import numpy as np
 
 from .static import levien, nakano, noise_gen
 
@@ -18,7 +19,9 @@ def edodf(img, algorithm, settings):
     if algorithm == "Levien":
         output_img = levien(img, str, hysteresis_c, serpentine)
     elif algorithm == "Nakano":
-        logger.debug(f"Nakano : {algorithm}, {str}, {hysteresis_c}, {serpentine}")
+        logger.debug(
+            f"Nakano : {algorithm}, {str}, {hysteresis_c}, {serpentine}"
+        )
         output_img = nakano(img, str, hysteresis_c, serpentine)
     else:
         # Default to Zhou-Fang serpentine

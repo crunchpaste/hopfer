@@ -21,16 +21,9 @@ ApplicationWindow {
     minimumHeight: height
     maximumHeight: height
 
+    property int isNative: config.window.native_frame
+
     flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
-
-    property bool isNative: config.window.native_frame
-    property bool darkTheme: false
-    property int accent: 0
-    property string version: config.version
-
-    signal toggleTheme(bool state)
-    signal accentSelected(int index)
-    signal memChanged(int value)
 
     color: Material.background
 
@@ -55,7 +48,7 @@ ApplicationWindow {
         TitlebarIcon {
             id: logo
             Layout.preferredHeight: 150
-            Layout.preferredWidth: height * (81 / 40) // width = height * ratio
+            Layout.preferredWidth: height * (81 / 40)
 
             Layout.alignment: Qt.AlignHCenter
 
@@ -63,10 +56,8 @@ ApplicationWindow {
             opacity: 0.9
         }
         Label {
-            text: `v${root.version}`
+            text: `v${config.version}`
             Layout.alignment: Qt.AlignHCenter
-            font.family: "Jetbrains Mono"
-            font.pointSize: 11
         }
 
         Item {height:24}
@@ -95,15 +86,7 @@ ApplicationWindow {
             id: stack
             currentIndex: bar.currentIndex
             Layout.margins: 20
-            PreferencesTab {
-                isNative: root.isNative
-                darkTheme: root.darkTheme
-                accent: root.accent
-
-                onToggleTheme: (state) => root.toggleTheme(state)
-                onAccentSelected: (index) => root.accentSelected(index)
-                onMemChanged: (value) => root.memChanged(value)
-            }
+            PreferencesTab {}
             Item {}
             AboutTab {}
         }

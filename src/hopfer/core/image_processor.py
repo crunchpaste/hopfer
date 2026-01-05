@@ -1,7 +1,8 @@
+import logging
 import time
+
 import cv2
 import numpy as np
-import logging
 
 from hopfer.helpers.kernels import get_kernel
 
@@ -52,8 +53,8 @@ try:
         luma,
         luminance,
         manual,
-        value,
         sierra24a,
+        value,
     )
 except ImportError:
     from hopfer.core.algorithms.grayscale import (
@@ -236,7 +237,9 @@ class ImageProcessor:
         _brightness = im_settings["brightness"]
         if _brightness > 0:
             # using a log function makes the adjustment feel a bit more natural
-            _brightness = 5 * (np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01))
+            _brightness = 5 * (
+                np.log(1 + (0.01 - 1) * _brightness) / np.log(0.01)
+            )
         _brightness += 1
 
         _contrast = im_settings["contrast"]
@@ -252,7 +255,9 @@ class ImageProcessor:
             if high > low:
                 # LUT and equalizeHist require uint8
                 img8 = (image >> 8).astype(np.uint8)
-                lut = (np.arange(256) - (low >> 8)) * (255.0 / ((high - low) >> 8))
+                lut = (np.arange(256) - (low >> 8)) * (
+                    255.0 / ((high - low) >> 8)
+                )
                 lut = np.clip(lut, 0, 255).astype(np.uint8)
                 img8 = cv2.LUT(img8, lut)
                 image = img8.astype(np.uint16) << 8
@@ -262,17 +267,16 @@ class ImageProcessor:
             img8 = cv2.equalizeHist(img8)
             image = img8.astype(np.uint16) << 8
 
-        if im_settings["bc_t"]:
-            if _brightness != 1.0 or _contrast != 1.0:
-                alpha = float(_contrast)
-                beta = 32767.5 * (1.0 - alpha) + (_brightness - 1.0) * 65535.0
-                image = cv2.addWeighted(image, alpha, image, 0, beta)
+        if im_settings["bc_t"] and (_brightness != 1.0 or _contrast != 1.0):
+            alpha = float(_contrast)
+            beta = 32767.5 * (1.0 - alpha) + (_brightness - 1.0) * 65535.0
+            image = cv2.addWeighted(image, alpha, image, 0, beta)
 
         if im_settings["blur_t"]:
             _box = int(im_settings["box"] * 2 - 1)
             _blur = int(im_settings["blur"] * 2 - 1)
             _median = int(im_settings["median"] * 2 - 1)
-            if _median > 1:
+            if _median > 1: # noqa: SIM102
                 # medianBlur only supports uint8 or float32
                 if image.dtype != np.uint8:
                     image = (image >> 8).astype(np.uint8)

@@ -1,6 +1,8 @@
-import platformdirs
-import os
 import json
+import os
+
+import platformdirs
+
 from hopfer import VERSION
 
 DEFAULT_CONFIG = {
@@ -53,7 +55,9 @@ def update_config(clean=False):
             with open(CONFIG_PATH, "r") as f:
                 existing_config = json.load(f)
 
-            config_to_write = _recursive_merge_defaults(existing_config, DEFAULT_CONFIG)
+            config_to_write = _recursive_merge_defaults(
+                existing_config, DEFAULT_CONFIG
+            )
 
             config_to_write["version"] = DEFAULT_CONFIG["version"]
 

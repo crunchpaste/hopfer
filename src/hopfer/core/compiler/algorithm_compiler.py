@@ -48,9 +48,15 @@ def style_alpha(img, alpha_img, black, white, alpha):
             else:
                 c_r, c_g, c_b = white[0], white[1], white[2]
 
-            output_img[y, x, 0] = uint8((c_r * a_val + alpha[0] * a_inv + 127) // 255)
-            output_img[y, x, 1] = uint8((c_g * a_val + alpha[1] * a_inv + 127) // 255)
-            output_img[y, x, 2] = uint8((c_b * a_val + alpha[2] * a_inv + 127) // 255)
+            output_img[y, x, 0] = uint8(
+                (c_r * a_val + alpha[0] * a_inv + 127) // 255
+            )
+            output_img[y, x, 1] = uint8(
+                (c_g * a_val + alpha[1] * a_inv + 127) // 255
+            )
+            output_img[y, x, 2] = uint8(
+                (c_b * a_val + alpha[2] * a_inv + 127) // 255
+            )
 
     return output_img
 
@@ -307,7 +313,9 @@ def phansalkar(img, n=25, R=0.5, k=0.2, p=3.0, q=10.0):
             # Get the threshold for the current pixel using the formula provided by craft of coding: https://craftofcoding.wordpress.com/2021/09/28/thresholding-algorithms-phansalkar-local/
             # Mean is divided by 255 to keep the exponential term consistent with the original 0.0-1.0 logic.
             threshold = mean * (
-                1.0 + p * np.exp(-q * (mean / 255.0)) + k * ((std / R_scaled) - 1.0)
+                1.0
+                + p * np.exp(-q * (mean / 255.0))
+                + k * ((std / R_scaled) - 1.0)
             )
 
             # Check against the calculated threshold
@@ -400,9 +408,9 @@ def ed_float(img, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            error * kernel[ky, kx]
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += error * kernel[ky, kx]
                         # actually diffuse the error maybe the index could be precomputed
 
     return img  # return the image in a dithered form
@@ -448,9 +456,9 @@ def ed(img_u16, kernel, str_value):
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
                         # Add the error to the int32 array
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            np.int32(error * kernel[ky, kx])
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += np.int32(error * kernel[ky, kx])
                         # actually diffuse the error maybe the index could be precomputed
 
     return output  # return the image in a dithered form
@@ -492,9 +500,9 @@ def eds_float(img, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            error * kernel[ky, kx]
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += error * kernel[ky, kx]
                         # actually diffuse the error. maybe the index could be precomputed
     # Flip it one last time if needed
     if h.size % 2 != 0:
@@ -550,9 +558,9 @@ def eds_u16(img_u16, kernel, str_value):
                         and 0 <= y + ky - kernel_center_y < height
                         and 0 <= x + kx - kernel_center_x < width
                     ):  # check if the pixel is even inside the image. I've tried padding the image to avoid this check but it didn't seem to matter at all.
-                        img[y + ky - kernel_center_y, x + kx - kernel_center_x] += (
-                            np.int32(error * kernel[ky, kx])
-                        )
+                        img[
+                            y + ky - kernel_center_y, x + kx - kernel_center_x
+                        ] += np.int32(error * kernel[ky, kx])
                         # actually diffuse the error. maybe the index could be precomputed
 
     # Flip back once at the end if we finished on an odd row to restore original orientation
@@ -600,9 +608,8 @@ def sierra24a(img_u16, str_value, serpentine):
                 if x - 1 >= 0:
                     img[y + 1, x - 1] += error >> 2  # x - 1
 
-    if serpentine:
-        if h % 2 != 0:
-            output = np.fliplr(output)
+    if serpentine and h % 2 != 0:
+        output = np.fliplr(output)
 
     return output
 
@@ -1063,7 +1070,7 @@ def nakano(img_u16, str_value, hysteresis_c, serpentine):
                 VAL_1 = 4095  # 65535 >> 4
 
                 # current row
-                if x - 1 >= 0:
+                if x - 1 >= 0:  # noqa: SIM102
                     if output[y, x - 1]:
                         hysteresis += VAL_7  # x - 1
 
@@ -1071,10 +1078,10 @@ def nakano(img_u16, str_value, hysteresis_c, serpentine):
                 if y - 1 >= 0:
                     if output[y - 1, x]:
                         hysteresis += VAL_5  # current x
-                    if x - 1 >= 0:
+                    if x - 1 >= 0:  # noqa: SIM102
                         if output[y - 1, x - 1]:
                             hysteresis += VAL_1  # x - 1
-                    if x + 1 < w:
+                    if x + 1 < w:  # noqa: SIM102
                         if output[y - 1, x + 1]:
                             hysteresis += VAL_3  # x + 1
 
@@ -1133,9 +1140,8 @@ def nakano(img_u16, str_value, hysteresis_c, serpentine):
                 if x + 3 < w:
                     img[y + 3, x + 3] += (error * 2) >> 6  # x + 3
 
-    if serpentine:
-        if h % 2 != 0:
-            output = np.fliplr(output)
+    if serpentine and h % 2 != 0:
+        output = np.fliplr(output)
 
     return output
 
@@ -1256,9 +1262,8 @@ def levien(img_u16, str_value, hysteresis_c, serpentine):
             if y + 1 < h:
                 img[y + 1, x] += error >> 1
 
-    if serpentine:
-        if h % 2 != 0:
-            output = np.fliplr(output)
+    if serpentine and h % 2 != 0:
+        output = np.fliplr(output)
 
     return output
 
@@ -1422,14 +1427,18 @@ def sharpen(image, str=1.0):
     kernel = np.array([[0, y, 0], [y, x, y], [0, y, 0]]).astype(np.float32)
 
     # Create a padded image to avoid out of bounds error
-    padded_image = np.zeros((image.shape[0] + 2, image.shape[1] + 2), dtype=np.float32)
+    padded_image = np.zeros(
+        (image.shape[0] + 2, image.shape[1] + 2), dtype=np.float32
+    )
     padded_image[1:-1, 1:-1] = image
 
     sharpened = np.zeros((image.shape[0], image.shape[1]), dtype=np.float32)
 
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            region = padded_image[i : i + 3, j : j + 3]  # Extract the 3x3 region
+            region = padded_image[
+                i : i + 3, j : j + 3
+            ]  # Extract the 3x3 region
             sharpened[i, j] = np.sum(region * kernel)  # Apply the kernel
 
     return sharpened

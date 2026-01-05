@@ -1,16 +1,19 @@
-from PySide6.QtCore import QObject, Slot, Signal, QUrl, Property
+import json
+import logging
+import os
+import pickle
+from multiprocessing import Process, SimpleQueue, shared_memory
+
+import numpy as np
+import platformdirs
+from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
 from PySide6.QtGui import QGuiApplication
+
 from hopfer.core.daemon import Daemon
 from hopfer.core.queue_io import QueueReader, QueueWriter
-from hopfer.helpers.config import get_config, save_config
+from hopfer.helpers.config import save_config
 from hopfer.helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
-from multiprocessing import SimpleQueue, Process, shared_memory
-import pickle
-import numpy as np
-import json
-import platformdirs
-import os
-import logging
+
 # still not sure if i want to check available ram
 # from psutil import virtual_memory
 
@@ -29,15 +32,18 @@ class Bridge(QObject):
     hasImage = Signal(bool)
     sizeChanged = Signal()
 
-    def __init__(self, image_provider, parent=None):
+    def __init__(self, image_provider, config_obj, parent=None):
         super().__init__(parent)
         self.shm = None
         self.image_provider = image_provider
+        self.config = config_obj
         self.processing = False
         self._has_image = False
         self._w = 0
         self._h = 0
         self._ratio = 1
+
+        self._native_frame = self.config.window.native_frame
 
         self.clipboard = QGuiApplication.clipboard()
         self._initial_folder = platformdirs.user_videos_dir()
@@ -230,9 +236,9 @@ class Bridge(QObject):
 
     @Slot(bool)
     def toggle_native(self, state):
-        config = get_config()
-        config["window"]["native_frame"] = state
-        save_config(config)
+        # this is done here as otherwise the ui would react live and break
+        self._native_frame = state
+        print(self._native_frame)
 
     # TODECIDE: not sure if i want to check the system memory and include a dependency. i'm leaving it like that for now.
     # @Slot(result=float)
@@ -297,26 +303,12 @@ class Bridge(QObject):
         self.clipboard.setImage(qimage)
 
     def save_config(self):
-        config = get_config()
-        # window related
-        config["window"]["x"] = int(self._window.property("x"))
-        config["window"]["y"] = int(self._window.property("y"))
-        config["window"]["width"] = int(self._window.property("width"))
-        config["window"]["height"] = int(self._window.property("height"))
-        config["window"]["maximized"] = int(self._window.property("maximized"))
-        config["window"]["sidebar_width"] = int(self._window.property("sbw"))
+        # on exit update the config, otherwise it would be overwriten
+        self.config.window.native_frame = self._native_frame
 
-        # theme related
-        config["style"]["theme"] = int(self._window.property("themeIdx"))
-        config["style"]["accent"] = int(self._window.property("accent"))
+        config = self.config.to_dict()
 
-        # options related
-
-        config["options"]["memory_warning_threshold"] = int(
-            self._window.property("memThresh")
-        )
-
-        # path related
+        # I guess this should work for now and would be slighly more reliable
         if self._paths["open_path"] is not None:
             path = os.path.normpath(self._paths["open_path"])
             config["paths"]["open_path"] = path

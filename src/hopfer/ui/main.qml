@@ -26,7 +26,6 @@ ApplicationWindow {
 
     property bool isNative: config.window.native_frame
     property bool themeIdx: config.style.theme
-    property int memThresh: config.options.memory_warning_threshold
 
     // used for the config
     property int accent: theme.selectedIndex
@@ -183,19 +182,6 @@ ApplicationWindow {
     PreferencesDialog {
         id: preferences
         modality: Qt.WindowModal
-        darkTheme: main_window.themeIdx == 0
-        accent: main_window.accent
-
-        onToggleTheme: state => {
-            main_window.themeIdx = state ? 0 : 1;
-            raise();
-        }
-        onAccentSelected: index => {
-            theme.selectedIndex = index;
-        }
-        onMemChanged: value => {
-            main_window.memThresh = value;
-        }
     }
 
     Rectangle {
@@ -241,11 +227,9 @@ ApplicationWindow {
                                 preferences.show();
                                 preferences.raise();
                             }
-                            memThresh: main_window.memThresh
                         }
 
                         ColumnLayout {
-
                             TabBar {
                                 id: bar
                                 currentIndex: stack.currentIndex

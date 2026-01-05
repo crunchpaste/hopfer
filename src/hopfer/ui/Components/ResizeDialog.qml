@@ -24,11 +24,11 @@ ApplicationWindow {
     flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
     property bool isNative: config.window.native_frame
-    property int memThresh: 1024
+    property int memThresh: config.options.memory_warning_threshold
     property int pixelW: bridge.width
     property int pixelH: bridge.height
     property real ratio: bridge.ratio
-    property int res: 150
+    property int res: 300
 
     color: Material.background
 
@@ -339,7 +339,7 @@ ApplicationWindow {
                 rightInset: 0
 
                 activeFocusOnTab: false
-                
+
                 onClicked: {
                   root.resetValues()
                   root.close()

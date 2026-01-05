@@ -1,8 +1,8 @@
+import logging
 import os
 import pickle
 from multiprocessing.shared_memory import SharedMemory
 from urllib.parse import unquote, urlparse
-import logging
 
 import cv2
 import numpy as np
@@ -76,7 +76,9 @@ class ImageStorage(QObject):
             self.res_queue.put(message)
 
             self.shm.unlink()
-        self.shm = SharedMemory(size=height * width * 3, create=True, track=False)
+        self.shm = SharedMemory(
+            size=height * width * 3, create=True, track=False
+        )
         self.shm_preview = np.ndarray(
             (height, width, 3), dtype=np.uint8, buffer=self.shm.buf
         )
@@ -355,7 +357,9 @@ class ImageStorage(QObject):
         save_path = self.generate_unique_save_path(base_path, base_name)
 
         if self.save_like_preview and self.daemon.processor.algorithm != "None":
-            image = style_image(self.processed_image, self.color_dark, self.color_light)
+            image = style_image(
+                self.processed_image, self.color_dark, self.color_light
+            )
         else:
             image = self.processed_image
 
@@ -411,9 +415,7 @@ class ImageStorage(QObject):
 
         # check if the file actually exists on disk. i've had some problems with false positives before, so better safe than sorry.
         if os.path.exists(save_path):
-            message = (
-                f"Saved to <a href='file://{folder_path}'><b>{friendly_path}</b></a>"
-            )
+            message = f"Saved to <a href='file://{folder_path}'><b>{friendly_path}</b></a>"
             self.show_notification(message, duration=5000)
         else:
             message = "Failed to save image"
@@ -441,10 +443,14 @@ class ImageStorage(QObject):
         """
         # Extract the file extension (format) from the base_name
         base_name_without_ext = base_name.rsplit(".", 1)[0]
-        file_format = "." + base_name.rsplit(".", 1)[1] if "." in base_name else ".png"
+        file_format = (
+            "." + base_name.rsplit(".", 1)[1] if "." in base_name else ".png"
+        )
 
         counter = 1
-        save_path = os.path.join(base_path, f"{base_name_without_ext}{file_format}")
+        save_path = os.path.join(
+            base_path, f"{base_name_without_ext}{file_format}"
+        )
 
         while os.path.exists(save_path) and counter < self.MAX_SAVE_ATTEMPTS:
             save_path = os.path.join(
@@ -480,7 +486,9 @@ class ImageStorage(QObject):
 
         return self.processed_image
 
-    def generate_processed_pixmap(self, compositing=True, styled=True, clipboard=False):
+    def generate_processed_pixmap(
+        self, compositing=True, styled=True, clipboard=False
+    ):
         reset = self.reset_view
         processor = self.daemon.processor
 
@@ -527,7 +535,11 @@ class ImageStorage(QObject):
                 if not clipboard:
                     self.shm_preview[:, :, 0] = processed_img
                     self.res_queue.put(
-                        {"type": "display_image", "array": "gray", "reset": reset}
+                        {
+                            "type": "display_image",
+                            "array": "gray",
+                            "reset": reset,
+                        }
                     )
             except Exception as e:
                 logger.error(f"Failed generating pixmaps: {e}")

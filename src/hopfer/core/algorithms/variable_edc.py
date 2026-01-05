@@ -3,9 +3,9 @@ import numpy as np
 from .static import (
     ostromoukhov,
     ostromoukhov_s,
-    zhou_fang_s,
     zhou_fang_fast,
     zhou_fang_fast_s,
+    zhou_fang_s,
 )
 from .ved_data import OSTROMOUKHOV_COEFFN, ZF_COEFFN, ZF_PERT
 
@@ -16,9 +16,9 @@ def variable_ed(img, algorithm, settings):
     noise = settings["noise"]
     if noise:
         rng = np.random.default_rng(12345)
-        noise_array = rng.integers(low=0, high=32768, size=(20, img.shape[1])).astype(
-            np.uint16
-        )
+        noise_array = rng.integers(
+            low=0, high=32768, size=(20, img.shape[1])
+        ).astype(np.uint16)
 
         img = np.vstack((noise_array, img))
 

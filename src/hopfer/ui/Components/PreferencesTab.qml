@@ -8,13 +8,8 @@ import QtQuick.Controls.Material
 ColumnLayout {
     id: root
 
-    property bool isNative: false
-    property bool darkTheme: false
-    property int accent: 0
-
-    signal toggleTheme(bool state)
-    signal accentSelected(int index)
-    signal memChanged(int value)
+    property bool isNative: config.window.native_frame
+    property bool darkTheme: config.style.theme == 0
 
     spacing: 10
     // TODO: Implement UI scaling
@@ -32,9 +27,8 @@ ColumnLayout {
     //     }
     // }
     LabeledSwitch {
-        // visible: false
         text: "Use system frame"
-        value: root.isNative
+        value: config.window.native_frame ? true : false
         onInteraction: {
             bridge.toggle_native(value)
             if (root.isNative != value) {
@@ -46,19 +40,30 @@ ColumnLayout {
     }
     LabeledSwitch {
         text: "Dark theme"
-        value: root.darkTheme
-        onInteraction: root.toggleTheme(value)
+        value: config.style.theme == 0
+        onInteraction: {
+          console.log(value)
+          let index = 0
+          if (value) {
+            index = 0
+          } else {
+            index = 1
+          }
+          config.style.theme = index
+        }
     }
 
     AccentSelector {
         Layout.topMargin: 5
-        selectedIndex: root.accent
-        onAccentSelected: (index) => {root.accentSelected(index)}
+        selectedIndex: config.style.accent
+        onAccentSelected: (index) => {config.style.accent = index}
     }
     MemoryButtons {
         Layout.fillWidth: true
         Layout.topMargin: 8
-        onMemChanged: (value) => root.memChanged(value)
+        onMemChanged: (value) => {
+          config.options.memory_warning_threshold = value
+        }
     }
     Item {
         Layout.fillWidth: true

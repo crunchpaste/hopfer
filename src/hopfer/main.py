@@ -1,16 +1,18 @@
+import logging
 import os
 import sys
 from pathlib import Path
-import logging
 
-from hopfer.bridge.image_provider import ImageProvider
-from hopfer.bridge.bridge import Bridge
-from hopfer.helpers.config import update_config
-from hopfer.helpers.parse import parse_args
-from hopfer.helpers.logfile import get_handlers
-from hopfer import VERSION
 from PySide6.QtGui import QFontDatabase, QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine
+
+from hopfer import VERSION
+from hopfer.bridge.bridge import Bridge
+from hopfer.bridge.image_provider import ImageProvider
+from hopfer.core.config_object import Config
+from hopfer.helpers.config import update_config
+from hopfer.helpers.logfile import get_handlers
+from hopfer.helpers.parse import parse_args
 
 os.environ["QT_QUICK_CONTROLS_MATERIAL_VARIANT"] = "Dense"
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
@@ -34,13 +36,19 @@ def main():
     log_level = logging.DEBUG if args.debug else logging.INFO
 
     logging.basicConfig(
-        level=log_level, format=LOG_FORMAT, datefmt="%H:%M:%S", handlers=handlers
+        level=log_level,
+        format=LOG_FORMAT,
+        datefmt="%H:%M:%S",
+        handlers=handlers,
     )
 
     if args.debug:
         logger.debug(f"Hopfer {VERSION} starting in DEBUG mode")
 
-    config = update_config(args.clean)
+    # this is just a merged, cleaned and updated dict
+    config_dict = update_config(args.clean)
+    # this is the actual object used for two-way sync between the bidge and ui
+    config_obj = Config(config_dict)
 
     app = QGuiApplication(sys.argv)
 
@@ -66,22 +74,18 @@ def main():
 
     image_provider = ImageProvider()
 
-    bridge = Bridge(image_provider)
+    bridge = Bridge(image_provider, config_obj)
 
     engine.addImageProvider("preview", image_provider)
 
     engine.rootContext().setContextProperty("bridge", bridge)
 
-    engine.rootContext().setContextProperty("config", config)
+    engine.rootContext().setContextProperty("config", config_obj)
 
     engine.addImportPath(os.fspath(UI_PATH))
 
     main_qml = UI_PATH / "main.qml"
     engine.load(os.fspath(main_qml))
-
-    root_objects = engine.rootObjects()
-    window = root_objects[0]
-    bridge.set_window(window)
 
     app.aboutToQuit.connect(bridge.exit)
 

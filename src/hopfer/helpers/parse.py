@@ -1,6 +1,7 @@
 import argparse
-import textwrap
 import os
+import textwrap
+
 import platformdirs
 
 CONFIG_FOLDER = platformdirs.user_config_dir("hopfer")
@@ -25,7 +26,9 @@ def parse_args(version):
     parser.add_argument(
         "-d", "--debug", action="store_true", help="enable debug logging"
     )
-    parser.add_argument("-c", "--clean", action="store_true", help="reset to defaults")
+    parser.add_argument(
+        "-c", "--clean", action="store_true", help="reset to defaults"
+    )
     parser.add_argument(
         "-l",
         "--logfile",

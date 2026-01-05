@@ -1,15 +1,17 @@
-from setuptools import setup, Extension
-from setuptools.command.build_py import build_py
-import numpy as np
 import subprocess
 import sys
 from pathlib import Path
 
+import numpy as np
 from Cython.Build import cythonize
+from setuptools import Extension, setup
+from setuptools.command.build_py import build_py
 
 
 def compile_algorithms():
-    compiler = Path(__file__).parent / "src/hopfer/core/compiler/algorithm_compiler.py"
+    compiler = (
+        Path(__file__).parent / "src/hopfer/core/compiler/algorithm_compiler.py"
+    )
     if compiler.exists():
         print(f"\n--- RUNNING AOT COMPILATION: {compiler} ---")
         subprocess.check_call([sys.executable, str(compiler)])
@@ -47,7 +49,10 @@ try:
             compile_algorithms()
             super().run()
 
-    CMD_CLASS = {"build_py": BuildPyCommand, "editable_wheel": EditableWheelCommand}
+    CMD_CLASS = {
+        "build_py": BuildPyCommand,
+        "editable_wheel": EditableWheelCommand,
+    }
 except ImportError:
     CMD_CLASS = {"build_py": BuildPyCommand}
 
