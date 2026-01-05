@@ -14,20 +14,8 @@ Item {
     signal actual
     signal openPreferences
 
+    property bool buttonsEnabled: bridge.has_image
     property alias resizeDialog: resizeDialog
-
-    function enable_toolbar(state) {
-        open.enabled = state;
-        save.enabled = state;
-        save_as.enabled = state;
-        resize.enabled = state;
-        invert.enabled = state;
-        rot_r.enabled = state;
-        rot_l.enabled = state;
-        flip.enabled = state;
-        fit.enabled = state;
-        actual.enabled = state;
-    }
 
     width: 60
 
@@ -67,7 +55,7 @@ Item {
 
             onClicked: root.saveClicked()
             ToolTip.text: "Save image (Ctrl+S)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             icon: Component {
                 Save {}
@@ -79,7 +67,7 @@ Item {
 
             onClicked: root.saveAsClicked()
             ToolTip.text: "Save image as (Ctrl+Shift+S)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             icon: Component {
                 SaveAs {}
@@ -94,7 +82,7 @@ Item {
             id: resize
 
             ToolTip.text: "Resize image (Ctrl+Shift+I)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             icon: Component {
                 Resize {}
@@ -110,7 +98,7 @@ Item {
 
             onClicked: bridge.invert()
             ToolTip.text: "Invert values (Ctrl+Shift+N)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             icon: Component {
                 Invert {}
@@ -122,7 +110,7 @@ Item {
 
             onClicked: bridge.rotate(true)
             ToolTip.text: "Rotate CW (Ctrl+R)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             icon: Component {
                 RotR {}
@@ -134,7 +122,7 @@ Item {
 
             onClicked: bridge.rotate(false)
             ToolTip.text: "Rotate CCW (Ctrl+Shift+R)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             icon: Component {
                 RotL {}
@@ -145,7 +133,7 @@ Item {
             id: flip
 
             ToolTip.text: "Flip horizontally (Ctrl+F)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             onClicked: bridge.flip()
 
@@ -162,7 +150,7 @@ Item {
             id: fit
 
             ToolTip.text: "Fit image to viewbox (Ctrl+0)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             onClicked: {
                 root.fitImage();
@@ -177,7 +165,7 @@ Item {
             id: actual
 
             ToolTip.text: "Display at actual size (Ctrl+1)"
-            enabled: false
+            enabled: root.buttonsEnabled
 
             onClicked: {
                 root.actual();

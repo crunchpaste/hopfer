@@ -104,7 +104,11 @@ class ImageStorage(QObject):
 
         self.reset_view = True
 
-        message = {"type": "enable_toolbox", "state": False}
+        message = {
+            "type": "has_image",
+            "value": False,
+        }
+
         self.res_queue.put(message)
 
     def _load(self, image):
@@ -150,9 +154,6 @@ class ImageStorage(QObject):
             self.daemon.processor.start(step=0)
         except Exception as e:
             logger.warning(f"Failed processing: {e}")
-
-        message = {"type": "enable_toolbox", "state": True}
-        self.res_queue.put(message)
 
     def load_image(self, image_path):
         """

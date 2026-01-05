@@ -7,7 +7,7 @@ Item {
 
     property alias source: image.source
     property alias status: image.status
-    property bool hasImage: image.status === Image.Ready
+    property bool hasImage: image.source !== null
 
     function fit() {
         mouseArea.fit();

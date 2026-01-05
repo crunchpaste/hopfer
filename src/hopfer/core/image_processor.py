@@ -276,7 +276,7 @@ class ImageProcessor:
             _box = int(im_settings["box"] * 2 - 1)
             _blur = int(im_settings["blur"] * 2 - 1)
             _median = int(im_settings["median"] * 2 - 1)
-            if _median > 1: # noqa: SIM102
+            if _median > 1:  # noqa: SIM102
                 # medianBlur only supports uint8 or float32
                 if image.dtype != np.uint8:
                     image = (image >> 8).astype(np.uint8)

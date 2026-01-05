@@ -44,6 +44,12 @@ Item {
       }
     }
     Shortcut {
+      sequences: ["Ctrl+Shift+Q", "Cmd+Shift+Q"]
+      onActivated: {
+        bridge.send_reset();
+      }
+    }
+    Shortcut {
       sequences: ["Cmd+I", "Ctrl+I"]
       onActivated: {
         bar.currentIndex = 0;

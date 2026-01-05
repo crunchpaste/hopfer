@@ -35,6 +35,7 @@ class QueueReader(QObject):
 
             elif message["type"] == "has_image":
                 self.bridge._has_image = message["value"]
+                self.bridge.hasImage.emit()
 
             elif message["type"] == "load_failed":
                 self.bridge._has_image = False
@@ -70,9 +71,8 @@ class QueueReader(QObject):
                 # self.received_notification.emit(notification, duration)
 
             elif message["type"] == "enable_toolbox":
-                state = message["state"]
-                self.bridge.enableToolbar.emit(state)
-                # self.bridge.sidebar.toolbox.enable_buttons(state)
+                # this signal is handled in a more robust way now
+                pass
 
             elif message["type"] == "original_grayscale":
                 value = message["value"]
@@ -150,7 +150,6 @@ class QueueWriter(QObject):
     def reset(self):
         message = {"type": "reset_storage"}
         self.queue.put(message)
-        self.bridge.reset_viewer()
 
     def send_rotate(self, cw):
         message = {"type": "rotate", "cw": cw}

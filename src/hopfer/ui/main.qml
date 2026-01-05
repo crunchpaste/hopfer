@@ -64,8 +64,10 @@ ApplicationWindow {
             viewer.busy(false);
         }
 
-        function onEnableToolbar(state) {
-            toolbar.enable_toolbar(state);
+        function onRemoveImage() {
+            viewer.source = ""
+            busy_timer.stop();
+            viewer.busy(false);
         }
 
         function onOriginalGrayscale(state) {
@@ -302,13 +304,13 @@ ApplicationWindow {
                             fill: Material.foreground
                             Layout.leftMargin: 10
                             property real op: main_window.themeIdx == 0 ? 0.05 : 0.1
-                            opacity: viewer.hasImage ? 0 : op
+                            opacity: bridge.has_image ? 0 : op
                         }
 
                         Label {
                             text: "Open image or drop files here"
                             property real op: main_window.themeIdx == 0 ? 0.15 : 0.25
-                            opacity: viewer.hasImage ? 0 : op
+                            opacity: bridge.has_image ? 0 : op
                         }
                     }
 

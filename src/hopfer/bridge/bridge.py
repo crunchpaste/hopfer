@@ -24,12 +24,12 @@ class Bridge(QObject):
     processingStarted = Signal()
     resetView = Signal()
     displayImage = Signal()
+    removeImage = Signal()
     loadFailed = Signal()
     showNotification = Signal(str, int)
-    enableToolbar = Signal(bool)
     originalGrayscale = Signal(bool)
     pathsChanged = Signal()
-    hasImage = Signal(bool)
+    hasImage = Signal()
     sizeChanged = Signal()
 
     def __init__(self, image_provider, config_obj, parent=None):
@@ -134,6 +134,12 @@ class Bridge(QObject):
         settings_dict = json.loads(settings)
         self.writer.send_colors(settings_dict)
         logger.debug("Sending new colors to daemon")
+
+    @Slot()
+    def send_reset(self):
+        self.writer.reset()
+        self.removeImage.emit()
+        logger.debug("Closing the image")
 
     @Slot(str)
     def open(self, path):
@@ -295,6 +301,12 @@ class Bridge(QObject):
 
         self.processing = False
         self._has_image = True
+
+    def display_none(self):
+        """Reset the image provider to none."""
+
+        self.image_provider.setImage(None)
+        self.displayImage.emit()
 
     def store_in_clipboard(self, data):
         image = pickle.loads(data)
