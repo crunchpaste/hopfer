@@ -74,6 +74,17 @@ ApplicationWindow {
         return conservativeMB
     }
 
+    function resetValues() {
+        // Runs when the dialog is cancelled
+        root.pixelW = bridge.width
+        root.pixelH = bridge.height
+        root.ratio = bridge.ratio
+        root.res = 150
+
+        unitCombo.currentIndex = 0
+        resCombo.currentIndex = 0
+    }
+
     Connections {
         target: bridge
         function onSizeChanged() {
@@ -86,6 +97,7 @@ ApplicationWindow {
     Shortcut {
         sequence: "Esc"
         onActivated: {
+            resetValues()
             root.close()
         }
     }
@@ -176,140 +188,50 @@ ApplicationWindow {
                 Layout.row: 3
             }
             // SPINBOXES HERE
-            SpinBox {
+            MathSpinBox {
                 id: widthSpin
-
-                property int decimals: unitCombo.model.get(unitCombo.currentIndex).decimals
-                property real factor: Math.pow(10, decimals)
-
+                Layout.column: 1; Layout.row: 0; Layout.fillWidth: true
+                decimals: unitCombo.model.get(unitCombo.currentIndex).decimals
                 from: 1
                 to: 1000000
-
                 value: Math.round((root.pixelW / getUnitFactor()) * factor)
 
-                Layout.column: 1
-                Layout.row: 0
-                Layout.fillWidth: true
-                editable: true
-                validator: RegularExpressionValidator {
-                    regularExpression: /[0-9+\-*/()., ]+/
-                }
                 onValueModified: {
-                    let currentFactor = getUnitFactor()
-
-                    root.pixelW = Math.round((value / factor) * currentFactor)
-
+                    root.pixelW = Math.round((value / factor) * getUnitFactor())
                     if (ratioLockButton.isLocked) {
                         root.pixelH = Math.floor(root.pixelW * root.ratio)
                     }
                 }
-                textFromValue: function(value, locale) {
-                    return (value / factor).toLocaleString(locale, 'f', decimals)
-                }
-                valueFromText: function(text, locale) {
-                    try {
-                        let sep = locale.decimalPoint;
-                        let cleanRegex = new RegExp("[^0-9+\\-*/(). " + sep + "]", "g");
-                        let cleanText = text.replace(cleanRegex, '');
-                        let firstChar = cleanText.trim().charAt(0);
-                        let mathReadyText = cleanText;
-
-                        if (["+", "-", "*", "/"].indexOf(firstChar) !== -1) {
-                            mathReadyText = (value / factor).toString() + cleanText;
-                        }
-                        mathReadyText = mathReadyText.split(sep).join('.');
-
-                        let result = new Function('return ' + mathReadyText)();
-
-                        return Math.round(result * factor);
-                    } catch (e) {
-                        return value;
-                    }
-                }
             }
-            SpinBox {
+
+            // HEIGHT
+            MathSpinBox {
                 id: heightSpin
-
-                property int decimals: unitCombo.model.get(unitCombo.currentIndex).decimals
-                property real factor: Math.pow(10, decimals)
-
+                Layout.column: 1; Layout.row: 1; Layout.fillWidth: true
+                decimals: unitCombo.model.get(unitCombo.currentIndex).decimals
                 from: 1
                 to: 1000000
                 value: Math.round((root.pixelH / getUnitFactor()) * factor)
-                Layout.column: 1
-                Layout.row: 1
-                Layout.fillWidth: true
-                editable: true
-                validator: RegularExpressionValidator {
-                    regularExpression: /[0-9+\-*/()., ]+/
-                }
-                onValueModified: {
-                    let currentFactor = getUnitFactor()
-                    root.pixelH = Math.round((value / factor) * currentFactor)
 
+                onValueModified: {
+                    root.pixelH = Math.round((value / factor) * getUnitFactor())
                     if (ratioLockButton.isLocked) {
                         root.pixelW = Math.floor(root.pixelH / root.ratio)
                     }
                 }
-                textFromValue: function(value, locale) {
-                    return (value / factor).toLocaleString(locale, 'f', decimals)
-                }
-
-                valueFromText: function(text, locale) {
-                    try {
-                        let sep = locale.decimalPoint;
-                        let cleanRegex = new RegExp("[^0-9+\\-*/(). " + sep + "]", "g");
-                        let cleanText = text.replace(cleanRegex, '');
-                        let firstChar = cleanText.trim().charAt(0);
-                        let mathReadyText = cleanText;
-
-                        if (["+", "-", "*", "/"].indexOf(firstChar) !== -1) {
-                            mathReadyText = (value / factor).toString() + cleanText;
-                        }
-                        mathReadyText = mathReadyText.split(sep).join('.');
-
-                        let result = new Function('return ' + mathReadyText)();
-
-                        return Math.round(result * factor);
-                    } catch (e) {
-                        return value;
-                    }
-                }
             }
-            SpinBox {
+
+            // RESOLUTION
+            MathSpinBox {
                 id: resSpin
+                Layout.column: 1; Layout.row: 2; Layout.fillWidth: true
+                decimals: 0
                 from: 1
                 to: 10000
                 value: root.res
-                Layout.column: 1
-                Layout.row: 2
-                Layout.fillWidth: true
-                editable: true
-                validator: RegularExpressionValidator {
-                    regularExpression: /[0-9+\-*/()., ]+/
-                }
+
                 onValueModified: {
                     root.res = value
-                }
-                valueFromText: function(text, locale) {
-                    try {
-                        let sep = locale.decimalPoint;
-                        let cleanRegex = new RegExp("[^0-9+\\-*/(). " + sep + "]", "g");
-                        let cleanText = text.replace(cleanRegex, '');
-                        let firstChar = cleanText.trim().charAt(0);
-                        let mathReadyText = cleanText;
-
-                        if (["+", "-", "*", "/"].indexOf(firstChar) !== -1) {
-                            mathReadyText = (value / factor).toString() + cleanText;
-                        }
-                        mathReadyText = mathReadyText.split(sep).join('.');
-
-                        let result = new Function('return ' + mathReadyText)();
-
-                        return Math.round(result);
-                    } catch (e) {
-                        return value;
-                    }
                 }
             }
             RoundButton {
@@ -320,6 +242,8 @@ ApplicationWindow {
                 Layout.rowSpan: 2
                 Layout.preferredWidth: 50
                 Layout.alignment: Qt.AlignVCenter
+
+                activeFocusOnTab: false
 
                 width: 50
                 height: 50
@@ -345,6 +269,8 @@ ApplicationWindow {
                 Layout.rowSpan: 2
                 Layout.preferredWidth: 100
 
+                activeFocusOnTab: false
+
                 textRole: "unit"
 
                 model: ListModel {
@@ -359,6 +285,8 @@ ApplicationWindow {
                 Layout.column: 3
                 Layout.row: 2
                 Layout.preferredWidth: 100
+
+                activeFocusOnTab: false
 
                 textRole: "unit"
 
@@ -409,7 +337,13 @@ ApplicationWindow {
                 bottomInset: 0
                 leftInset: 0
                 rightInset: 0
-                onClicked: root.close()
+
+                activeFocusOnTab: false
+                
+                onClicked: {
+                  root.resetValues()
+                  root.close()
+                }
             }
             RoundButton {
                 id: acceptButton
