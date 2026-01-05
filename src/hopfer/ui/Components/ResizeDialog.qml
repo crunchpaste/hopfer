@@ -109,7 +109,6 @@ ApplicationWindow {
             Label {
                 text: "The requested dimensions will take up a significant amount of memory:"
                 Layout.maximumWidth: parent.width
-                // font.bold: true
                 wrapMode: Text.WordWrap
             }
 
@@ -192,6 +191,9 @@ ApplicationWindow {
                 Layout.row: 0
                 Layout.fillWidth: true
                 editable: true
+                validator: RegularExpressionValidator {
+                    regularExpression: /[0-9+\-*/()., ]+/
+                }
                 onValueModified: {
                     let currentFactor = getUnitFactor()
 
@@ -204,9 +206,25 @@ ApplicationWindow {
                 textFromValue: function(value, locale) {
                     return (value / factor).toLocaleString(locale, 'f', decimals)
                 }
-
                 valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text) * factor
+                    try {
+                        let sep = locale.decimalPoint;
+                        let cleanRegex = new RegExp("[^0-9+\\-*/(). " + sep + "]", "g");
+                        let cleanText = text.replace(cleanRegex, '');
+                        let firstChar = cleanText.trim().charAt(0);
+                        let mathReadyText = cleanText;
+
+                        if (["+", "-", "*", "/"].indexOf(firstChar) !== -1) {
+                            mathReadyText = (value / factor).toString() + cleanText;
+                        }
+                        mathReadyText = mathReadyText.split(sep).join('.');
+
+                        let result = new Function('return ' + mathReadyText)();
+
+                        return Math.round(result * factor);
+                    } catch (e) {
+                        return value;
+                    }
                 }
             }
             SpinBox {
@@ -222,15 +240,14 @@ ApplicationWindow {
                 Layout.row: 1
                 Layout.fillWidth: true
                 editable: true
+                validator: RegularExpressionValidator {
+                    regularExpression: /[0-9+\-*/()., ]+/
+                }
                 onValueModified: {
                     let currentFactor = getUnitFactor()
-
-                    // INPUT: Units -> Pixels
-                    // 1.00 inch * 150dpi = 150px
                     root.pixelH = Math.round((value / factor) * currentFactor)
 
                     if (ratioLockButton.isLocked) {
-                        // Keep Height in sync using the image ratio
                         root.pixelW = Math.floor(root.pixelH / root.ratio)
                     }
                 }
@@ -239,7 +256,24 @@ ApplicationWindow {
                 }
 
                 valueFromText: function(text, locale) {
-                    return Number.fromLocaleString(locale, text) * factor
+                    try {
+                        let sep = locale.decimalPoint;
+                        let cleanRegex = new RegExp("[^0-9+\\-*/(). " + sep + "]", "g");
+                        let cleanText = text.replace(cleanRegex, '');
+                        let firstChar = cleanText.trim().charAt(0);
+                        let mathReadyText = cleanText;
+
+                        if (["+", "-", "*", "/"].indexOf(firstChar) !== -1) {
+                            mathReadyText = (value / factor).toString() + cleanText;
+                        }
+                        mathReadyText = mathReadyText.split(sep).join('.');
+
+                        let result = new Function('return ' + mathReadyText)();
+
+                        return Math.round(result * factor);
+                    } catch (e) {
+                        return value;
+                    }
                 }
             }
             SpinBox {
@@ -251,8 +285,31 @@ ApplicationWindow {
                 Layout.row: 2
                 Layout.fillWidth: true
                 editable: true
+                validator: RegularExpressionValidator {
+                    regularExpression: /[0-9+\-*/()., ]+/
+                }
                 onValueModified: {
                     root.res = value
+                }
+                valueFromText: function(text, locale) {
+                    try {
+                        let sep = locale.decimalPoint;
+                        let cleanRegex = new RegExp("[^0-9+\\-*/(). " + sep + "]", "g");
+                        let cleanText = text.replace(cleanRegex, '');
+                        let firstChar = cleanText.trim().charAt(0);
+                        let mathReadyText = cleanText;
+
+                        if (["+", "-", "*", "/"].indexOf(firstChar) !== -1) {
+                            mathReadyText = (value / factor).toString() + cleanText;
+                        }
+                        mathReadyText = mathReadyText.split(sep).join('.');
+
+                        let result = new Function('return ' + mathReadyText)();
+
+                        return Math.round(result);
+                    } catch (e) {
+                        return value;
+                    }
                 }
             }
             RoundButton {

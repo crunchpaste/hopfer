@@ -20,7 +20,7 @@ ColumnLayout {
         spacing: 8
         Layout.fillWidth: true
         Label {
-            text: "Memory warning threshold"
+            text: "Memory warning"
         }
 
         Item {
