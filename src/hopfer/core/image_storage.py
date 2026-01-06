@@ -362,7 +362,7 @@ class ImageStorage(QObject):
                 self.processed_image, self.color_dark, self.color_light
             )
         else:
-            image = self.processed_image
+            image = self.processed_image.astype(np.uint8) * 255
 
         if self.ignore_alpha or self.alpha is None:
             output_image = image
