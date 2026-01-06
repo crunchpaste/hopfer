@@ -44,18 +44,7 @@ ApplicationWindow {
     property bool isNative: config.window.native_frame
     property bool themeIdx: config.style.theme
 
-    // used for the config
-    property int accent: theme.selectedIndex
-    property bool maximized: visibility == Window.Maximized
-    // this is the sidebar width
-    property alias sbw: sidebar.width
-
-    flags: isNative ? Qt.Window : Qt.Window | Qt.FramelessWindowHint
-    font.family: "Jetbrains Mono"
-    font.pointSize: config.style.font_size
-    Material.theme: themeIdx == 0 ? Material.Dark : Material.Light
-    Material.roundedScale: Material.ExtraSmallScale
-    Material.containerStyle: Material.Outlined
+    // Theme related
 
     ThemeManager {
         id: theme
@@ -63,8 +52,15 @@ ApplicationWindow {
         selectedIndex: config.style.accent
     }
 
-
+    flags: isNative ? Qt.Window : Qt.Window | Qt.FramelessWindowHint
+    font.family: "Jetbrains Mono"
+    font.pointSize: config.style.font_size
+    Material.theme: themeIdx == 0 ? Material.Dark : Material.Light
+    Material.roundedScale: Material.ExtraSmallScale
+    Material.containerStyle: Material.Outlined
     Material.accent: theme.currentAccent
+
+    // Shortcut related
 
     Shortcuts {
         openDialog: openDialog
@@ -73,6 +69,8 @@ ApplicationWindow {
         viewer: viewer
         toolbar: toolbar
     }
+
+    // Bridge connection
 
     Connections {
         function onDisplayImage() {
@@ -102,7 +100,6 @@ ApplicationWindow {
         function onLoadFailed() {
             busy_timer.stop();
             viewer.busy(false);
-            console.log("failed");
         }
 
         function onShowNotification(msg, duration) {
@@ -247,7 +244,9 @@ ApplicationWindow {
                             onSaveClicked: bridge.save(saveDialog.selectedFile)
                             onFitImage: viewer.fit()
                             onActual: viewer.to_scale(1)
-                            onOpenPreferences: {
+                            onOpenShortcutOverlay: shortcutOverlay.open()
+                            onOpenPreferences: (index) => {
+                                // preferences.currentIndex = index
                                 preferences.show();
                                 preferences.raise();
                             }

@@ -108,6 +108,12 @@ Item {
       }
     }
     Shortcut {
+      sequences: ["Cmd+F", "Ctrl+F"]
+      onActivated: {
+        bridge.flip()
+      }
+    }
+    Shortcut {
       sequences: ["Cmd+0", "Ctrl+0"]
       onActivated: {
         viewer.fit()

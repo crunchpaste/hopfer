@@ -22,6 +22,7 @@ ApplicationWindow {
     maximumHeight: height
 
     property int isNative: config.window.native_frame
+    property alias currentIndex: bar.currentIndex
 
     flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
@@ -85,9 +86,9 @@ ApplicationWindow {
         StackLayout {
             id: stack
             currentIndex: bar.currentIndex
-            Layout.margins: 20
+            Layout.margins: 0
             PreferencesTab {}
-            Item {}
+            ShortcutTab {}
             AboutTab {}
         }
     }

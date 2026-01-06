@@ -12,7 +12,8 @@ Item {
     signal saveClicked
     signal fitImage
     signal actual
-    signal openPreferences
+    signal openShortcutOverlay
+    signal openPreferences(int index)
 
     property bool buttonsEnabled: bridge.has_image
     property alias resizeDialog: resizeDialog
@@ -186,9 +187,24 @@ Item {
             icon: Component {
                 Preferences {}
             }
-            onClicked: {
-                root.openPreferences();
-            }
+            onClicked: root.openPreferences(1)
+
+            // Menu {
+            //     id: helpMenu
+            //     y: -height // Opens upwards if the button is at the bottom
+            //     MenuItem {
+            //         text: "Keyboard Shortcuts"
+            //         onTriggered: root.openShortcutOverlay()
+            //     }
+            //     MenuItem {
+            //         text: "Preferences"
+            //         onTriggered: root.openPreferences(0);
+            //     }
+            //     MenuItem {
+            //         text: "About"
+            //         onTriggered: root.openPreferences(1);
+            //     }
+            // }
         }
     }
 }
