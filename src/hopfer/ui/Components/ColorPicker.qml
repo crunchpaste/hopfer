@@ -18,6 +18,19 @@ Window {
     width: 880
     height: 595
 
+    function center() {
+        let mwx = config.window.x
+        let mwy = config.window.y
+        let mww = config.window.width
+        let mwh = config.window.height
+        x = mwx + (mww - width) / 2
+        y = mwy + (mwh - height) / 2
+    }
+    onVisibleChanged: {
+        if (visible) center()
+    }
+
+
     function emitColor() {
         colorAccepted(colorController.current_color)
     }

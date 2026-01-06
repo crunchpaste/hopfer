@@ -21,6 +21,19 @@ ApplicationWindow {
     minimumHeight: height
     maximumHeight: height
 
+    function center() {
+        let mwx = config.window.x
+        let mwy = config.window.y
+        let mww = config.window.width
+        let mwh = config.window.height
+        x = mwx + (mww - width) / 2
+        y = mwy + (mwh - height) / 2
+    }
+    onVisibleChanged: {
+        if (visible) center()
+    }
+
+
     property int isNative: config.window.native_frame
     property alias currentIndex: bar.currentIndex
 

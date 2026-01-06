@@ -23,6 +23,19 @@ ApplicationWindow {
 
     flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
+    // the following two are just so that the window centers itself the the main window
+    function center() {
+        let mwx = config.window.x
+        let mwy = config.window.y
+        let mww = config.window.width
+        let mwh = config.window.height
+        x = mwx + (mww - width) / 2
+        y = mwy + (mwh - height) / 2
+    }
+    onVisibleChanged: {
+        if (visible) center()
+    }
+
     property bool isNative: config.window.native_frame
     property int memThresh: config.options.memory_warning_threshold
     property int pixelW: bridge.width
@@ -254,6 +267,7 @@ ApplicationWindow {
 
                 contentItem: Label {
                     text: ratioLockButton.checked ? "\ue897" : "\uf656"
+                    opacity: ratioLockButton.checked ? 1 : 0.5
                     font.pixelSize: 18
                     font.family: "Material Icons"
                     horizontalAlignment: Text.AlignHCenter
