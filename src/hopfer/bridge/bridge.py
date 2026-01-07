@@ -290,6 +290,15 @@ class Bridge(QObject):
         """Display the processed image in the photo viewer."""
         _img = np.ascontiguousarray(self.shm_preview)
 
+        # HACK: If the image dimensions are not even QML mipmaps look like shit. This was the cleanest solution to the problem. This only affect the preview, not the output image, so it should be fine mostly.
+
+        h, w = _img.shape[:2]
+        new_h = h - (h % 2)
+        new_w = w - (w % 2)
+
+        # Slice the image array to be even
+        _img = _img[:new_h, :new_w]
+
         if array == "gray":
             pixmap = numpy_to_pixmap(_img[:, :, 0], qi=True)
         elif array == "rgb":

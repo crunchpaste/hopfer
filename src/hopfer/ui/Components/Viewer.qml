@@ -13,6 +13,11 @@ Item {
         mouseArea.fit();
     }
 
+    function nudge() {
+        // exposing the nudge for debugging
+        mouseArea.nudge();
+    }
+
     function busy(state) {
         busy.visible = state;
     }
@@ -30,7 +35,7 @@ Item {
         // needed because of windows having default fractional sca
         property real system_f: 1 / (Screen.devicePixelRatio * config.window.ui_scale)
         asynchronous: false
-        smooth: ((imageScale.xScale / system_f) % 1 !== 0) && (imageScale.xScale / system_f < 2)
+        smooth: ((imageScale.xScale / system_f).toFixed(3) % 1 !== 0) && (imageScale.xScale / system_f < 2)
         mipmap: true
         anchors.centerIn: parent
         retainWhileLoading: true
@@ -230,11 +235,11 @@ Item {
             imageScale.xScale = new_scale;
             imageScale.yScale = new_scale;
             if (Math.round(se.x - nw.x) <= vw * system_f) {
-                let tx = 0
+                let tx = 0.05
                 if (image.width % 2 == 0) {
-                    tx = 0.5
+                    tx = 0.55
                 }
-                imageTranslate.y = tx;
+                imageTranslate.x = 0;
             } else {
                 const proposed_tx = imageTranslate.x - transl_x;
                 const new_scaled_w = w * new_scale;
@@ -246,11 +251,11 @@ Item {
                 imageTranslate.x = final_tx;
             }
             if (Math.round(se.y - nw.y) <= vh * system_f) {
-                let ty = 0
+                let ty = 0.05
                 if (image.height % 2 == 0) {
-                    ty = 0.5
+                    ty = 0.55
                 }
-                imageTranslate.y = ty;
+                imageTranslate.y = 0;
             } else {
                 const proposed_ty = imageTranslate.y - transl_y;
                 const new_scaled_h = h * new_scale;
@@ -260,7 +265,16 @@ Item {
                 final_ty = Math.min(final_ty, max_bottom_pos);
                 imageTranslate.y = final_ty;
             }
+            // HACK: Slightly nudging the image fixes misalignment for some reason. it should be invisible to the user.
+            nudge()
         }
+
+        function nudge() {
+
+            imageTranslate.x += 0.05;
+            imageTranslate.y += 0.05;
+        }
+
 
         function fit() {
             const w = image.width;
@@ -268,6 +282,7 @@ Item {
             const vw = mouseArea.width;
             const vh = mouseArea.height;
             // center the image
+
             imageTranslate.x = 0;
             imageTranslate.y = 0;
             // calculate ratios
