@@ -41,7 +41,8 @@ ApplicationWindow {
         }
     }
 
-    property bool isNative: config.window.native_frame
+    // cant be bothered to make the shadows work on windows so non-system frame is disabled permanently
+    property int isNative: (Qt.platform.os === "windows") ? 0 : config.window.native_frame
     property bool themeIdx: config.style.theme
 
     // Theme related
@@ -68,6 +69,11 @@ ApplicationWindow {
         tabBar: bar
         viewer: viewer
         toolbar: toolbar
+    }
+
+    function fixPath(p) {
+        if (p === "") return StandardPaths.writableLocation(StandardPaths.PicturesLocation);
+        return (p.indexOf(":") !== -1 && p.indexOf("file://") === -1) ? "file:///" + p : p;
     }
 
     // Bridge connection
@@ -126,7 +132,7 @@ ApplicationWindow {
         currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
         Component.onCompleted: {
             if (config.paths.open_path !== "") {
-                currentFolder = Qt.resolvedUrl(config.paths.open_path);
+                currentFolder = Qt.resolvedUrl(fixPath(config.paths.open_path));
                 lastFolder = currentFolder;
             }
         }
@@ -176,7 +182,7 @@ ApplicationWindow {
         selectedFile: currentFolder + "/hopfer.png"
         Component.onCompleted: {
             if (config.paths.save_path !== "") {
-                currentFolder = Qt.resolvedUrl(config.paths.open_path);
+                currentFolder = Qt.resolvedUrl(fixPath(config.paths.open_path));
             }
         }
         nameFilters: [

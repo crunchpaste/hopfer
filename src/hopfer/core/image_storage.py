@@ -2,6 +2,7 @@ import logging
 import os
 import pickle
 from multiprocessing.shared_memory import SharedMemory
+from pathlib import Path
 from urllib.parse import unquote, urlparse
 
 import cv2
@@ -128,11 +129,11 @@ class ImageStorage(QObject):
 
         self.res_queue.put(message)
 
-        if os.name != "nt":
-            try:
-                self.create_shm(h, w)
-            except Exception as e:
-                logger.error(f"Failed creating SHM: {e}")
+        # if os.name != "nt":
+        try:
+            self.create_shm(h, w)
+        except Exception as e:
+            logger.error(f"Failed creating SHM: {e}")
 
         message = {
             "type": "original_grayscale",
@@ -163,6 +164,10 @@ class ImageStorage(QObject):
         """
 
         cv_image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+
+        if cv_image is None:
+            file_bytes = np.fromfile(image_path, dtype=np.uint8)
+            cv_image = cv2.imdecode(file_bytes, cv2.IMREAD_UNCHANGED)
 
         if cv_image is not None:
             self._load(cv_image)
@@ -234,16 +239,18 @@ class ImageStorage(QObject):
         h, w = np_image_uint16.shape[0], np_image_uint16.shape[1]
 
         self.res_queue.put(
-            {"type": "image_size", "height": h, "width": w, "ratio": h / w}
+            {"type": "image_size", "height": h, "width": w, "ratio": h / w},
+            block=False,
         )
-
         if num_channels == 1:
+            logger.debug("Image has 1 channel")
             L = np_image_uint16
             A = None
             self.original_grayscale = True
             return L, A
 
         elif num_channels == 2:
+            logger.debug("Image has 2 channels")
             L = np_image_uint16[:, :, 0]
             A = self.discard_alpha(np_image_uint16[:, :, 1])
 
@@ -251,6 +258,7 @@ class ImageStorage(QObject):
             return L, A
 
         elif num_channels == 3:
+            logger.debug("Image has 3 channels")
             BGR = np_image_uint16
             RGB = self.bgr_to_rgb(BGR)
             A = None
@@ -262,6 +270,7 @@ class ImageStorage(QObject):
             return RGB, A  # Color_BGR is (H, W, 3), A is None
 
         elif num_channels == 4:
+            logger.debug("Image has 4 channels")
             BGR = np_image_uint16[:, :, :3]
             RGB = self.bgr_to_rgb(BGR)
             A = self.discard_alpha(np_image_uint16[:, :, 3])
@@ -318,11 +327,11 @@ class ImageStorage(QObject):
 
         self.resized = cv2.resize(resized, (w, h), interpolation=method)
 
-        if os.name != "nt":
-            try:
-                self.create_shm(h, w)
-            except Exception as e:
-                logger.error(f"Failed creating SHM: {e}")
+        # if os.name != "nt":
+        try:
+            self.create_shm(h, w)
+        except Exception as e:
+            logger.error(f"Failed creating SHM: {e}")
 
         if self.original_grayscale:
             self.grayscale_image = self.resized
@@ -416,7 +425,12 @@ class ImageStorage(QObject):
 
         # check if the file actually exists on disk. i've had some problems with false positives before, so better safe than sorry.
         if os.path.exists(save_path):
-            message = f"Saved to <a href='file://{folder_path}'><b>{friendly_path}</b></a>"
+            folder_uri = Path(folder_path).as_uri()
+            # safe_uri = urllib.parse.quote(folder_uri, safe=':/')
+
+            message = (
+                f"Saved to <a href='{folder_uri}'><b>{friendly_path}</b></a>"
+            )
             self.show_notification(message, duration=5000)
         else:
             message = "Failed to save image"
@@ -501,49 +515,40 @@ class ImageStorage(QObject):
             if clipboard:
                 return result
 
-            if os.name == "nt":
-                pickled_array = pickle.dumps(result)
-                self.res_queue.put(
-                    {
-                        "type": "display_image_nt",
-                        "reset": reset,
-                        "array": pickled_array,
-                    }
-                )
-            else:
-                self.shm_preview[:] = result
-                self.res_queue.put(
-                    {"type": "display_image", "array": "rgb", "reset": reset}
-                )
+            # if os.name == "nt":
+            #     pickled_array = pickle.dumps(result)
+            #     self.res_queue.put(
+            #         {
+            #             "type": "display_image_nt",
+            #             "reset": reset,
+            #             "array": pickled_array,
+            #         }
+            #     )
+            # else:
+            self.shm_preview[:] = result
+            self.res_queue.put(
+                {"type": "display_image", "array": "rgb", "reset": reset}
+            )
+            logger.debug("Sent image to bridge")
 
             processor.processing = False
 
     def _handle_no_algorithm(self, reset, clipboard):
         # Handles the case when "None" is the algo
-        if os.name == "nt":
-            pickled_array = pickle.dumps(self.processed_image)
-            self.res_queue.put(
-                {
-                    "type": "display_image_nt",
-                    "reset": reset,
-                    "array": pickled_array,
-                }
-            )
-        else:
-            try:
-                processed_img = np.ascontiguousarray(self.processed_image)
-                logger.debug(f"Processed: {processed_img.dtype}")
-                if not clipboard:
-                    self.shm_preview[:, :, 0] = processed_img
-                    self.res_queue.put(
-                        {
-                            "type": "display_image",
-                            "array": "gray",
-                            "reset": reset,
-                        }
-                    )
-            except Exception as e:
-                logger.error(f"Failed generating pixmaps: {e}")
+        try:
+            processed_img = np.ascontiguousarray(self.processed_image)
+            logger.debug(f"Processed: {processed_img.dtype}")
+            if not clipboard:
+                self.shm_preview[:, :, 0] = processed_img
+                self.res_queue.put(
+                    {
+                        "type": "display_image",
+                        "array": "gray",
+                        "reset": reset,
+                    }
+                )
+        except Exception as e:
+            logger.error(f"Failed generating pixmaps: {e}")
 
         return processed_img if clipboard else None
 
@@ -619,8 +624,8 @@ class ImageStorage(QObject):
             self.processed_image = np.rot90(self.processed_image, k=-1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=-1)
-            if os.name != "nt":
-                self.shm_preview = np.rot90(self.shm_preview, k=-1)
+            # if os.name != "nt":
+            self.shm_preview = np.rot90(self.shm_preview, k=-1)
         else:
             self.original_image = np.rot90(self.original_image, k=1)
             self.resized = np.rot90(self.resized, k=1)
@@ -629,8 +634,8 @@ class ImageStorage(QObject):
             self.processed_image = np.rot90(self.processed_image, k=1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=1)
-            if os.name != "nt":
-                self.shm_preview = np.rot90(self.shm_preview, k=1)
+            # if os.name != "nt":
+            self.shm_preview = np.rot90(self.shm_preview, k=1)
 
         h, w = self.grayscale_image.shape
         self.res_queue.put(

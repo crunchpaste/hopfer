@@ -31,6 +31,7 @@ Item {
     // }
     LabeledSwitch {
       text: "Use system frame"
+      enabled: (Qt.platform.os != "windows")
       value: config.window.native_frame ? true : false
       onInteraction: {
         bridge.toggle_native(value)

@@ -11,7 +11,7 @@ ApplicationWindow {
 
     title: "Resize image"
     width: 600
-    height: 380
+    height: isNative ? 380 - tb.height : 380
 
     font.family: "Jetbrains Mono"
     font.pointSize: 11
@@ -36,7 +36,8 @@ ApplicationWindow {
         if (visible) center()
     }
 
-    property bool isNative: config.window.native_frame
+    // cant be bothered to make the shadows work on windows so non-system frame is disabled permanently
+    property int isNative: (Qt.platform.os === "windows") ? 0 : config.window.native_frame
     property int memThresh: config.options.memory_warning_threshold
     property int pixelW: bridge.width
     property int pixelH: bridge.height
@@ -159,6 +160,7 @@ ApplicationWindow {
         anchors.fill: parent
 
         DialogTitlebar {
+            id: tb
             visible: !root.isNative
             window: root
             title: root.title

@@ -16,7 +16,7 @@ Window {
 
     title: "Select Color"
     width: 880
-    height: 595
+    height: isNative ? 585 - tb.height : 585
 
     function center() {
         let mwx = config.window.x

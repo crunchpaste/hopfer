@@ -2,7 +2,7 @@ import json
 import logging
 import os
 import pickle
-from multiprocessing import Process, SimpleQueue, shared_memory
+from multiprocessing import Process, Queue, shared_memory
 
 import numpy as np
 import platformdirs
@@ -54,9 +54,9 @@ class Bridge(QObject):
 
     def _init_components(self):
         # the request queue
-        self.req_queue = SimpleQueue()
+        self.req_queue = Queue()
         # the response queue
-        self.res_queue = SimpleQueue()
+        self.res_queue = Queue()
 
         self._paths = {"open_path": None, "save_path": None}
 
@@ -256,7 +256,16 @@ class Bridge(QObject):
     def init_array(self, name, size):
         self.shm = shared_memory.SharedMemory(name=name, track=False)
         self.shm_preview = np.frombuffer(dtype=np.uint8, buffer=self.shm.buf)
-        self.shm_preview = self.shm_preview.reshape(size)
+
+        expected_size = size[0] * size[1] * size[2]
+
+        try:
+            self.shm_preview = self.shm_preview[:expected_size].reshape(size)
+        except ValueError as e:
+            logger.debug(
+                f"Reshape failed: {e}. Buffer size: {len(self.shm_preview)}, Needed: {expected_size}"
+            )
+            self.shm_preview = self.shm_preview.reshape(size)
 
     def rotate_shm(self, cw):
         if cw:
@@ -265,7 +274,7 @@ class Bridge(QObject):
             self.shm_preview = np.rot90(self.shm_preview, k=1)
 
     def close_shm(self):
-        self.image_provider.image = None
+        self.image_provider.setImage(None)
         if self.shm_preview is not None:
             del self.shm_preview
         if self.shm is not None:
@@ -323,10 +332,10 @@ class Bridge(QObject):
         # I guess this should work for now and would be slighly more reliable
         if self._paths["open_path"] is not None:
             path = os.path.normpath(self._paths["open_path"])
-            config["paths"]["open_path"] = path
+            config["paths"]["open_path"] = QUrl.fromLocalFile(path).toString()
         if self._paths["save_path"] is not None:
             path = os.path.normpath(self._paths["save_path"])
-            config["paths"]["save_path"] = path
+            config["paths"]["save_path"] = QUrl.fromLocalFile(path).toString()
 
         save_config(config)
         logger.debug("Saved config")
@@ -337,7 +346,7 @@ class Bridge(QObject):
 
     def exit(self):
         self.save_config()
-        self.image_provider.image = None
+        self.image_provider.setImage(None)
         self.close_shm()
         self.writer.close()
         self.daemon_process.join()

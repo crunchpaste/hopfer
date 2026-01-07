@@ -27,9 +27,11 @@ Item {
 
     Image {
         id: image
-
-        smooth: false
-        mipmap: (imageScale.xScale % 1 !== 0) && (imageScale.xScale < 2)
+        // needed because of windows having default fractional sca
+        property real system_f: 1 / Screen.devicePixelRatio
+        asynchronous: false
+        smooth: ((imageScale.xScale / system_f) % 1 !== 0) && (imageScale.xScale / system_f < 2)
+        mipmap: true
         anchors.centerIn: parent
         retainWhileLoading: true
         transform: [
@@ -80,10 +82,14 @@ Item {
 
         function snap_to_int(current_scale, proposed_scale) {
             // in case a boundary was crossed
+            const ratio = Screen.devicePixelRatio;
+            const current_phys = current_scale * ratio;
+            const proposed_phys = proposed_scale * ratio;
 
             // get the integers needed for the snapping
-            const curr_floor = Math.floor(current_scale);
-            const prop_floor = Math.floor(proposed_scale);
+            const curr_floor = Math.floor(current_phys + 0.001);
+            const prop_floor = Math.floor(proposed_phys + 0.001);
+
             // this handles the exception in the case of 0 as we dont want to snap to zero.
             if (prop_floor <= 0)
                 return proposed_scale;
@@ -93,16 +99,16 @@ Item {
                 return proposed_scale;
 
             // in case we we already at an integer return the proposed scale
-            if (current_scale == curr_floor)
+            if (Math.abs(current_phys - curr_floor) < 0.001)
                 return proposed_scale;
 
             // when going up rescale to the floored proposal
             if (prop_floor > curr_floor)
-                return prop_floor;
+                return prop_floor / ratio;
 
             // if crossing down and the current scale is not an int already, return the current floor
-            if (current_scale !== curr_floor)
-                return curr_floor;
+            if (Math.abs(current_phys - curr_floor) > 0.001)
+                return curr_floor / ratio;
 
             return proposed_scale;
         }
@@ -168,7 +174,8 @@ Item {
             // zoom_index += step;
             // var new_scale = Math.pow(zoom_base, zoom_index);
 
-            const zoom_out_f = 1;
+            // system_f is mostly used as Windows defaults to 125% scaling, which is quite the nightmare. If the image is not scaled by 1/1.25 we get shit in the preview. Why would an OS default to fractional scaling is beyond me.
+            const system_f = 1 / Screen.devicePixelRatio;
             var current_scale = imageScale.xScale;
             var new_scale = current_scale * scale_f;
             // if ((current_scale < 1) && (new_scale > 1)) {
@@ -180,7 +187,7 @@ Item {
                 new_scale = snap_to_int(current_scale, new_scale);
             }
             else {
-                new_scale = target_scale
+                new_scale = target_scale * system_f
                 // if a target scale is sent skip the min_scale check
                 skip_min = true
             }
@@ -222,25 +229,25 @@ Item {
             var se = image.mapToItem(mouseArea, w, h);
             imageScale.xScale = new_scale;
             imageScale.yScale = new_scale;
-            if (Math.round(se.x - nw.x) <= vw * zoom_out_f) {
+            if (Math.round(se.x - nw.x) <= vw * system_f) {
                 imageTranslate.x = 0;
             } else {
                 const proposed_tx = imageTranslate.x - transl_x;
                 const new_scaled_w = w * new_scale;
-                const max_left_pos = (vw / 2) * zoom_out_f - (new_scaled_w / 2);
-                const max_right_pos = (new_scaled_w / 2) - (vw / 2) * zoom_out_f;
+                const max_left_pos = (vw / 2) * system_f - (new_scaled_w / 2);
+                const max_right_pos = (new_scaled_w / 2) - (vw / 2) * system_f;
                 // console.log(max_left_pos, max_right_pos)
                 let final_tx = Math.max(proposed_tx, max_left_pos);
                 final_tx = Math.min(final_tx, max_right_pos);
                 imageTranslate.x = final_tx;
             }
-            if (Math.round(se.y - nw.y) <= vh * zoom_out_f) {
+            if (Math.round(se.y - nw.y) <= vh * system_f) {
                 imageTranslate.y = 0;
             } else {
                 const proposed_ty = imageTranslate.y - transl_y;
                 const new_scaled_h = h * new_scale;
-                const max_top_pos = (vh / 2) * zoom_out_f - (new_scaled_h / 2);
-                const max_bottom_pos = (new_scaled_h / 2) - (vh / 2) * zoom_out_f;
+                const max_top_pos = (vh / 2) * system_f - (new_scaled_h / 2);
+                const max_bottom_pos = (new_scaled_h / 2) - (vh / 2) * system_f;
                 let final_ty = Math.max(proposed_ty, max_top_pos);
                 final_ty = Math.min(final_ty, max_bottom_pos);
                 imageTranslate.y = final_ty;

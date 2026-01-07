@@ -33,12 +33,11 @@ ApplicationWindow {
         if (visible) center()
     }
 
-
-    property int isNative: config.window.native_frame
+    // cant be bothered to make the shadows work on windows so non-system frame is disabled
+    property int isNative: (Qt.platform.os === "windows") ? 0 : config.window.native_frame
     property alias currentIndex: bar.currentIndex
 
-    flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
-
+    flags: isNative ? Qt.Window : Qt.FramelessWindowHint | Qt.SubWindow
     color: Material.background
 
     Shortcut {

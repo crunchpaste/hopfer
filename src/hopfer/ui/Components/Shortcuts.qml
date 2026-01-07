@@ -9,13 +9,13 @@ Item {
     property var toolbar
 
     Shortcut {
-      sequence: StandardKey.Open
+      sequences: [StandardKey.Open]
       onActivated: {
         openDialog.open();
       }
     }
     Shortcut {
-      sequence: StandardKey.Save
+      sequences: [StandardKey.Save]
       onActivated: {
         if (bridge.has_image) {
 
@@ -24,7 +24,7 @@ Item {
       }
     }
     Shortcut {
-      sequence: StandardKey.SaveAs
+      sequences: [StandardKey.SaveAs]
       onActivated: {
         if (bridge.has_image) {
           saveDialog.open();
