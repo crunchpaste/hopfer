@@ -14,7 +14,6 @@ Item {
 
     spacing: 10
     anchors.fill: parent
-    anchors.margins: 20
     // TODO: Implement UI scaling
     // LabeledSlider {
     //     text: "Font size"
@@ -29,45 +28,100 @@ Item {
     //       root.font.pointSize = value;
     //     }
     // }
-    LabeledSwitch {
-      text: "Use system frame"
-      enabled: (Qt.platform.os != "windows")
-      value: config.window.native_frame ? true : false
-      onInteraction: {
-        bridge.toggle_native(value)
-        if (root.isNative != value) {
-          alert.visible = true
-        } else {
-          alert.visible = false
+    Pane {
+        Layout.fillWidth: true
+        Layout.margins: 20
+        Layout.topMargin: 10
+        Layout.bottomMargin: 0
+        Material.elevation: 10
+        padding: 24
+
+        background: Rectangle {
+            color: Qt.alpha(Material.foreground, 0.02)
+            radius: 8
         }
-      }
-    }
-    LabeledSwitch {
-      text: "Dark theme"
-      value: config.style.theme == 0
-      onInteraction: {
-        console.log(value)
-        let index = 0
-        if (value) {
-          index = 0
-        } else {
-          index = 1
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 8
+
+            Label {
+                text: "Appearance"
+                font.bold: true
+                font.pointSize: 10
+                color: Material.accent
+                Layout.bottomMargin: 5
+                opacity: 0.75
+            }
+            LabeledSwitch {
+              text: "Use system frame"
+              enabled: (Qt.platform.os != "windows")
+              value: config.window.native_frame ? true : false
+              onInteraction: {
+                bridge.toggle_native(value)
+                if (root.isNative != value) {
+                  alert.visible = true
+                } else {
+                  alert.visible = false
+                }
+              }
+            }
+            LabeledSwitch {
+              text: "Dark theme"
+              value: config.style.theme == 0
+              onInteraction: {
+                let index = 0
+                if (value) {
+                  index = 0
+                } else {
+                  index = 1
+                }
+                config.style.theme = index
+              }
+            }
+
+            AccentSelector {
+              Layout.topMargin: 5
+              selectedIndex: config.style.accent
+              onAccentSelected: (index) => {config.style.accent = index}
+            }
         }
-        config.style.theme = index
-      }
     }
 
-    AccentSelector {
-      Layout.topMargin: 5
-      selectedIndex: config.style.accent
-      onAccentSelected: (index) => {config.style.accent = index}
-    }
-    MemoryButtons {
-      Layout.fillWidth: true
-      Layout.topMargin: 8
-      onMemChanged: (value) => {
-        config.options.memory_warning_threshold = value
-      }
+    Pane {
+        Layout.fillWidth: true
+        Layout.margins: 20
+        Layout.topMargin: 10
+        Layout.bottomMargin: 0
+        Material.elevation: 10
+        padding: 24
+
+        background: Rectangle {
+            color: Qt.alpha(Material.foreground, 0.02)
+            radius: 8
+        }
+
+        ColumnLayout {
+            width: parent.width
+            spacing: 8
+
+            Label {
+                text: "System"
+                font.bold: true
+                font.pointSize: 10
+                color: Material.accent
+                Layout.bottomMargin: 5
+                opacity: 0.75
+            }
+
+            MemoryButtons {
+                Layout.fillWidth: true
+                Layout.topMargin: 8
+                onMemChanged: (value) => {
+                    config.options.memory_warning_threshold = value
+                }
+            }
+        }
     }
     Item {
       Layout.fillWidth: true
@@ -79,6 +133,8 @@ Item {
       height: 48
       radius: 5
       Layout.fillWidth: true
+      Layout.margins: 20
+      Layout.bottomMargin: 20
       color: Qt.darker(Material.background, 1.25)
       RowLayout {
         anchors.fill: parent

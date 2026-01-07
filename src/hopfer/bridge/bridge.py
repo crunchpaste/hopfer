@@ -244,7 +244,6 @@ class Bridge(QObject):
     def toggle_native(self, state):
         # this is done here as otherwise the ui would react live and break
         self._native_frame = state
-        print(self._native_frame)
 
     # TODECIDE: not sure if i want to check the system memory and include a dependency. i'm leaving it like that for now.
     # @Slot(result=float)
