@@ -256,6 +256,7 @@ Window {
                 ColumnLayout {
                     id: sliders
                     Layout.margins: 0
+                    Layout.maximumHeight: 500
                     spacing: 0
 
                     function handleSlider(mouse) {
