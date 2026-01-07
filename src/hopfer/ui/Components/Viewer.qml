@@ -230,7 +230,11 @@ Item {
             imageScale.xScale = new_scale;
             imageScale.yScale = new_scale;
             if (Math.round(se.x - nw.x) <= vw * system_f) {
-                imageTranslate.x = 0;
+                let tx = 0
+                if (image.width % 2 == 0) {
+                    tx = 0.5
+                }
+                imageTranslate.y = tx;
             } else {
                 const proposed_tx = imageTranslate.x - transl_x;
                 const new_scaled_w = w * new_scale;
@@ -242,7 +246,11 @@ Item {
                 imageTranslate.x = final_tx;
             }
             if (Math.round(se.y - nw.y) <= vh * system_f) {
-                imageTranslate.y = 0;
+                let ty = 0
+                if (image.height % 2 == 0) {
+                    ty = 0.5
+                }
+                imageTranslate.y = ty;
             } else {
                 const proposed_ty = imageTranslate.y - transl_y;
                 const new_scaled_h = h * new_scale;
