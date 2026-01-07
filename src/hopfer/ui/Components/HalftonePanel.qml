@@ -103,28 +103,47 @@ ColumnLayout {
 
         Layout.fillWidth: true
         popup: Popup {
-            y: 0
-            width: combo.width
-            height: Math.min(contentItem.implicitHeight, combo.Window.height)
-            padding: 0
 
-            contentItem: ListView {
-                clip: true
-                implicitHeight: contentHeight
-                model: combo.popup.visible ? combo.delegateModel : null
-                currentIndex: combo.highlightedIndex
+           y: 0
 
-                ScrollIndicator.vertical: ScrollIndicator { }
-            }
+           id: comboPopup
 
-            background: Rectangle {
-                color: Material.background
-                border.color: Material.accent
-                border.width: 2
-                radius: 5
-            }
-        }
+           width: combo.width * config.window.ui_scale
 
+           height: Math.min(list.implicitHeight * config.window.ui_scale, combo.Window.height - (150 * config.window.ui_scale) )
+           padding: 0
+           // clip: true
+           contentItem: Item{
+               width: comboPopup.height / config.window.ui_scale
+               height: comboPopup.height / config.window.ui_scale
+               transform: Scale {
+                   xScale: config.window.ui_scale
+                   yScale: config.window.ui_scale
+                   origin.x: 0; origin.y: 0
+               }
+               ListView {
+                   id: list
+                   clip: true
+                   implicitHeight: contentHeight
+                   width: parent.width / config.window.ui_scale
+                   height: parent.height / config.window.ui_scale
+                   model: combo.popup.visible ? combo.delegateModel : null
+                   currentIndex: combo.highlightedIndex
+                   ScrollIndicator.vertical: ScrollIndicator { }
+               }
+           }
+
+           background: Rectangle {
+
+               color: Material.background
+
+               border.color: Material.accent
+
+               border.width: 2
+
+               radius: 5
+           }
+       }
     }
 
     Loader {

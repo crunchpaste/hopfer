@@ -10,8 +10,8 @@ ApplicationWindow {
     id: root
 
     title: "Preferences"
-    width: 520
-    height: 740
+    width: Math.floor(520 * config.window.ui_scale)
+    height: Math.floor(790 * config.window.ui_scale)
 
     font.family: "Jetbrains Mono"
     font.pointSize: 11
@@ -58,50 +58,58 @@ ApplicationWindow {
             Layout.preferredHeight: 45
         }
 
-        TitlebarIcon {
-            id: logo
-            Layout.preferredHeight: 150
-            Layout.preferredWidth: height * (81 / 40)
-
-            Layout.alignment: Qt.AlignHCenter
-
-            fill: Material.foreground
-            opacity: 0.9
-        }
-        Label {
-            text: `v${config.version}`
-            Layout.alignment: Qt.AlignHCenter
-        }
-
-        Item {height:24}
-
-        TabBar {
-            id: bar
-            currentIndex: stack.currentIndex
-            topPadding: 10
-
+        ScaleContainer {
+            zoom: config.window.ui_scale
             Layout.fillWidth: true
+            Layout.fillHeight: true
+            ColumnLayout{
+              anchors.fill: parent
+              TitlebarIcon {
+                id: logo
+                Layout.preferredHeight: 150
+                Layout.preferredWidth: height * (81 / 40)
 
-            TabButton {
-                text: "Preferences"
+                Layout.alignment: Qt.AlignHCenter
+
+                fill: Material.foreground
+                opacity: 0.9
+              }
+              Label {
+                text: `v${config.version}`
+                Layout.alignment: Qt.AlignHCenter
+              }
+
+              Item {height:24}
+
+              TabBar {
+                id: bar
+                currentIndex: stack.currentIndex
+                topPadding: 10
+
+                Layout.fillWidth: true
+
+                TabButton {
+                  text: "Preferences"
+                }
+
+                TabButton {
+                  text: "Shortcuts"
+                }
+
+                TabButton {
+                  text: "About"
+                }
+
+              }
+              StackLayout {
+                id: stack
+                currentIndex: bar.currentIndex
+                Layout.margins: 0
+                PreferencesTab {}
+                ShortcutTab {}
+                AboutTab {}
+              }
             }
-
-            TabButton {
-                text: "Shortcuts"
-            }
-
-            TabButton {
-                text: "About"
-            }
-
-        }
-        StackLayout {
-            id: stack
-            currentIndex: bar.currentIndex
-            Layout.margins: 0
-            PreferencesTab {}
-            ShortcutTab {}
-            AboutTab {}
         }
     }
 }

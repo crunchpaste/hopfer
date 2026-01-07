@@ -55,7 +55,7 @@ DropArea {
                 Text {
                     anchors.centerIn: parent
                     text: "\ue2c6" // Material "Cloud Upload" or "File" icon code
-                    font.family: "Material Icons"
+                    font.family: "Material Symbols Rounded Filled 48pt"
                     font.pointSize: 48
 
                     color: Material.accent

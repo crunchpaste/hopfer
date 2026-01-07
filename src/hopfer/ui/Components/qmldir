@@ -28,3 +28,6 @@ MemoryButtons 1.0 MemoryButtons.qml
 MathSpinBox 1.0 MathSpinBox.qml
 ShortcutTab 1.0 ShortcutTab.qml
 ShortcutRow 1.0 ShortcutRow.qml
+ScaleContainer 1.0 ScaleContainer.qml
+ScaleButtons 1.0 ScaleButtons.qml
+ScaleCombo 1.0 ScaleCombo.qml

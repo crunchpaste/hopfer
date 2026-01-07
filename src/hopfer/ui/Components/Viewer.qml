@@ -28,7 +28,7 @@ Item {
     Image {
         id: image
         // needed because of windows having default fractional sca
-        property real system_f: 1 / Screen.devicePixelRatio
+        property real system_f: 1 / (Screen.devicePixelRatio * config.window.ui_scale)
         asynchronous: false
         smooth: ((imageScale.xScale / system_f) % 1 !== 0) && (imageScale.xScale / system_f < 2)
         mipmap: true
@@ -82,7 +82,7 @@ Item {
 
         function snap_to_int(current_scale, proposed_scale) {
             // in case a boundary was crossed
-            const ratio = Screen.devicePixelRatio;
+            const ratio = Screen.devicePixelRatio * config.window.ui_scale;
             const current_phys = current_scale * ratio;
             const proposed_phys = proposed_scale * ratio;
 
@@ -175,7 +175,7 @@ Item {
             // var new_scale = Math.pow(zoom_base, zoom_index);
 
             // system_f is mostly used as Windows defaults to 125% scaling, which is quite the nightmare. If the image is not scaled by 1/1.25 we get shit in the preview. Why would an OS default to fractional scaling is beyond me.
-            const system_f = 1 / Screen.devicePixelRatio;
+            const system_f = 1 / (Screen.devicePixelRatio * config.window.ui_scale);
             var current_scale = imageScale.xScale;
             var new_scale = current_scale * scale_f;
             // if ((current_scale < 1) && (new_scale > 1)) {

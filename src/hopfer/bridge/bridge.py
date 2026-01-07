@@ -44,6 +44,7 @@ class Bridge(QObject):
         self._ratio = 1
 
         self._native_frame = self.config.window.native_frame
+        self._ui_scale = self.config.window.ui_scale
 
         self.clipboard = QGuiApplication.clipboard()
         self._initial_folder = platformdirs.user_videos_dir()
@@ -245,6 +246,11 @@ class Bridge(QObject):
         # this is done here as otherwise the ui would react live and break
         self._native_frame = state
 
+    @Slot(float)
+    def ui_scale(self, value):
+        # same as toggle_native(), this is done here as otherwise the ui would react live and break
+        self._ui_scale = value
+
     # TODECIDE: not sure if i want to check the system memory and include a dependency. i'm leaving it like that for now.
     # @Slot(result=float)
     # def get_free_ram(self):
@@ -323,10 +329,8 @@ class Bridge(QObject):
         self.clipboard.setImage(qimage)
 
     def save_config(self):
-        # on exit update the config, otherwise it would be overwriten
-        self.config.window.native_frame = self._native_frame
-
         config = self.config.to_dict()
+        # on exit update the config, otherwise it would be overwriten
 
         # I guess this should work for now and would be slighly more reliable
         if self._paths["open_path"] is not None:
@@ -336,6 +340,9 @@ class Bridge(QObject):
             path = os.path.normpath(self._paths["save_path"])
             config["paths"]["save_path"] = QUrl.fromLocalFile(path).toString()
 
+        # do it in the dict phase to prevet breakage
+        config["window"]["native_frame"] = self._native_frame
+        config["window"]["ui_scale"] = self._ui_scale
         save_config(config)
         logger.debug("Saved config")
 

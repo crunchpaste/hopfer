@@ -15,6 +15,7 @@ DEFAULT_CONFIG = {
         "maximized": False,
         "native_frame": False,
         "sidebar_width": 400,
+        "ui_scale": 1.0,
     },
     "style": {
         # using an int here despite the headaches, as i plan on adding a neutral theme.

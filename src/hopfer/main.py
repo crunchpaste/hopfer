@@ -62,6 +62,8 @@ def main():
         logger.warning("Failed to load Material Icons")
     else:
         logger.debug("Material Icons loaded successfully.")
+        families = QFontDatabase.applicationFontFamilies(icon_font_id)
+        logger.debug(f"Material Icons loaded as: {families[0]}")
 
     # Load UI Font
     ui_font_id = QFontDatabase.addApplicationFont(UI_FONT_PATH)

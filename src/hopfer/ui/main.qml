@@ -220,140 +220,143 @@ ApplicationWindow {
                 Layout.fillWidth: true
                 visible: !main_window.isNative
             }
-
-            SplitView {
+            ScaleContainer {
+                zoom: config.window.ui_scale
                 Layout.fillWidth: true
                 Layout.fillHeight: true
+                SplitView {
+                    anchors.fill: parent
 
-                Item {
-                    id: sidebar
-                    SplitView.minimumWidth: 400
-                    SplitView.preferredWidth: config.window.sidebar_width
-                    SplitView.fillHeight: true
-                    onWidthChanged: {
-                      // when instantiated the sidebar is assigned it's minimum width. if we dont ignore this assignment it is never updated properly.
-                      if (width != SplitView.minimumWidth) {
-                        config.window.sidebar_width = width
-                      }
-                    }
+                    Item {
+                        id: sidebar
+                        SplitView.minimumWidth: 400
+                        SplitView.preferredWidth: config.window.sidebar_width
+                        SplitView.fillHeight: true
+                        onWidthChanged: {
+                          // when instantiated the sidebar is assigned it's minimum width. if we dont ignore this assignment it is never updated properly.
+                          if (width != SplitView.minimumWidth) {
+                            config.window.sidebar_width = width
+                          }
+                        }
 
-                    RowLayout {
-                        anchors.fill: parent
-                        spacing: 0
+                        RowLayout {
+                            anchors.fill: parent
+                            spacing: 0
 
-                        Toolbar {
-                            id: toolbar
+                            Toolbar {
+                                id: toolbar
 
-                            Layout.fillHeight: true
-                            onOpenClicked: openDialog.open()
-                            onSaveAsClicked: saveDialog.open()
-                            onSaveClicked: bridge.save(saveDialog.selectedFile)
-                            onFitImage: viewer.fit()
-                            onActual: viewer.to_scale(1)
-                            onOpenShortcutOverlay: shortcutOverlay.open()
-                            onOpenPreferences: (index) => {
-                                // preferences.currentIndex = index
-                                preferences.show();
-                                preferences.raise();
+                                Layout.fillHeight: true
+                                onOpenClicked: openDialog.open()
+                                onSaveAsClicked: saveDialog.open()
+                                onSaveClicked: bridge.save(saveDialog.selectedFile)
+                                onFitImage: viewer.fit()
+                                onActual: viewer.to_scale(1)
+                                onOpenShortcutOverlay: shortcutOverlay.open()
+                                onOpenPreferences: (index) => {
+                                    // preferences.currentIndex = index
+                                    preferences.show();
+                                    preferences.raise();
+                                }
+                            }
+
+                            ColumnLayout {
+                                TabBar {
+                                    id: bar
+                                    currentIndex: stack.currentIndex
+                                    topPadding: 10
+
+                                    Layout.fillWidth: true
+
+                                    TabButton {
+                                        text: "Image"
+                                    }
+
+                                    TabButton {
+                                        text: "Halftone"
+                                    }
+
+                                    TabButton {
+                                        text: "Output"
+                                    }
+                                }
+                                StackLayout {
+                                    id: stack
+                                    currentIndex: bar.currentIndex
+
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    Layout.margins: 20
+
+                                    ImagePanel {
+                                        id: image_panel
+                                        onGrayscaleChanged: function (algorithm, settings) {
+                                            let settings_json = JSON.stringify(settings);
+                                            bridge.send_grayscale(algorithm, settings_json);
+                                        }
+                                        onEnhanceChanged: function (settings) {
+                                            let settings_json = JSON.stringify(settings);
+                                            bridge.send_enhance(settings_json);
+                                        }
+                                    }
+                                    // Item {}
+
+                                    HalftonePanel {
+                                        id: halftone_panel
+                                        onHalftoneChanged: function (algorithm, settings) {
+                                            let settings_json = JSON.stringify(settings);
+                                            bridge.send_halftone(algorithm, settings_json);
+                                        }
+                                    }
+                                    OutputPanel {
+                                        onColorsChanged: function (settings) {
+                                            let settings_json = JSON.stringify(settings);
+                                            bridge.send_colors(settings_json);
+                                        }
+                                    }
+                                }
                             }
                         }
+                    }
+
+                    Viewer {
+                        id: viewer
+
+                        SplitView.fillHeight: true
+                        SplitView.fillWidth: true
+                        SplitView.minimumWidth: 400
 
                         ColumnLayout {
-                            TabBar {
-                                id: bar
-                                currentIndex: stack.currentIndex
-                                topPadding: 10
-
-                                Layout.fillWidth: true
-
-                                TabButton {
-                                    text: "Image"
-                                }
-
-                                TabButton {
-                                    text: "Halftone"
-                                }
-
-                                TabButton {
-                                    text: "Output"
-                                }
+                            anchors.centerIn: parent
+                            spacing: 30
+                            Watermark {
+                                fill: Material.foreground
+                                Layout.leftMargin: 10
+                                property real op: config.style.theme == 0 ? 0.05 : 0.1
+                                opacity: bridge.has_image ? 0 : op
                             }
-                            StackLayout {
-                                id: stack
-                                currentIndex: bar.currentIndex
 
-                                Layout.fillWidth: true
-                                Layout.fillHeight: true
-                                Layout.margins: 20
-
-                                ImagePanel {
-                                    id: image_panel
-                                    onGrayscaleChanged: function (algorithm, settings) {
-                                        let settings_json = JSON.stringify(settings);
-                                        bridge.send_grayscale(algorithm, settings_json);
-                                    }
-                                    onEnhanceChanged: function (settings) {
-                                        let settings_json = JSON.stringify(settings);
-                                        bridge.send_enhance(settings_json);
-                                    }
-                                }
-                                // Item {}
-
-                                HalftonePanel {
-                                    id: halftone_panel
-                                    onHalftoneChanged: function (algorithm, settings) {
-                                        let settings_json = JSON.stringify(settings);
-                                        bridge.send_halftone(algorithm, settings_json);
-                                    }
-                                }
-                                OutputPanel {
-                                    onColorsChanged: function (settings) {
-                                        let settings_json = JSON.stringify(settings);
-                                        bridge.send_colors(settings_json);
-                                    }
-                                }
+                            Label {
+                                text: "Open image or drop files here"
+                                property real op: config.style.theme == 0 ? 0.15 : 0.25
+                                opacity: bridge.has_image ? 0 : op
                             }
                         }
-                    }
-                }
 
-                Viewer {
-                    id: viewer
-
-                    SplitView.fillHeight: true
-                    SplitView.fillWidth: true
-                    SplitView.minimumWidth: 400
-
-                    ColumnLayout {
-                        anchors.centerIn: parent
-                        spacing: 30
-                        Watermark {
-                            fill: Material.foreground
-                            Layout.leftMargin: 10
-                            property real op: config.style.theme == 0 ? 0.05 : 0.1
-                            opacity: bridge.has_image ? 0 : op
+                        SnackBar {
+                            id: snack
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            anchors.bottom: parent.bottom
+                            anchors.bottomMargin: 46
+                            z: 100
                         }
 
-                        Label {
-                            text: "Open image or drop files here"
-                            property real op: config.style.theme == 0 ? 0.15 : 0.25
-                            opacity: bridge.has_image ? 0 : op
-                        }
-                    }
-
-                    SnackBar {
-                        id: snack
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        anchors.bottom: parent.bottom
-                        anchors.bottomMargin: 46
-                        z: 100
-                    }
-
-                    Drop {
-                        anchors.fill: parent
-                        onDroppedUrl: url => {
-                            bridge.open_url(url);
-                            busy_timer.restart();
+                        Drop {
+                            anchors.fill: parent
+                            onDroppedUrl: url => {
+                                bridge.open_url(url);
+                                busy_timer.restart();
+                            }
                         }
                     }
                 }

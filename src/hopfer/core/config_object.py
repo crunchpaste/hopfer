@@ -54,6 +54,7 @@ class WindowConfig(QObject):
     maximizedChanged = Signal()
     nativeFrameChanged = Signal()
     sidebarWidthChanged = Signal()
+    uiScaleChanged = Signal()
 
     def __init__(self, data):
         super().__init__()
@@ -64,6 +65,7 @@ class WindowConfig(QObject):
         self._maximized = data.get("maximized", False)
         self._native_frame = data.get("native_frame", True)
         self._sidebar_width = data.get("sidebar_width", 250)
+        self._ui_scale = data.get("ui_scale", 1.0)
 
     def getX(self):
         return self._x
@@ -141,6 +143,16 @@ class WindowConfig(QObject):
         int, getSidebarWidth, setSidebarWidth, notify=sidebarWidthChanged
     )
 
+    def getUiScale(self):
+        return self._ui_scale
+
+    def setUiScale(self, v):
+        if self._ui_scale != v:
+            self._ui_scale = v
+            self.uiScaleChanged.emit()
+
+    ui_scale = Property(float, getUiScale, setUiScale, notify=uiScaleChanged)
+
     def to_dict(self):
         return {
             "x": self._x,
@@ -150,6 +162,7 @@ class WindowConfig(QObject):
             "maximized": self._maximized,
             "native_frame": self._native_frame,
             "sidebar_width": self._sidebar_width,
+            "ui_scale": self.ui_scale,
         }
 
 
