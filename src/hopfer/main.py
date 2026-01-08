@@ -93,7 +93,7 @@ def main():
 
     if args.file:
         full_path = os.path.abspath(os.path.expanduser(args.file))
-        bridge.open_path(full_path)
+        bridge.open_path(full_path, True)
         # print(f"File argument received: {args.file}")
 
     if not engine.rootObjects():

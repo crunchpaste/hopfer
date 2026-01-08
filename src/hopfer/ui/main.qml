@@ -71,11 +71,6 @@ ApplicationWindow {
         toolbar: toolbar
     }
 
-    function fixPath(p) {
-        if (p === "") return StandardPaths.writableLocation(StandardPaths.PicturesLocation);
-        return (p.indexOf(":") !== -1 && p.indexOf("file://") === -1) ? "file:///" + p : p;
-    }
-
     // Bridge connection
 
     Connections {
@@ -97,6 +92,11 @@ ApplicationWindow {
 
         function onResetView() {
             viewer.fit();
+        }
+
+        function onFileReceived(url) {
+            openDialog.selectedFile = url
+            saveDialog.syncName(url)
         }
 
         function onProcessingStarted() {
@@ -122,83 +122,13 @@ ApplicationWindow {
         onTriggered: viewer.busy(true)
     }
 
-    FileDialog {
-        id: openDialog
-
-        property url lastFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
-
-        fileMode: FileDialog.OpenFile
-        modality: Qt.WindowModal
-        currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
-        Component.onCompleted: {
-            if (config.paths.open_path !== "") {
-                currentFolder = Qt.resolvedUrl(fixPath(config.paths.open_path));
-                lastFolder = currentFolder;
-            }
-        }
-        nameFilters: [
-            "Image files (*.png *.PNG *.jpg *.JPG *.jpeg *.JPEG *.tiff *.TIFF *.tif *.TIF *.webp *.WEBP *.gif *.GIF)",
-            "All files (*)"
-        ]
-        onAccepted: {
-            bridge.open(selectedFile);
-            currentFolder = selectedFile;
-            lastFolder = currentFolder;
-            let openPath = selectedFile.toString();
-            lastFolder = openPath.substring(0, openPath.lastIndexOf("/"));
-            // in case the user has already saved a file to a folder, just change the fileName otherwise replace the whole taget folder
-            if (saveDialog.modified) {
-                let fileName = openPath.substring(openPath.lastIndexOf("/") + 1);
-                let saveFolder = saveDialog.currentFolder.toString();
-                if (!saveFolder.endsWith("/")) {
-                    saveFolder += "/";
-                }
-                Qt.callLater(() => {
-                    saveDialog.selectedFile = Qt.resolvedUrl(saveFolder + fileName);
-                });
-            } else {
-                Qt.callLater(() => {
-                    saveDialog.selectedFile = selectedFile;
-                });
-            }
-        }
-        onRejected: {
-            currentFolder = lastFolder;
-        }
+    SaveDialog {
+        id: saveDialog
     }
 
-    FileDialog {
-        id: saveDialog
-
-        property url lastFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
-        property bool modified: false
-
-        // title: "Save image as"
-        fileMode: FileDialog.SaveFile
-        options: FileDialog.DontConfirmOverwrite
-        modality: Qt.WindowModal
-        defaultSuffix: "png"
-        currentFolder: StandardPaths.writableLocation(StandardPaths.PicturesLocation)
-        selectedFile: currentFolder + "/hopfer.png"
-        Component.onCompleted: {
-            if (config.paths.save_path !== "") {
-                currentFolder = Qt.resolvedUrl(fixPath(config.paths.open_path));
-            }
-        }
-        nameFilters: [
-            "PNG files (*.png. *.PNG)",
-            "TIFF files (*.tif *.tiff *.TIF *.TIFF)",
-            "All files (*)"]
-
-        onAccepted: {
-            bridge.save(selectedFile);
-            currentFolder = selectedFile;
-            lastFolder = currentFolder;
-            modified = true;
-        }
-        onRejected: {
-            currentFolder = lastFolder;
-        }
+    OpenDialog {
+        id: openDialog
+        saveDialog: saveDialog
     }
 
     PreferencesDialog {

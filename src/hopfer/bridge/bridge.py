@@ -31,6 +31,7 @@ class Bridge(QObject):
     pathsChanged = Signal()
     hasImage = Signal()
     sizeChanged = Signal()
+    fileReceived = Signal(str)
 
     def __init__(self, image_provider, config_obj, parent=None):
         super().__init__(parent)
@@ -143,18 +144,21 @@ class Bridge(QObject):
         logger.debug("Closing the image")
 
     @Slot(str)
-    def open(self, path):
+    def open(self, path, is_cli=False):
         path = QUrl(path).toLocalFile()
         logger.debug(f"Opening {path}")
         self._paths["open_path"] = self.get_dir(path)
         self.writer.load_image(path)
         self.processingStarted.emit()
 
-    def open_path(self, path):
+    def open_path(self, path, is_cli=False):
         logger.debug(f"Opening {path}")
         self._paths["open_path"] = self.get_dir(path)
         self.writer.load_image(path)
         self.processingStarted.emit()
+        if is_cli:
+            url_path = QUrl.fromLocalFile(path).toString()
+            self.fileReceived.emit(url_path)
 
     @Slot()
     def open_clipboard(self):
@@ -306,19 +310,6 @@ class Bridge(QObject):
 
         self.image_provider.setImage(pixmap)
         self.displayImage.emit()
-        if reset:
-            self.resetView.emit()
-
-        self.processing = False
-        self._has_image = True
-
-    def display_processed_image_nt(self, array, reset=True):
-        """Display the processed image in the photo viewer on windows."""
-        _img = pickle.loads(array)
-
-        pixmap = numpy_to_pixmap(_img, qi=True)
-
-        self.viewer.setImage(pixmap)
         if reset:
             self.resetView.emit()
 

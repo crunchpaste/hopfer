@@ -31,3 +31,5 @@ ShortcutRow 1.0 ShortcutRow.qml
 ScaleContainer 1.0 ScaleContainer.qml
 ScaleButtons 1.0 ScaleButtons.qml
 ScaleCombo 1.0 ScaleCombo.qml
+SaveDialog 1.0 SaveDialog.qml
+OpenDialog 1.0 OpenDialog.qml
