@@ -13,6 +13,8 @@ tree.py
 # Cython intermediate files
 src/hopfer/helpers/*.c
 src/hopfer/helpers/*.html
+src/hopfer/core/algorithms/cython_ops/*.c
+src/hopfer/core/algorithms/cython_ops/*.html
 
 # Build directories
 build/

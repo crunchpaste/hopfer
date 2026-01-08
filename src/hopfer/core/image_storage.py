@@ -15,7 +15,7 @@ from PySide6.QtGui import QPixmap
 from hopfer.helpers.image_conversion import numpy_to_pixmap
 
 try:
-    from hopfer.core.algorithms.static import style_alpha, style_image
+    from hopfer.core.algorithms.numba_ops import style_alpha, style_image
 except ImportError:
     from hopfer.core.algorithms.style_preview import style_alpha, style_image
 

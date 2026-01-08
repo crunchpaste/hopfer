@@ -47,17 +47,16 @@ except ImportError:
     from hopfer.core.algorithms.edodf import edodf
 
 try:
-    from hopfer.core.algorithms.static import (
+    from hopfer.core.algorithms.cython_ops import (
         average,
         lightness,
         luma,
         luminance,
         manual,
-        sierra24a,
         value,
     )
 except ImportError:
-    from hopfer.core.algorithms.grayscale import (
+    from hopfer.core.algorithms.numba_ops import (
         average,
         lightness,
         luma,
@@ -65,6 +64,10 @@ except ImportError:
         manual,
         value,
     )
+
+from hopfer.core.algorithms.numba_ops import (
+    sierra24a
+)
 
 logger = logging.getLogger(__name__)
 
@@ -160,7 +163,7 @@ class ImageProcessor:
         """Converts the image to grayscale if necessary."""
         if step == 0:
             self.storage.grayscale_image = self._convert_to_grayscale(
-                self.storage.resized.copy(),
+                self.storage.resized,
                 self.grayscale_mode,
                 self.grayscale_settings,
             )

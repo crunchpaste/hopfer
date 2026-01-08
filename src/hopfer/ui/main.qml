@@ -340,7 +340,7 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
         }
 
-        // CORNERS (drawn last = higher stacking)
+        // CORNERS
         ResizeEdge {
             width: 10
             height: 10

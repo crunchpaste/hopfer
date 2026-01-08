@@ -8,7 +8,7 @@ from numba.pycc import CC
 BASE_DIR = Path(__file__).resolve().parent.parent / "algorithms"
 
 # Initialize the compiler
-cc = CC("static")
+cc = CC("numba_ops")
 cc.output_dir = os.fspath(BASE_DIR)
 
 
