@@ -65,7 +65,7 @@ except ImportError:
         value,
     )
 
-from hopfer.core.algorithms.numba_ops import sierra24a
+from hopfer.core.algorithms.cython_ops import sierra24a
 
 logger = logging.getLogger(__name__)
 
@@ -118,10 +118,6 @@ class ImageProcessor:
         self.reset = True
 
     def start(self, step=0):
-        """
-        The main method of the processor. It processes the image in a sequential manner
-        then stores the result in the ImageStorage instance.
-        """
         self.processing = True
         start = time.perf_counter()
 
@@ -131,18 +127,35 @@ class ImageProcessor:
 
         try:
             self.res_queue.put({"type": "started_processing"})
+            # step = self._determine_processing_step(step)
 
-            # Determine the processing step based on grayscale mode and enhancement settings.
-            step = self._determine_processing_step(step)
+            # As grayscaling is done in parallel now and is so fast i merged the grayscaling and enchancement step into a single one to save on memory.
+            if step == 0:
+                if self.storage.original_grayscale:
+                    source = self.storage.resized
+                    gray_input = source.copy()
+                    logger.debug(
+                        "Skipping grayscale: Image is already grayscale."
+                    )
+                else:
+                    gray_input = self._convert_to_grayscale(
+                        self.storage.resized,
+                        self.grayscale_mode,
+                        self.grayscale_settings,
+                    )
+                    logger.debug(
+                        f"Converted to grayscale via {self.grayscale_mode}"
+                    )
 
-            # Perform processing steps sequentially.
-            self._process_grayscale(step)
-            self._process_enhancement(step)
+                self.storage.enhanced_image = self._enhance_image(
+                    gray_input, self.image_settings
+                )
+                logger.debug("Finished image adjustments")
 
             processed_image = self._process_algorithm()
 
         except Exception as e:
-            print(e)
+            logger.error(f"Error in processing: {e}")
             self._handle_processing_error()
             processed_image = self.storage.processed_image
 
@@ -151,26 +164,16 @@ class ImageProcessor:
 
     # --- Helper Methods ---
 
-    def _determine_processing_step(self, step):
-        """Determines whether conversion or enhancement should be performed."""
-        convert = not self.storage.original_grayscale and step == 0
-        enhance = step <= 1
-        return 0 if convert else (1 if enhance else step)
+    # def _determine_processing_step(self, step):
+    #     """Determines whether conversion or enhancement should be performed."""
+    #     convert = not self.storage.original_grayscale and step == 0
+    #     enhance = step <= 1
+    #     return 0 if convert else (1 if enhance else step)
 
-    def _process_grayscale(self, step):
-        """Converts the image to grayscale if necessary."""
-        if step == 0:
-            self.storage.grayscale_image = self._convert_to_grayscale(
-                self.storage.resized,
-                self.grayscale_mode,
-                self.grayscale_settings,
-            )
-            logger.debug("Converted to grayscale")
-
-    def _process_enhancement(self, step):
+    def _process_enhancement(self, grayscale_image, step):
         """Enhances the image based on the provided settings."""
         im_settings = self.image_settings
-        if step <= 1 and any(
+        if step < 1 and any(
             im_settings[key]
             for key in [
                 "normalize",
@@ -182,19 +185,32 @@ class ImageProcessor:
             ]
         ):
             self.storage.enhanced_image = self._enhance_image(
-                self.storage.grayscale_image, im_settings
+                grayscale_image, im_settings
             )
             logger.debug("Finished image adjustments")
-        elif step <= 1:
-            self.storage.enhanced_image = self.storage.grayscale_image
+        else:
+            self.storage.enhanced_image = grayscale_image
+            logger.debug("Enhanced is just grayscale")
 
     def _process_algorithm(self):
         """Applies the processing algorithm if selected."""
+        # Use enhanced_image if it exists, otherwise fallback to resized
+        source = (
+            self.storage.enhanced_image
+            if self.storage.enhanced_image is not None
+            else self.storage.resized
+        )
+
+        if source is None:
+            logger.error("No image data available to process.")
+            return None
+
         if self.algorithm != "None":
-            return self._apply_algorithm(
-                self.storage.enhanced_image, self.algorithm, self.settings
-            )
-        return (self.storage.enhanced_image >> 8).astype(np.uint8)
+            return self._apply_algorithm(source, self.algorithm, self.settings)
+
+        if source.dtype == np.uint16:
+            return (source >> 8).astype(np.uint8)
+        return source.astype(np.uint8)
 
     def _handle_processing_error(self):
         """Handles exceptions during processing."""

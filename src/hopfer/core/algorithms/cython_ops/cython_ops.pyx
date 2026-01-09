@@ -30,3 +30,6 @@ include "manual.pxi"
 # Image styling
 include "style_image.pxi"
 include "style_alpha.pxi"
+
+# Halftoning
+include "sierra24a.pxi"

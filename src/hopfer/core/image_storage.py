@@ -4,12 +4,12 @@ import pickle
 from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
 from urllib.parse import unquote, urlparse
+import zstandard as zstd
 
 import cv2
 import numpy as np
 import requests
 from platformdirs import user_pictures_dir
-from PySide6.QtCore import QObject
 from PySide6.QtGui import QPixmap
 
 from hopfer.helpers.image_conversion import numpy_to_pixmap
@@ -22,7 +22,7 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class ImageStorage(QObject):
+class ImageStorage:
     """
     Class for managing the loading, processing, and saving of images.
     Handles the original and processed image, as well as varous conversions.
@@ -54,7 +54,7 @@ class ImageStorage(QObject):
         self.original_image = None  # uint16
         self.original_grayscale = False
         self.resized = None  # uint16
-        self.grayscale_image = None  # uint16
+        # self.grayscale_image = None  # uint16
         self.enhanced_image = None  # uint16
         self.alpha = None  # uint8
         self.ignore_alpha = False
@@ -129,7 +129,6 @@ class ImageStorage(QObject):
 
         self.res_queue.put(message)
 
-        # if os.name != "nt":
         try:
             self.create_shm(h, w)
         except Exception as e:
@@ -143,7 +142,7 @@ class ImageStorage(QObject):
         self.res_queue.put(message)
 
         if self.original_grayscale:
-            self.grayscale_image = self.original_image
+            self.grayscale_image = None
         else:
             self.grayscale_image = None
 
@@ -152,6 +151,7 @@ class ImageStorage(QObject):
         self.daemon.processor.reset = True
 
         try:
+            logger.debug("Started processing")
             self.daemon.processor.start(step=0)
         except Exception as e:
             logger.warning(f"Failed processing: {e}")
@@ -338,14 +338,13 @@ class ImageStorage(QObject):
 
         self.resized = cv2.resize(resized, (w, h), interpolation=method)
 
-        # if os.name != "nt":
         try:
             self.create_shm(h, w)
         except Exception as e:
             logger.error(f"Failed creating SHM: {e}")
 
         if self.original_grayscale:
-            self.grayscale_image = self.resized
+            self.grayscale_image = None
 
         try:
             self.daemon.processor.reset = True
@@ -526,16 +525,6 @@ class ImageStorage(QObject):
             if clipboard:
                 return result
 
-            # if os.name == "nt":
-            #     pickled_array = pickle.dumps(result)
-            #     self.res_queue.put(
-            #         {
-            #             "type": "display_image_nt",
-            #             "reset": reset,
-            #             "array": pickled_array,
-            #         }
-            #     )
-            # else:
             self.shm_preview[:] = result
             self.res_queue.put(
                 {"type": "display_image", "array": "rgb", "reset": reset}
@@ -634,7 +623,7 @@ class ImageStorage(QObject):
         if cw:
             self.original_image = np.rot90(self.original_image, k=-1)
             self.resized = np.rot90(self.resized, k=-1)
-            self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
+            # self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
             self.processed_image = np.rot90(self.processed_image, k=-1)
             if self.alpha is not None:
@@ -644,7 +633,7 @@ class ImageStorage(QObject):
         else:
             self.original_image = np.rot90(self.original_image, k=1)
             self.resized = np.rot90(self.resized, k=1)
-            self.grayscale_image = np.rot90(self.grayscale_image, k=1)
+            # self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
             self.processed_image = np.rot90(self.processed_image, k=1)
             if self.alpha is not None:
@@ -652,7 +641,7 @@ class ImageStorage(QObject):
             # if os.name != "nt":
             self.shm_preview = np.rot90(self.shm_preview, k=1)
 
-        h, w = self.grayscale_image.shape
+        h, w = self.resized.shape[:2]
         self.res_queue.put(
             {"type": "image_size", "height": h, "width": w, "ratio": h / w}
         )
@@ -666,7 +655,7 @@ class ImageStorage(QObject):
     def flip_image(self):
         self.original_image = np.fliplr(self.original_image)
         self.resized = np.fliplr(self.resized)
-        self.grayscale_image = np.fliplr(self.grayscale_image)
+        # self.grayscale_image = np.fliplr(self.grayscale_image)
         self.enhanced_image = np.fliplr(self.enhanced_image)
         self.processed_image = np.fliplr(self.processed_image)
         if self.alpha is not None:
@@ -681,8 +670,8 @@ class ImageStorage(QObject):
         logger.debug(f"Original image: {self.original_image.dtype}")
         self.resized = 65535 - self.resized
         logger.debug(f"Resized image: {self.resized.dtype}")
-        self.grayscale_image = 65535 - self.grayscale_image
-        logger.debug(f"Grayscale image: {self.grayscale_image.dtype}")
+        # self.grayscale_image = 65535 - self.grayscale_image
+        # logger.debug(f"Grayscale image: {self.grayscale_image.dtype}")
         self.enhanced_image = 65535 - self.enhanced_image
         logger.debug(f"Enhanced image: {self.enhanced_image.dtype}")
         logger.debug(f"Processed image: {self.processed_image.dtype}")

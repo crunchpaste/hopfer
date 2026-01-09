@@ -94,11 +94,11 @@ class Daemon:
                     step.append(0)
                 if message["e_settings"] is not None:
                     self.processor.image_settings = message["e_settings"]
-                    step.append(1)
+                    step.append(0)
                 if message["h_algorithm"] is not None:
                     self.processor.algorithm = message["h_algorithm"]
                     self.processor.settings = message["h_settings"]
-                    step.append(2)
+                    step.append(1)
                 if self.storage.original_image is not None:
                     self.processor.start(step=min(step))
 
