@@ -1,6 +1,6 @@
 # luminance.pxi
 
-def luminance(img, bool out_8bit=False):
+def luminance(img, bint out_8bit=False):
     # Rec. 709 coefficients
     cdef int h = img.shape[0]
     cdef int w = img.shape[1]

@@ -65,9 +65,7 @@ except ImportError:
         value,
     )
 
-from hopfer.core.algorithms.numba_ops import (
-    sierra24a
-)
+from hopfer.core.algorithms.numba_ops import sierra24a
 
 logger = logging.getLogger(__name__)
 

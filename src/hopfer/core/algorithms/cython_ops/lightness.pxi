@@ -3,7 +3,7 @@ import numpy as np
 cimport numpy as cnp
 from cython.parallel import prange
 
-def lightness(img, bool out_8bit=False):
+def lightness(img, bint out_8bit=False):
     cdef int h = img.shape[0]
     cdef int w = img.shape[1]
     is_u8 = img.dtype == np.uint8

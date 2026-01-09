@@ -1,6 +1,6 @@
 # average.pxi
 
-def average(img, bool out_8bit=False):
+def average(img, bint out_8bit=False):
     cdef int h = img.shape[0]
     cdef int w = img.shape[1]
     is_u8 = img.dtype == np.uint8

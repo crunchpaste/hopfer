@@ -1,6 +1,6 @@
 # value.pxi
 
-def value(img, bool out_8bit=False):
+def value(img, bint out_8bit=False):
     cdef int h = img.shape[0]
     cdef int w = img.shape[1]
     is_u8 = img.dtype == np.uint8

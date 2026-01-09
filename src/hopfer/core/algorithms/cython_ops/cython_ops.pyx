@@ -1,7 +1,9 @@
 # cython: language_level=3
 # cython: boundscheck=False
 # cython: wraparound=False
+# cython: initializedcheck=False
 # cython: cdivision=True
+# cython: nonecheck=False
 
 import numpy as np
 cimport numpy as cnp
@@ -13,14 +15,18 @@ ctypedef fused pixel_t:
     uint8_t
     uint16_t
 
-# Define another for the output so they can be different
 ctypedef fused out_t:
     uint8_t
     uint16_t
 
+# Grayscales
 include "value.pxi"
 include "lightness.pxi"
 include "average.pxi"
 include "luma.pxi"
 include "luminance.pxi"
 include "manual.pxi"
+
+# Image styling
+include "style_image.pxi"
+include "style_alpha.pxi"

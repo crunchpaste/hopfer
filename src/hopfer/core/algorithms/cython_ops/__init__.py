@@ -4,6 +4,8 @@ from .backend import (
     luma,
     luminance,
     manual,
+    style_alpha,
+    style_image,
     value,
 )
 
@@ -13,5 +15,7 @@ __all__ = [
     "luma",
     "luminance",
     "manual",
+    "style_alpha",
+    "style_image",
     "value",
 ]

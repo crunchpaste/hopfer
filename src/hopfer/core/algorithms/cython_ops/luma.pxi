@@ -1,6 +1,6 @@
 # luma.pxi
 
-def luma(img, bool out_8bit=False):
+def luma(img, bint out_8bit=False):
     # Rec. 601 coefficients
     cdef int h = img.shape[0]
     cdef int w = img.shape[1]

@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 import numpy as np
-from numba import uint8
 from numba.pycc import CC
 
 BASE_DIR = Path(__file__).resolve().parent.parent / "algorithms"
@@ -33,30 +32,29 @@ def style_image(img, black, white):
 
 # It seems to be much faster to just style and composite in one step
 # instead of calling separate functions for it
-@cc.export("style_alpha", "u1[:,:,:](u1[:,:], b1[:,:], u1[:], u1[:], u1[:])")
+@cc.export("style_alpha", "u1[:,:,:](b1[:,:], u1[:,:], u1[:], u1[:], u1[:])")
 def style_alpha(img, alpha_img, black, white, alpha):
     h, w = img.shape
-    output_img = np.zeros((h, w, 3), dtype=np.uint8)
+    output_img = np.empty((h, w, 3), dtype=np.uint8)
+
+    # Cache color values as ints to prevent overflow during math
+    b0, b1, b2 = int(black[0]), int(black[1]), int(black[2])
+    w0, w1, w2 = int(white[0]), int(white[1]), int(white[2])
+    a0, a1, a2 = int(alpha[0]), int(alpha[1]), int(alpha[2])
 
     for y in range(h):
         for x in range(w):
-            a_val = alpha_img[y, x]
+            a_val = int(alpha_img[y, x])
             a_inv = 255 - a_val
 
             if img[y, x]:
-                c_r, c_g, c_b = black[0], black[1], black[2]
+                c_r, c_g, c_b = w0, w1, w2
             else:
-                c_r, c_g, c_b = white[0], white[1], white[2]
+                c_r, c_g, c_b = b0, b1, b2
 
-            output_img[y, x, 0] = uint8(
-                (c_r * a_val + alpha[0] * a_inv + 127) // 255
-            )
-            output_img[y, x, 1] = uint8(
-                (c_g * a_val + alpha[1] * a_inv + 127) // 255
-            )
-            output_img[y, x, 2] = uint8(
-                (c_b * a_val + alpha[2] * a_inv + 127) // 255
-            )
+            output_img[y, x, 0] = np.uint8((c_r * a_val + a0 * a_inv) // 255)
+            output_img[y, x, 1] = np.uint8((c_g * a_val + a1 * a_inv) // 255)
+            output_img[y, x, 2] = np.uint8((c_b * a_val + a2 * a_inv) // 255)
 
     return output_img
 

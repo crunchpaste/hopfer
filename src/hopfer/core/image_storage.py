@@ -15,9 +15,9 @@ from PySide6.QtGui import QPixmap
 from hopfer.helpers.image_conversion import numpy_to_pixmap
 
 try:
-    from hopfer.core.algorithms.numba_ops import style_alpha, style_image
+    from hopfer.core.algorithms.cython_ops import style_alpha, style_image
 except ImportError:
-    from hopfer.core.algorithms.style_preview import style_alpha, style_image
+    from hopfer.core.algorithms.numba_ops import style_alpha, style_image
 
 logger = logging.getLogger(__name__)
 
@@ -250,9 +250,15 @@ class ImageStorage(QObject):
             return L, A
 
         elif num_channels == 2:
+            # This one is never used as cv2 converts them automatically to RGBA
             logger.debug("Image has 2 channels")
             L = np_image_uint16[:, :, 0]
-            A = self.discard_alpha(np_image_uint16[:, :, 1])
+            A = (self.discard_alpha(np_image_uint16[:, :, 1]) >> 8).astype(
+                np.uint8
+            )
+
+            cv2.imwrite("test_alpha.png", A)
+            logger.debug("Saved alpha as an image")
 
             self.original_grayscale = True
             return L, A
@@ -273,12 +279,17 @@ class ImageStorage(QObject):
             logger.debug("Image has 4 channels")
             BGR = np_image_uint16[:, :, :3]
             RGB = self.bgr_to_rgb(BGR)
-            A = self.discard_alpha(np_image_uint16[:, :, 3])
+            # TODO: Fix the logic here so that the alpha is 16bit if needed
+            A = (self.discard_alpha(np_image_uint16[:, :, 3]) >> 8).astype(
+                np.uint8
+            )
 
             # Check for grayscale conversion and status update
             RGB, is_gray = self.check_grayscale(RGB)
 
             self.original_grayscale = is_gray
+            cv2.imwrite("test_alpha.png", A)
+            logger.debug("Saved alpha as an image")
             return RGB, A
 
         else:
@@ -567,6 +578,10 @@ class ImageStorage(QObject):
     def _apply_styling_with_alpha(
         self, compositing, color_dark, color_light, color_alpha
     ):
+        logger.debug(
+            f"Alpha styling image of dtype: {self.processed_image.dtype}"
+        )
+        logger.debug(f"Alpha channel of dtype: {self.alpha.dtype}")
         # Applies the styling and composits
         if compositing:
             try:

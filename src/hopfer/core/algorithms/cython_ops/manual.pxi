@@ -1,6 +1,6 @@
 # manual.pxi
 
-def manual(img, double rf, double gf, double bf, bool out_8bit=False):
+def manual(img, double rf, double gf, double bf, bint out_8bit=False):
     cdef int h = img.shape[0]
     cdef int w = img.shape[1]
     is_u8 = img.dtype == np.uint8

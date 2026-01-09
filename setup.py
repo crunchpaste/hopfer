@@ -69,4 +69,12 @@ except ImportError:
 setup(
     cmdclass=CMD_CLASS,
     ext_modules=cythonize(ext_modules, annotate=True),
+    compiler_directives={
+        "boundscheck": False,
+        "wraparound": False,
+        "initializedcheck": False,
+        "cdivision": True,
+        "language_level": "3",
+        "nonecheck": False,
+    },
 )
