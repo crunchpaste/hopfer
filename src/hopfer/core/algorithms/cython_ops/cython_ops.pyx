@@ -27,9 +27,14 @@ include "luma.pxi"
 include "luminance.pxi"
 include "manual.pxi"
 
-# Image styling
-include "style_image.pxi"
-include "style_alpha.pxi"
+# Image adjustments
+include "normalize.pxi"
+include "equalize.pxi"
+include "blur_caster.pxi"
 
 # Halftoning
 include "sierra24a.pxi"
+
+# Image styling
+include "style_image.pxi"
+include "style_alpha.pxi"

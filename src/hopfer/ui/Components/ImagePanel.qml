@@ -44,6 +44,7 @@ ColumnLayout {
             "u_strength": um_str.value,
             "u_thresh": um_thresh.value,
             "l_strength": lap_str.value,
+            "l_ksize": lap_kernel.value,
         }
 
         root.enhanceChanged(settings);
@@ -244,19 +245,19 @@ ColumnLayout {
                     id: median
                     text: "Median filter"
                     from: 1
-                    to: 50
-                    step: 1
+                    to: 51
+                    step: 2
                     value: 1
                     default_value: 1
-                    precision: 1
+                    precision: 0
                     onInteraction: root.emitEnhanceSignal()
                 }
                 LabeledSlider {
                     id: box
                     text: "Box blur"
-                    from: 0
-                    to: 50
-                    step: 1
+                    from: 1
+                    to: 51
+                    step: 2
                     value: 0
                     default_value: 0
                     precision: 0
@@ -265,9 +266,9 @@ ColumnLayout {
                 LabeledSlider {
                     id: gauss
                     text: "Gaussian filter"
-                    from: 0
-                    to: 150
-                    step: 1
+                    from: 1
+                    to: 151
+                    step: 2
                     value: 0
                     default_value: 0
                     precision: 0
@@ -339,6 +340,17 @@ ColumnLayout {
                     value: 0.25
                     default_value: 0.25
                     precision: 2
+                    onInteraction: root.emitEnhanceSignal()
+                }
+                LabeledSlider {
+                    id: lap_kernel
+                    text: "Kernel size"
+                    from: 1
+                    to: 7
+                    step: 2
+                    value: 1
+                    default_value: 1
+                    precision: 0
                     onInteraction: root.emitEnhanceSignal()
                 }
             }

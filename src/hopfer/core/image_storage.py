@@ -4,7 +4,6 @@ import pickle
 from multiprocessing.shared_memory import SharedMemory
 from pathlib import Path
 from urllib.parse import unquote, urlparse
-import zstandard as zstd
 
 import cv2
 import numpy as np
@@ -303,9 +302,9 @@ class ImageStorage:
     @staticmethod
     def image_to_uint16(image):
         image_dtype = image.dtype
-
-        if image_dtype == np.uint8:
-            image = image.astype(np.uint16) << 8
+        logger.debug(f"Image arrived at storage as {image_dtype}")
+        # if image_dtype == np.uint8:
+        #     image = image.astype(np.uint16) << 8
 
         return image
 
@@ -646,10 +645,7 @@ class ImageStorage:
             {"type": "image_size", "height": h, "width": w, "ratio": h / w}
         )
 
-        # while this does not produce accurate results for the dithering
-        # it is much faster than reprocessing the image on each transform.
-        # the halftoning would be accurate again on the next reprocess.
-        # h, w = self.grayscale_image.shape
+        # while this does not produce accurate results for the dithering it is much faster than reprocessing the image on each transform. the halftoning would be accurate again on the next reprocess.
         self.reset_view = True
 
     def flip_image(self):
@@ -661,18 +657,18 @@ class ImageStorage:
         if self.alpha is not None:
             self.alpha = np.fliplr(self.alpha)
 
-        # while this does not produce accurate results for the dithering
-        # it is much faster than reprocessing the image on each transform.
-        # the halftoning would be accurate again on the next reprocess.
+        # while this does not produce accurate results for the dithering it is much faster than reprocessing the image on each transform. the halftoning would be accurate again on the next reprocess.
 
     def invert_image(self):
-        self.original_image = 65535 - self.original_image
-        logger.debug(f"Original image: {self.original_image.dtype}")
-        self.resized = 65535 - self.resized
-        logger.debug(f"Resized image: {self.resized.dtype}")
-        # self.grayscale_image = 65535 - self.grayscale_image
-        # logger.debug(f"Grayscale image: {self.grayscale_image.dtype}")
-        self.enhanced_image = 65535 - self.enhanced_image
+        if self.original_image.dtype == np.uint16:
+            self.original_image = 65535 - self.original_image
+            self.resized = 65535 - self.resized
+            self.enhanced_image = 65535 - self.enhanced_image
+        else:
+            self.original_image = 255 - self.original_image
+            self.resized = 255 - self.resized
+            self.enhanced_image = 255 - self.enhanced_image
+
         logger.debug(f"Enhanced image: {self.enhanced_image.dtype}")
         logger.debug(f"Processed image: {self.processed_image.dtype}")
         if self.processed_image.dtype == np.uint8:

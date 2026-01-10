@@ -7,8 +7,6 @@ def mezzo(img, settings, mode="uniform"):
     seed = settings["seed"]
     h, w = img.shape
     rng = np.random.default_rng(seed)
-    # no need to use uint16 as results are not better at all
-    img = (img >> 8).astype(np.uint8)
 
     if mode == "uniform":
         # the GUI still works in floats, while i've switched to ints internally

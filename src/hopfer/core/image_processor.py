@@ -49,10 +49,13 @@ except ImportError:
 try:
     from hopfer.core.algorithms.cython_ops import (
         average,
+        cast_f32_u16,
+        equalize,
         lightness,
         luma,
         luminance,
         manual,
+        normalize,
         value,
     )
 except ImportError:
@@ -132,8 +135,7 @@ class ImageProcessor:
             # As grayscaling is done in parallel now and is so fast i merged the grayscaling and enchancement step into a single one to save on memory.
             if step == 0:
                 if self.storage.original_grayscale:
-                    source = self.storage.resized
-                    gray_input = source.copy()
+                    gray_input = self.storage.resized.copy()
                     logger.debug(
                         "Skipping grayscale: Image is already grayscale."
                     )
@@ -227,29 +229,33 @@ class ImageProcessor:
         """
         The function responsible for the grayscale conversion in the main worker_p.
         """
+
+        flag = image.dtype == np.uint8
         if mode == "Luminance":
-            return luminance(image)
+            return luminance(image, out_8bit=flag)
         if mode == "Luma":
-            return luma(image)
+            return luma(image, out_8bit=flag)
         elif mode == "Average":
-            return average(image)
+            return average(image, out_8bit=flag)
         elif mode == "Value":
-            return value(image)
+            return value(image, out_8bit=flag)
         elif mode == "Lightness":
-            return lightness(image)
+            return lightness(image, out_8bit=flag)
         elif mode == "Manual RGB":
             r = settings["r"]
             g = settings["g"]
             b = settings["b"]
             return manual(image, r, g, b)
         else:
-            return luminance(image)
+            return luminance(image, out_8bit=flag)
 
     @staticmethod
     def _enhance_image(image, im_settings):
         """
         This is the method for image enchancements e.g. blurs.
         """
+
+        logger.debug(f"Image arrived ad Enhancement as {image.dtype}")
 
         _brightness = im_settings["brightness"]
         if _brightness > 0:
@@ -266,110 +272,168 @@ class ImageProcessor:
         _contrast += 1
 
         if im_settings["normalize"]:
-            low = np.min(image)
-            high = np.max(image)
-
-            if high > low:
-                # LUT and equalizeHist require uint8
-                img8 = (image >> 8).astype(np.uint8)
-                lut = (np.arange(256) - (low >> 8)) * (
-                    255.0 / ((high - low) >> 8)
-                )
-                lut = np.clip(lut, 0, 255).astype(np.uint8)
-                img8 = cv2.LUT(img8, lut)
-                image = img8.astype(np.uint16) << 8
+            # nomalize comes from the cython_ops module and is much faster than cv2 lut
+            image = normalize(image, lut=True)
+            logger.debug(f"Image left Normalize as {image.dtype}")
 
         if im_settings["equalize"]:
-            img8 = (image >> 8).astype(np.uint8)
-            img8 = cv2.equalizeHist(img8)
-            image = img8.astype(np.uint16) << 8
+            if image.dtype == np.uint8:
+                # cv2 is at least 2x faster for uint8
+                image = cv2.equalizeHist(image)
+            else:
+                # unfortunately it does not support uint16 so we use a cython implementation
+                image = equalize(image)
+            logger.debug(f"Image left EQ as {image.dtype}")
 
         if im_settings["bc_t"] and (_brightness != 1.0 or _contrast != 1.0):
             alpha = float(_contrast)
-            beta = 32767.5 * (1.0 - alpha) + (_brightness - 1.0) * 65535.0
-            image = cv2.addWeighted(image, alpha, image, 0, beta)
+            if image.dtype == np.uint8:
+                scale = 255
+            else:
+                scale = 65535
+
+            beta = (scale / 2) * (1.0 - alpha) + (_brightness - 1.0) * scale
+            # addWeighted is much much faster than any implementation i could come up and it does support uint16 ootb
+            image = cv2.addWeighted(image, alpha, image, 0, beta, dst=image)
+            logger.debug(f"Image left Contrast as {image.dtype}")
 
         if im_settings["blur_t"]:
-            _box = int(im_settings["box"] * 2 - 1)
-            _blur = int(im_settings["blur"] * 2 - 1)
-            _median = int(im_settings["median"] * 2 - 1)
-            if _median > 1:  # noqa: SIM102
-                # medianBlur only supports uint8 or float32
-                if image.dtype != np.uint8:
+            _box = int(im_settings["box"])
+            _blur = int(im_settings["blur"])
+            _median = int(im_settings["median"])
+            if _median > 1:
+                # medianBlur only supports uint8
+                old_type = image.dtype
+                if image.dtype != np.uint8 and _median > 5:
                     image = (image >> 8).astype(np.uint8)
-                    image = cv2.medianBlur(image, ksize=_median)
-            if _box > 0:
-                if image.dtype != np.uint8:
-                    image = (image >> 8).astype(np.uint8)
-                image = cv2.blur(image, ksize=(_box, _box))
-            if _blur > 0:
-                if image.dtype != np.uint8:
-                    image = (image >> 8).astype(np.uint8)
-                image = cv2.stackBlur(image, ksize=(_blur, _blur))
-            if image.dtype != np.uint16:
-                image = image.astype(np.uint16) << 8
+
+                cv2.medianBlur(image, ksize=_median, dst=image)
+
+                if old_type == np.uint16 and image.dtype != old_type:
+                    logger.debug("Casting back to uint16")
+                    image = image.astype(np.uint16) << 8
+
+            if _box > 1:
+                cv2.blur(image, ksize=(_box, _box), dst=image)
+            if _blur > 1:
+                if image.dtype == np.uint8:
+                    cv2.stackBlur(image, ksize=(_blur, _blur), dst=image)
+                else:
+                    # if using uint16 stackBlur returns an overflowed image at kernel size 25 and up. therefore the image is cast to a float and the calculations are done like so.
+                    img_f32 = image.astype(np.float32)
+                    cv2.stackBlur(img_f32, ksize=(_blur, _blur), dst=img_f32)
+                    # Slightly faster than casting and clipping with numpy, also a bit more memory efficient as we reuse the old array
+                    cast_f32_u16(img_f32, image)
+            logger.debug(f"Image left Blurs as {image.dtype}")
 
         if im_settings["unsharp_t"]:
             radius = im_settings["u_radius"] + 0.01
-            strength = im_settings["u_strength"] * 2
-            thresh = (im_settings["u_thresh"] / 10) * 65535
+            strength = float(im_settings["u_strength"] * 3)
 
-            blurred = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=radius)
+            if image.dtype == np.uint16:
+                thresh = (im_settings["u_thresh"] / 10) * 65535
 
-            unsharp_mask = image.astype(np.int32) - blurred.astype(np.int32)
+                blurred = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=radius)
 
-            if thresh > 0:
-                bool_mask = np.abs(unsharp_mask) < thresh
-                unsharp_mask[bool_mask] = 0
+                # diff in int32 to prevent wrap-around
+                unsharp_mask = image.astype(np.int32) - blurred.astype(np.int32)
 
-            res = cv2.addWeighted(
-                image.astype(np.float32),
-                1.0,
-                unsharp_mask.astype(np.float32),
-                strength,
-                0,
-            )
-            image = np.clip(res, 0, 65535).astype(np.uint16)
+                if thresh > 0:
+                    unsharp_mask[np.abs(unsharp_mask) < thresh] = 0
+
+                res = cv2.addWeighted(
+                    image.astype(np.float32),
+                    1.0,
+                    unsharp_mask.astype(np.float32),
+                    strength,
+                    0,
+                )
+                # clip and cast back to original buffer
+                cast_f32_u16(res, image)
+            else:
+                thresh = (im_settings["u_thresh"] / 10) * 255
+
+                blurred = cv2.GaussianBlur(image, ksize=(0, 0), sigmaX=radius)
+
+                # int16 should be enough
+                unsharp_mask = image.astype(np.int16) - blurred.astype(np.int16)
+
+                if thresh > 0:
+                    unsharp_mask[np.abs(unsharp_mask) < thresh] = 0
+
+                res = cv2.addWeighted(
+                    image.astype(np.float32),
+                    1.0,
+                    unsharp_mask.astype(np.float32),
+                    strength,
+                    0,
+                )
+                image[:] = np.clip(res, 0, 255).astype(np.uint8)
+            logger.debug(f"Image left Unsharp as {image.dtype}")
 
         if im_settings["laplacian_t"]:
-            strength = im_settings["l_strength"]
+            strength = float(im_settings["l_strength"])
+            size = int(im_settings["l_ksize"])
+            if image.dtype == np.uint16:
+                laplacian_mask = cv2.Laplacian(
+                    image, ddepth=cv2.CV_32F, ksize=size
+                )
 
-            laplacian_mask = cv2.Laplacian(image, ddepth=cv2.CV_32F, ksize=1)
+                res = cv2.addWeighted(
+                    image.astype(np.float32), 1.0, laplacian_mask, -strength, 0
+                )
 
-            res = image.astype(np.float32) - (strength * laplacian_mask)
+                cast_f32_u16(res, image)
+            else:
+                laplacian_mask = cv2.Laplacian(
+                    image, ddepth=cv2.CV_32F, ksize=1
+                )
 
-            image = np.clip(res, 0, 65535).astype(np.uint16)
+                res = cv2.addWeighted(
+                    image.astype(np.float32), 1.0, laplacian_mask, -strength, 0
+                )
+
+                image[:] = np.clip(res, 0, 255).astype(np.uint8)
+            logger.debug(f"Image left Laplacian as {image.dtype}")
 
         return image
 
     @staticmethod
     def _apply_algorithm(image, algorithm, settings):
         """Apply the selected halftoning algorithm to the image via worker_h."""
-
+        image_dtype = image.dtype
+        logger.debug(f"Image arrived for processing as {image_dtype}")
         if algorithm == "Fixed threshold":
             # demote to uint8. no visual differences found.
-            image = (image >> 8).astype(np.uint8)
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = threshold(image, settings)
 
         elif algorithm == "Niblack threshold":
             # demote to uint8. no visual differences found.
-            image = (image >> 8).astype(np.uint8)
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = niblack_threshold(image, settings)
 
         elif algorithm == "Sauvola threshold":
             # demote to uint8. no visual differences found.
-            image = (image >> 8).astype(np.uint8)
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = sauvola_threshold(image, settings)
 
         elif algorithm == "Phansalkar threshold":
             # demote to uint8. no visual differences found.
-            image = (image >> 8).astype(np.uint8)
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = phansalkar_threshold(image, settings)
 
         elif algorithm == "Mezzotint uniform":
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = mezzo(image, settings, mode="uniform")
 
         elif algorithm == "Mezzotint normal":
+            # TODO: get that working
             processed_image = mezzo(image, settings, mode="gauss")
 
         elif algorithm == "Mezzotint beta":
@@ -393,22 +457,38 @@ class ImageProcessor:
             "Sierra",
             "Sierra2",
         ]:
+            # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
+            if image.dtype == np.uint8:
+                image = (image).astype(np.uint16) << 8
             kernel = get_kernel(algorithm)
             processed_image = error_diffusion(image, kernel, settings)
 
         elif algorithm == "Sierra2 4A":
+            # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
+            logger.debug(f"Image arrived at Sierra2 4A as {image.dtype}")
+            if image.dtype == np.uint8:
+                image = (image).astype(np.uint16) << 8
             processed_image = sierra24a(
                 image, settings["diffusion_factor"], settings["serpentine"]
             )
 
         elif algorithm in ["Ostromoukhov", "Zhou-Fang"]:
+            # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
+            if image.dtype == np.uint8:
+                image = (image).astype(np.uint16) << 8
             processed_image = variable_ed(image, algorithm, settings)
 
         elif algorithm in ["Levien", "Nakano"]:
+            # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
+            if image.dtype == np.uint8:
+                image = (image).astype(np.uint16) << 8
             processed_image = edodf(image, algorithm, settings)
 
         elif algorithm == "None":
             # No processing, return the original image
+            # Truncating it as Qt expects 8 bits anyway
+            if image.dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = image
 
         else:
