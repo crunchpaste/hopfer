@@ -177,10 +177,11 @@ class ImageStorage:
     def load_from_pickle(self, data):
         buffer = pickle.loads(data)
         if not isinstance(buffer, np.ndarray):
+
             image = np.array(buffer)
         else:
             image = buffer
-
+        logger.debug(f"Loaded from pickle. dtype: {image.dtype} ")
         self._load(image)
 
     def load_from_url(self, url, local):
@@ -279,16 +280,19 @@ class ImageStorage:
             BGR = np_image_uint16[:, :, :3]
             RGB = self.bgr_to_rgb(BGR)
             # TODO: Fix the logic here so that the alpha is 16bit if needed
-            A = (self.discard_alpha(np_image_uint16[:, :, 3]) >> 8).astype(
-                np.uint8
-            )
+
+            alpha_tmp = self.discard_alpha(np_image_uint16[:, :, 3])
+
+            if alpha_tmp is not None:
+                if alpha_tmp.dtype == np.uint16:
+                    A = (alpha_tmp >> 8).astype(np.uint8)
+            else:
+                A = None
 
             # Check for grayscale conversion and status update
             RGB, is_gray = self.check_grayscale(RGB)
 
             self.original_grayscale = is_gray
-            cv2.imwrite("test_alpha.png", A)
-            logger.debug("Saved alpha as an image")
             return RGB, A
 
         else:
@@ -622,17 +626,14 @@ class ImageStorage:
         if cw:
             self.original_image = np.rot90(self.original_image, k=-1)
             self.resized = np.rot90(self.resized, k=-1)
-            # self.grayscale_image = np.rot90(self.grayscale_image, k=-1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=-1)
             self.processed_image = np.rot90(self.processed_image, k=-1)
             if self.alpha is not None:
                 self.alpha = np.rot90(self.alpha, k=-1)
-            # if os.name != "nt":
             self.shm_preview = np.rot90(self.shm_preview, k=-1)
         else:
             self.original_image = np.rot90(self.original_image, k=1)
             self.resized = np.rot90(self.resized, k=1)
-            # self.grayscale_image = np.rot90(self.grayscale_image, k=1)
             self.enhanced_image = np.rot90(self.enhanced_image, k=1)
             self.processed_image = np.rot90(self.processed_image, k=1)
             if self.alpha is not None:
