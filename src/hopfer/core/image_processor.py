@@ -279,7 +279,7 @@ class ImageProcessor:
         if im_settings["equalize"]:
             if image.dtype == np.uint8:
                 # cv2 is at least 2x faster for uint8
-                image = cv2.equalizeHist(image)
+                cv2.equalizeHist(image, dst=image)
             else:
                 # unfortunately it does not support uint16 so we use a cython implementation
                 image = equalize(image)

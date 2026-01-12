@@ -177,7 +177,6 @@ class ImageStorage:
     def load_from_pickle(self, data):
         buffer = pickle.loads(data)
         if not isinstance(buffer, np.ndarray):
-
             image = np.array(buffer)
         else:
             image = buffer
@@ -286,6 +285,8 @@ class ImageStorage:
             if alpha_tmp is not None:
                 if alpha_tmp.dtype == np.uint16:
                     A = (alpha_tmp >> 8).astype(np.uint8)
+                else:
+                    A = alpha_tmp
             else:
                 A = None
 
@@ -308,7 +309,7 @@ class ImageStorage:
         image_dtype = image.dtype
         logger.debug(f"Image arrived at storage as {image_dtype}")
         # if image_dtype == np.uint8:
-        #     image = image.astype(np.uint16) << 8
+        #     image = image.astype(np.uint16)e << 8
 
         return image
 
