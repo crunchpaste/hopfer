@@ -339,8 +339,9 @@ def compare(img, noise, h, w):
     return output
 
 
-@cc.export("ordered_dither", "f4[:,:](f4[:,:], f8[:,:])")
+@cc.export("ordered_dither_u8", "b1[:,:](u1[:,:], u1[:,:])")
 def ordered_dither(img, matrix):
+    output_img = np.zeros((img.shape), dtype=np.bool)
     n = matrix.shape[0]
     for y in range(img.shape[0]):
         for x in range(img.shape[1]):
@@ -349,11 +350,11 @@ def ordered_dither(img, matrix):
             if not (pixel == 0 or pixel == 1):
                 i = x % n
                 if matrix[j, i] > img[y, x]:
-                    img[y, x] = 0
+                    output_img[y, x] = False
                 else:
-                    img[y, x] = 1
+                    output_img[y, x] = True
 
-    return img
+    return output_img
 
 
 @cc.export("ordered_dither_p", "f4[:,:](f4[:,:], f8, f8[:,:])")

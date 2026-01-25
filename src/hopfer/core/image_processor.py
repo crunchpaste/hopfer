@@ -437,9 +437,13 @@ class ImageProcessor:
             processed_image = mezzo(image, settings, mode="gauss")
 
         elif algorithm == "Mezzotint beta":
+            # TODO: get that working too
             processed_image = mezzo(image, settings, mode="beta")
 
         elif algorithm == "Clustered dot":
+            # TODO: port to cython and handle 16bit
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = clustered(image, settings)
 
         elif algorithm == "Bayer":

@@ -1,9 +1,11 @@
 import numpy as np
 
-from .static import ordered_dither, ordered_dither_p
+from .numba_ops import ordered_dither_p, ordered_dither_u8
 
 
-def generate_halftone_matrix(size):
+def generate_halftone_matrix(size, bit_depth=8):
+    max_val = 2**bit_depth - 1
+
     matrix = np.zeros((size, size), dtype=int)
     center = (size - 1) / 2
 
@@ -29,7 +31,12 @@ def generate_halftone_matrix(size):
     stacked_matrix = np.block([[negative, matrix],
                                [matrix, negative]]).astype(np.float64)
     # fmt: on
-    return stacked_matrix / np.max(stacked_matrix)
+    normalized_matrix = stacked_matrix / np.max(stacked_matrix)
+
+    # TODO: this could all be way more elegant and done in cython, but it should work as a temporary solution
+    return np.round(normalized_matrix * max_val).astype(
+        np.uint16 if bit_depth == 16 else np.uint8
+    )
 
 
 def generate_bayer_matrix(power, offset=0):
@@ -67,6 +74,10 @@ def clustered(img, settings):
     # it proved massively hard to rotate a matrix by an arbitrary angle
     # and keep it tileable.
     # angle = settings["angle"]
-    matrix = generate_halftone_matrix(size)
-    img = ordered_dither(img, matrix)
+    if img.dtype == np.uint8:
+        bit_depth = 8
+    else:
+        bit_depth = 16
+    matrix = generate_halftone_matrix(size, bit_depth)
+    img = ordered_dither_u8(img, matrix)
     return img
