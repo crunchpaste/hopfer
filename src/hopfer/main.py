@@ -1,4 +1,5 @@
 import logging
+import multiprocessing
 import os
 import sys
 from pathlib import Path
@@ -10,14 +11,20 @@ from hopfer import VERSION
 from hopfer.bridge.bridge import Bridge
 from hopfer.bridge.image_provider import ImageProvider
 from hopfer.core.config_object import Config
+from hopfer.core.daemon import Daemon
 from hopfer.helpers.config import update_config
 from hopfer.helpers.logfile import get_handlers
 from hopfer.helpers.parse import parse_args
 
+# Block the portal for any child process before they are born
+if "-c" in sys.argv or "--multiprocessing-fork" in sys.argv:
+    os.environ["QT_NO_XDG_DESKTOP_PORTAL"] = "1"
+    os.environ["QT_QPA_PLATFORM"] = "offscreen"
+
 os.environ["QT_QUICK_CONTROLS_MATERIAL_VARIANT"] = "Dense"
 os.environ["QT_QUICK_CONTROLS_STYLE"] = "Material"
 
-LOG_FORMAT = "%(asctime)s %(levelname)s: %(message)s"
+LOG_FORMAT = "%(asctime)s [MAIN] %(levelname)s: %(message)s"
 
 BASE_DIR = Path(__file__).resolve().parent
 UI_PATH = BASE_DIR / "ui"
@@ -33,17 +40,41 @@ def main():
 
     handlers = get_handlers(args.logfile)
 
-    log_level = logging.DEBUG if args.debug else logging.INFO
+    LOG_LEVEL = logging.DEBUG if args.debug else logging.INFO
 
     logging.basicConfig(
-        level=log_level,
+        level=LOG_LEVEL,
         format=LOG_FORMAT,
         datefmt="%H:%M:%S",
         handlers=handlers,
     )
 
-    if args.debug:
+    if LOG_LEVEL:
         logger.debug(f"Hopfer {VERSION} starting in DEBUG mode")
+
+    # setup the queues and daemon here. since python v3.14 spawn is the default method, also it is the only one available on windows. if the daemon is initialized in the bridge, qt throws dbus warnings. therefore i've decided to move the daemon initialization here. also, its a bit cleaner to start it here instead of the brdige.
+
+    # TODO: Qt warning do not disappear. investigate further.
+
+    # using spawn to be consistent across platforms
+    multiprocessing.set_start_method("spawn", force=True)
+
+    # the request queue
+    req_queue = multiprocessing.Queue()
+    # the response queue
+    res_queue = multiprocessing.Queue()
+
+    # passing them to the bridge as a tuple to save on argument spam.
+    queues = (req_queue, res_queue)
+
+    daemon = Daemon(queues=queues)
+
+    daemon_process = multiprocessing.Process(
+        target=daemon.run, kwargs={"debug": args.debug}, daemon=False
+    )
+    daemon_process.start()
+
+    logging.debug("Started daemon process")
 
     # this is just a merged, cleaned and updated dict
     config_dict = update_config(args.clean)
@@ -76,7 +107,7 @@ def main():
 
     image_provider = ImageProvider()
 
-    bridge = Bridge(image_provider, config_obj)
+    bridge = Bridge(image_provider, config_obj, queues)
 
     engine.addImageProvider("preview", image_provider)
 
@@ -89,7 +120,14 @@ def main():
     main_qml = UI_PATH / "main.qml"
     engine.load(os.fspath(main_qml))
 
-    app.aboutToQuit.connect(bridge.exit)
+    def cleanup():
+        bridge.exit()
+        logging.debug("Closed bridge.")
+        if daemon_process.is_alive():
+            daemon_process.join()
+            logging.debug("Joined daemon.")
+
+    app.aboutToQuit.connect(cleanup)
 
     if args.file:
         full_path = os.path.abspath(os.path.expanduser(args.file))

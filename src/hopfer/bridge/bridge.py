@@ -2,14 +2,13 @@ import json
 import logging
 import os
 import pickle
-from multiprocessing import Process, Queue, shared_memory
+from multiprocessing import shared_memory
 
 import numpy as np
 import platformdirs
 from PySide6.QtCore import Property, QObject, QUrl, Signal, Slot
 from PySide6.QtGui import QGuiApplication
 
-from hopfer.core.daemon import Daemon
 from hopfer.core.queue_io import QueueReader, QueueWriter
 from hopfer.helpers.config import save_config
 from hopfer.helpers.image_conversion import numpy_to_pixmap, qimage_to_numpy
@@ -33,8 +32,14 @@ class Bridge(QObject):
     sizeChanged = Signal()
     fileReceived = Signal(str)
 
-    def __init__(self, image_provider, config_obj, parent=None):
+    def __init__(self, image_provider, config_obj, queues, parent=None):
         super().__init__(parent)
+        # get the queues to communicate
+        # the request queue
+        self.req_queue = queues[0]
+        # the response queue
+        self.res_queue = queues[1]
+
         self.shm = None
         self.image_provider = image_provider
         self.config = config_obj
@@ -55,17 +60,8 @@ class Bridge(QObject):
         self._init_components()
 
     def _init_components(self):
-        # the request queue
-        self.req_queue = Queue()
-        # the response queue
-        self.res_queue = Queue()
-
         self._paths = {"open_path": None, "save_path": None}
 
-        self.daemon = Daemon(response=self.res_queue, request=self.req_queue)
-
-        self.daemon_process = Process(target=self.daemon.run, daemon=False)
-        self.daemon_process.start()
         self.shm_preview = None
 
         self.reader = QueueReader(self.res_queue, bridge=self)
@@ -74,12 +70,6 @@ class Bridge(QObject):
         self.reader.received_array.connect(self.init_array)
         self.reader.close_shm.connect(self.close_shm)
         self.reader.received_processed.connect(self.display_processed_image)
-        # windows specific signal as it can't properly deal with shared memory
-        # self.reader.received_processed_nt.connect(
-        # self.display_processed_image_nt
-        # )
-        # self.reader.received_notification.connect(self.display_notification)
-        # self.reader.show_processing_label.connect(self.display_processing_label)
 
         self.writer = QueueWriter(self.req_queue, bridge=self)
 
@@ -355,5 +345,3 @@ class Bridge(QObject):
         self.image_provider.closeImage()
         self.close_shm()
         self.writer.close()
-        self.daemon_process.join()
-        logger.debug("Killed daemon")

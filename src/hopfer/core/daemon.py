@@ -8,21 +8,36 @@ from hopfer.helpers.hex_rgb import hex_to_numpy
 
 
 class Daemon:
-    def __init__(self, response=None, request=None, paths=None):
+    def __init__(self, queues=None, paths=None):
         # this one is for returning to the GUI
-        self.res_queue = response
+        self.res_queue = queues[1]
         # this one is for taking instruction
-        self.req_queue = request
+        self.req_queue = queues[0]
         # for save and open directories
+        # TODO: check if this is actually used anymore and remove if not. 
         self.paths = paths
 
-    def run(self):
-        # initializing processor and storage as windows uses spawn
-        # instead of fork, and these classes cant be serialized
+    def run(self, debug=False):
+        # initializing logging for the daemon
+        import logging
+
+        # Re-init for THIS process only
+        LOG_LEVEL = logging.DEBUG if debug else logging.INFO
+        LOG_FORMAT = "%(asctime)s [DAEMON] %(levelname)s: %(message)s"
+
+        logging.basicConfig(
+            level=LOG_LEVEL, format=LOG_FORMAT, datefmt="%H:%M:%S"
+        )
+
+        logger = logging.getLogger(__name__)
+        logger.debug("Daemon logging initialized independently.")
+
+        # all platforms now use spawn, so initializing the processor and storage here.
         self.storage = ImageStorage(self)
         self.processor = ImageProcessor(self, self.storage)
+
         if os.name != "nt":
-            # setproctitle seems to not work on windows too
+            # setproctitle does not work on windows
             setproctitle("hopferd")
         while True:
             message = self.req_queue.get()
