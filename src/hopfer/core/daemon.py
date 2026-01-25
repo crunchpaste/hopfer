@@ -8,14 +8,11 @@ from hopfer.helpers.hex_rgb import hex_to_numpy
 
 
 class Daemon:
-    def __init__(self, queues=None, paths=None):
+    def __init__(self, queues=None):
         # this one is for returning to the GUI
         self.res_queue = queues[1]
-        # this one is for taking instruction
+        # this one is for taking instructions
         self.req_queue = queues[0]
-        # for save and open directories
-        # TODO: check if this is actually used anymore and remove if not. 
-        self.paths = paths
 
     def run(self, debug=False):
         # initializing logging for the daemon
@@ -65,9 +62,6 @@ class Daemon:
                 self.storage.save_image(path)
             elif message["type"] == "save_to_clipboard":
                 self.storage.save_to_clipboard()
-            elif message["type"] == "update_paths":
-                paths = message["paths"]
-                self.storage.paths = paths
             elif message["type"] == "reset_storage":
                 self.storage.reset()
             elif message["type"] == "rotate":

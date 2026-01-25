@@ -68,20 +68,10 @@ class QueueReader(QObject):
                 notification = message["notification"]
                 duration = message["duration"]
                 self.bridge.showNotification.emit(notification, duration)
-                # self.received_notification.emit(notification, duration)
-
-            elif message["type"] == "enable_toolbox":
-                # this signal is handled in a more robust way now
-                pass
 
             elif message["type"] == "original_grayscale":
                 value = message["value"]
                 self.bridge.originalGrayscale.emit(value)
-                # self.grayscale_signal.emit(value)
-
-            elif message["type"] == "update_paths":
-                paths = message["paths"]
-                self.bridge._paths = paths
 
             elif message["type"] == "image_size":
                 w = message["width"]
@@ -114,10 +104,6 @@ class QueueWriter(QObject):
 
     def close(self):
         message = {"type": "exit"}
-        self.queue.put(message)
-
-    def update_paths(self, paths):
-        message = {"type": "update_paths", "paths": paths}
         self.queue.put(message)
 
     def load_image(self, path):

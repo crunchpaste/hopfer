@@ -691,10 +691,3 @@ class ImageStorage:
             "duration": duration,
         }
         self.res_queue.put(message)
-
-    def update_paths(self):
-        message = {
-            "type": "update_paths",
-            "paths": self.paths,
-        }
-        self.res_queue.put(message)
