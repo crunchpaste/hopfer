@@ -1,6 +1,6 @@
 import numpy as np
 
-from .static import (
+from .numba_ops import (
     ostromoukhov,
     ostromoukhov_s,
     zhou_fang_fast,

@@ -1,6 +1,6 @@
 import numpy as np
 
-from .static import compare
+from .numba_ops import compare
 
 
 def mezzo(img, settings, mode="uniform"):

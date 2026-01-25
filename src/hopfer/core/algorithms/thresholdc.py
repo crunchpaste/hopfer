@@ -1,4 +1,4 @@
-from .static import niblack, phansalkar, sauvola, thresh
+from .numba_ops import niblack, phansalkar, sauvola, thresh
 
 
 def threshold(img, settings):

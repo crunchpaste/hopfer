@@ -2,7 +2,7 @@ import logging
 
 import numpy as np
 
-from .static import levien, nakano, noise_gen
+from .numba_ops import levien, nakano, noise_gen
 
 logger = logging.getLogger(__name__)
 
