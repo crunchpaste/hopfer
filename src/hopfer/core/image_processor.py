@@ -386,7 +386,7 @@ class ImageProcessor:
                 cast_f32_u16(res, image)
             else:
                 laplacian_mask = cv2.Laplacian(
-                    image, ddepth=cv2.CV_32F, ksize=1
+                    image, ddepth=cv2.CV_32F, ksize=size
                 )
 
                 res = cv2.addWeighted(
