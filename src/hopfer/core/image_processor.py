@@ -11,15 +11,22 @@ try:
         niblack_threshold,
         phansalkar_threshold,
         sauvola_threshold,
-        threshold,
+        # threshold,
     )
 except ImportError:
     from hopfer.core.algorithms.threshold import (
         niblack_threshold,
         phansalkar_threshold,
         sauvola_threshold,
-        threshold,
+        # threshold,
     )
+
+from hopfer.core.algorithms.threshold_cython import (
+    niblack_threshold,
+    phansalkar_threshold,
+    sauvola_threshold,
+    threshold,
+)
 
 try:
     from hopfer.core.algorithms.mezzoc import mezzo
@@ -407,7 +414,12 @@ class ImageProcessor:
             # demote to uint8. no visual differences found.
             if image_dtype == np.uint16:
                 image = (image >> 8).astype(np.uint8)
+            elif image_dtype in (np.float64, np.float32, np.float16):
+                image = (image * 255).astype(np.uint8)
             processed_image = threshold(image, settings)
+            logger.debug(
+                f"Image sent for thresholding with settings:  {settings}"
+            )
 
         elif algorithm == "Niblack threshold":
             # demote to uint8. no visual differences found.
@@ -447,6 +459,9 @@ class ImageProcessor:
             processed_image = clustered(image, settings)
 
         elif algorithm == "Bayer":
+            # TODO: port to cython and handle 16bit
+            if image_dtype == np.uint16:
+                image = (image >> 8).astype(np.uint8)
             processed_image = bayer(image, settings)
 
         elif algorithm in [

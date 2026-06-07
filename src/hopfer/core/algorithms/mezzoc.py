@@ -1,6 +1,6 @@
 import numpy as np
 
-from .numba_ops import compare
+from hopfer.core.algorithms.cython_ops import compare
 
 
 def mezzo(img, settings, mode="uniform"):
@@ -18,10 +18,11 @@ def mezzo(img, settings, mode="uniform"):
         loc = settings["location"] / 100
         std = settings["std"] / 200
         noise = rng.normal(loc, std, (h, w))
+
     elif mode == "beta":
         alpha = settings["alpha"] / 10
         beta = settings["beta"] / 10
         noise = rng.beta(alpha, beta, (h, w))
 
-    img = compare(img, noise, h, w)
+    img = compare(img, noise)
     return img

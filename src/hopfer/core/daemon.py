@@ -107,6 +107,8 @@ class Daemon:
                 if message["h_algorithm"] is not None:
                     self.processor.algorithm = message["h_algorithm"]
                     self.processor.settings = message["h_settings"]
+                    logger.debug(f"Algorithm: {message['h_algorithm']}.")
+                    logger.debug(f"Settings: {message['h_settings']}.")
                     step.append(1)
                 if self.storage.original_image is not None:
                     self.processor.start(step=min(step))

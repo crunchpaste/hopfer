@@ -1,6 +1,9 @@
-from .numba_ops import niblack, phansalkar, sauvola, thresh
-
-# from hopfer.core.algorithms.cython_ops import thresh
+from hopfer.core.algorithms.cython_ops import (
+    niblack,
+    phansalkar,
+    sauvola,
+    thresh,
+)
 
 
 def threshold(img, settings):

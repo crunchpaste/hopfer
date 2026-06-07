@@ -33,7 +33,20 @@ include "equalize.pxi"
 include "blur_caster.pxi"
 
 # Halftoning
+
+# Thresholds
 include "sierra24a.pxi"
+include "thresh.pxi"
+include "niblack.pxi"
+include "sauvola.pxi"
+include "phansalkar.pxi"
+
+# Random dithers
+include "compare.pxi" # masks are generated in their respective modules e.g. mezzoc.py
+
+# Ordered
+include "ordered_dither.pxi"
+# TODO: Add the perturbed one for Bayer
 
 # Image styling
 include "style_image.pxi"

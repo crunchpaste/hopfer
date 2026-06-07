@@ -1,6 +1,6 @@
 import numpy as np
 
-from .numba_ops import ordered_dither_p, ordered_dither_u8
+from hopfer.core.algorithms.cython_ops import ordered_dither
 
 
 def generate_halftone_matrix(size, bit_depth=8):
@@ -79,5 +79,5 @@ def clustered(img, settings):
     else:
         bit_depth = 16
     matrix = generate_halftone_matrix(size, bit_depth)
-    img = ordered_dither_u8(img, matrix)
+    img = ordered_dither(img, matrix)
     return img
