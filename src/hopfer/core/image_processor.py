@@ -124,12 +124,6 @@ class ImageProcessor:
 
     # --- Helper Methods ---
 
-    # def _determine_processing_step(self, step):
-    #     """Determines whether conversion or enhancement should be performed."""
-    #     convert = not self.storage.original_grayscale and step == 0
-    #     enhance = step <= 1
-    #     return 0 if convert else (1 if enhance else step)
-
     def _process_enhancement(self, grayscale_image, step):
         """Enhances the image based on the provided settings."""
         im_settings = self.image_settings
@@ -408,7 +402,7 @@ class ImageProcessor:
             processed_image = clustered(image, settings)
 
         elif algorithm == "Bayer":
-            # TODO: port to cython and handle 16bit
+            # TODO: Handling 16bit may be beneficial in some cases.
             if image_dtype == np.uint16:
                 image = (image >> 8).astype(np.uint8)
             processed_image = bayer(image, settings)
@@ -433,15 +427,6 @@ class ImageProcessor:
             processed_image = error_diffusion(
                 image, kernel, settings, algorithm
             )
-
-        # elif algorithm == "Sierra2 4A":
-        #     # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
-        #     logger.debug(f"Image arrived at Sierra2 4A as {image.dtype}")
-        #     if image.dtype == np.uint8:
-        #         image = (image).astype(np.uint16) << 8
-        #     processed_image = sierra24a(
-        #         image, settings["diffusion_factor"], settings["serpentine"]
-        #     )
 
         elif algorithm in ["Ostromoukhov", "Zhou-Fang"]:
             # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
