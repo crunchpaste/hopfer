@@ -4,7 +4,7 @@ import time
 import cv2
 import numpy as np
 
-from hopfer.core.algorithms.bayerc import bayer, clustered
+from hopfer.core.algorithms.bayer import bayer, clustered
 from hopfer.core.algorithms.cython_ops import (
     average,
     cast_f32_u16,
@@ -16,16 +16,16 @@ from hopfer.core.algorithms.cython_ops import (
     normalize,
     value,
 )
-from hopfer.core.algorithms.edodfc import edodf
-from hopfer.core.algorithms.error_diffusionc import error_diffusion
-from hopfer.core.algorithms.mezzoc import mezzo
-from hopfer.core.algorithms.threshold_cython import (
+from hopfer.core.algorithms.edodf import edodf
+from hopfer.core.algorithms.error_diffusion import error_diffusion
+from hopfer.core.algorithms.mezzo import mezzo
+from hopfer.core.algorithms.threshold import (
     niblack_threshold,
     phansalkar_threshold,
     sauvola_threshold,
     threshold,
 )
-from hopfer.core.algorithms.variable_edc import variable_ed
+from hopfer.core.algorithms.variable_ed import variable_ed
 from hopfer.helpers.kernels import get_kernel
 
 logger = logging.getLogger(__name__)
