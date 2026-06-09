@@ -4,78 +4,29 @@ import time
 import cv2
 import numpy as np
 
-from hopfer.helpers.kernels import get_kernel
-
-try:
-    from hopfer.core.algorithms.thresholdc import (
-        niblack_threshold,
-        phansalkar_threshold,
-        sauvola_threshold,
-        # threshold,
-    )
-except ImportError:
-    from hopfer.core.algorithms.threshold import (
-        niblack_threshold,
-        phansalkar_threshold,
-        sauvola_threshold,
-        # threshold,
-    )
-
+from hopfer.core.algorithms.bayerc import bayer, clustered
+from hopfer.core.algorithms.cython_ops import (
+    average,
+    cast_f32_u16,
+    equalize,
+    lightness,
+    luma,
+    luminance,
+    manual,
+    normalize,
+    value,
+)
+from hopfer.core.algorithms.edodfc import edodf
+from hopfer.core.algorithms.error_diffusionc import error_diffusion
+from hopfer.core.algorithms.mezzoc import mezzo
 from hopfer.core.algorithms.threshold_cython import (
     niblack_threshold,
     phansalkar_threshold,
     sauvola_threshold,
     threshold,
 )
-
-try:
-    from hopfer.core.algorithms.mezzoc import mezzo
-except ImportError:
-    from hopfer.core.algorithms.mezzo import mezzo
-
-try:
-    from hopfer.core.algorithms.bayerc import bayer, clustered
-except ImportError:
-    from hopfer.core.algorithms.bayer import bayer, clustered
-
-try:
-    from hopfer.core.algorithms.error_diffusionc import error_diffusion
-except ImportError:
-    from hopfer.core.algorithms.error_diffusion import error_diffusion
-
-try:
-    from hopfer.core.algorithms.variable_edc import variable_ed
-except ImportError:
-    from hopfer.core.algorithms.variable_ed import variable_ed
-
-try:
-    from hopfer.core.algorithms.edodfc import edodf
-except ImportError:
-    from hopfer.core.algorithms.edodf import edodf
-
-try:
-    from hopfer.core.algorithms.cython_ops import (
-        average,
-        cast_f32_u16,
-        equalize,
-        lightness,
-        luma,
-        luminance,
-        manual,
-        normalize,
-        value,
-    )
-except ImportError:
-    from hopfer.core.algorithms.numba_ops import (
-        average,
-        lightness,
-        luma,
-        luminance,
-        manual,
-        value,
-    )
-
-from hopfer.core.algorithms.cython_ops import sierra24a
+from hopfer.core.algorithms.variable_edc import variable_ed
+from hopfer.helpers.kernels import get_kernel
 
 logger = logging.getLogger(__name__)
 
@@ -445,15 +396,13 @@ class ImageProcessor:
             processed_image = mezzo(image, settings, mode="uniform")
 
         elif algorithm == "Mezzotint normal":
-            # TODO: get that working
             processed_image = mezzo(image, settings, mode="gauss")
 
         elif algorithm == "Mezzotint beta":
-            # TODO: get that working too
+            # TODO: get that working
             processed_image = mezzo(image, settings, mode="beta")
 
         elif algorithm == "Clustered dot":
-            # TODO: port to cython and handle 16bit
             if image_dtype == np.uint16:
                 image = (image >> 8).astype(np.uint8)
             processed_image = clustered(image, settings)
@@ -475,21 +424,24 @@ class ImageProcessor:
             "Burkes",
             "Sierra",
             "Sierra2",
+            "Sierra2 4A",
         ]:
             # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
             if image.dtype == np.uint8:
                 image = (image).astype(np.uint16) << 8
             kernel = get_kernel(algorithm)
-            processed_image = error_diffusion(image, kernel, settings)
-
-        elif algorithm == "Sierra2 4A":
-            # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
-            logger.debug(f"Image arrived at Sierra2 4A as {image.dtype}")
-            if image.dtype == np.uint8:
-                image = (image).astype(np.uint16) << 8
-            processed_image = sierra24a(
-                image, settings["diffusion_factor"], settings["serpentine"]
+            processed_image = error_diffusion(
+                image, kernel, settings, algorithm
             )
+
+        # elif algorithm == "Sierra2 4A":
+        #     # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.
+        #     logger.debug(f"Image arrived at Sierra2 4A as {image.dtype}")
+        #     if image.dtype == np.uint8:
+        #         image = (image).astype(np.uint16) << 8
+        #     processed_image = sierra24a(
+        #         image, settings["diffusion_factor"], settings["serpentine"]
+        #     )
 
         elif algorithm in ["Ostromoukhov", "Zhou-Fang"]:
             # Expanding seems to give much better results in high contrast images and does not seem to slow the processing too much, so keeping it like that. Also saves me a bit of work on making a separate uint8 version.

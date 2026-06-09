@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel", "numba", "numpy", "cython"]
+requires = ["setuptools>=61.0", "wheel", "numpy", "cython"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -16,7 +16,6 @@ classifiers = [
 ]
 dependencies = [
     "PySide6",
-    "numba",
     "numpy",
     "opencv-python-headless",
     "setproctitle",
@@ -49,4 +48,4 @@ line-length = 80
 line-ending = "lf"
 
 [project.scripts]
-hopfer-qml = "hopfer.main:main"
+hopfer = "hopfer.main:main"
