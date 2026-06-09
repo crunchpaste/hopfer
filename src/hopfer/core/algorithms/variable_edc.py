@@ -1,12 +1,19 @@
 import numpy as np
 
-from .numba_ops import (
+# from .numba_ops import (
+#     ostromoukhov,
+#     ostromoukhov_s,
+#     zhou_fang_fast,
+#     zhou_fang_fast_s,
+#     zhou_fang_s,
+# )
+from hopfer.core.algorithms.cython_ops import (
     ostromoukhov,
     ostromoukhov_s,
     zhou_fang_fast,
     zhou_fang_fast_s,
-    zhou_fang_s,
 )
+
 from .ved_data import OSTROMOUKHOV_COEFFN, ZF_COEFFN, ZF_PERT
 
 
@@ -34,7 +41,7 @@ def variable_ed(img, algorithm, settings):
             output_img = zhou_fang_fast(img, ZF_COEFFN, ZF_PERT, str)
     else:
         # Default to Zhou-Fang serpentine
-        output_img = zhou_fang_s(img, ZF_COEFFN, ZF_PERT, str)
+        output_img = zhou_fang_fast_s(img, ZF_COEFFN, ZF_PERT, str)
 
     if noise:
         output_img = output_img[20:, :]

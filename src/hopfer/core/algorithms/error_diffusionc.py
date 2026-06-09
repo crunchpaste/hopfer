@@ -1,6 +1,7 @@
 import numpy as np
 
-from .numba_ops import ed, eds, noise_gen
+# from .numba_ops import ed, eds, noise_gen
+from hopfer.core.algorithms.cython_ops import ed, eds, noise_gen
 
 
 def error_diffusion(img, kernel, settings):

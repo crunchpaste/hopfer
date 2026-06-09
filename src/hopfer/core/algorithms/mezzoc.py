@@ -15,9 +15,12 @@ def mezzo(img, settings, mode="uniform"):
         noise = rng.integers(r_min, r_max + 1, (h, w), dtype=np.uint8)
 
     elif mode == "gauss":
-        loc = settings["location"] / 100
-        std = settings["std"] / 200
-        noise = rng.normal(loc, std, (h, w))
+        loc = settings["location"]
+        std = settings["std"]
+        # TODO: look for a more elegant solution. currently this would do.
+        noise = (np.clip(rng.normal(loc, std, (h, w)), 0, 1) * 255).astype(
+            np.uint8
+        )
 
     elif mode == "beta":
         alpha = settings["alpha"] / 10

@@ -15,6 +15,8 @@ ColumnLayout {
     Component { id: sauvola; Sauvola {} }
     Component { id: phansalkar; Phansalkar {} }
     Component { id: mezzo; Mezzo {} }
+    Component { id: mezzoN; MezzoNormal {} }
+    Component { id: bayer; Bayer {} }
     Component { id: clustered; Clustered {} }
     Component { id: errordiffusion; ErrorDiffusion {} }
     Component { id: errordiffusion_s; ErrorDiffusion {serpentine: true} }
@@ -28,6 +30,8 @@ ColumnLayout {
         sauvola,
         phansalkar,
         mezzo,
+        mezzoN,
+        bayer,
         clustered,
         errordiffusion,
         errordiffusion,
@@ -74,6 +78,8 @@ ColumnLayout {
             "Sauvola threshold",
             "Phansalkar threshold",
             "Mezzotint uniform",
+            "Mezzotint normal",
+            "Bayer",
             "Clustered dot",
             "Floyd-Steinberg",
             "False Floyd-Steinberg",

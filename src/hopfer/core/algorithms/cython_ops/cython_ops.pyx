@@ -46,8 +46,26 @@ include "compare.pxi" # masks are generated in their respective modules e.g. mez
 
 # Ordered
 include "ordered_dither.pxi"
+include "ordered_dither_p.pxi"
 # TODO: Add the perturbed one for Bayer
+
+# Error Diffusion
+include "ed.pxi" # raster scan
+include "eds.pxi" # serpentine scan
+
+# VED
+include "ostromoukhov.pxi"
+include "ostromoukhov_s.pxi"
+include "zhou_fang_fast.pxi"
+include "zhou_fang_fast_s.pxi"
+
+# EDODF
+include "nakano.pxi"
+include "levien.pxi"
 
 # Image styling
 include "style_image.pxi"
 include "style_alpha.pxi"
+
+# Noise
+include "noise_gen.pxi"

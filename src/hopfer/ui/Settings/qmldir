@@ -1,10 +1,12 @@
 module Settings
 BlankSettings 1.0 BlankSettings.qml
+Bayer 1.0 Bayer.qml
 Threshold 1.0 Threshold.qml
 Niblack 1.0 Niblack.qml
 Sauvola 1.0 Sauvola.qml
 Phansalkar 1.0 Phansalkar.qml
 Mezzo 1.0 Mezzo.qml
+MezzoNormal 1.0 MezzoNormal.qml
 Clustered 1.0 Clustered.qml
 ErrorDiffusion 1.0 ErrorDiffusion.qml
 Levien 1.0 Levien.qml

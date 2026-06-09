@@ -1,6 +1,6 @@
 import numpy as np
 
-from hopfer.core.algorithms.cython_ops import ordered_dither
+from hopfer.core.algorithms.cython_ops import ordered_dither, ordered_dither_p
 
 
 def generate_halftone_matrix(size, bit_depth=8):
@@ -54,18 +54,23 @@ def generate_bayer_matrix(power, offset=0):
 
     matrix = bayer / (bayer.shape[0] * bayer.shape[1])
 
-    return np.clip(matrix - offset, 0, 1)
+    return (np.clip(matrix - offset, 0, 1) * 255).astype(np.uint8)
 
 
 def bayer(img, settings):
+
     size = settings["size"]
-    perturbation = settings["perturbation"] / 200
-    offset = settings["offset"] / 100
+    perturbation = settings["perturbation"]
+    offset = settings["offset"]
     matrix = generate_bayer_matrix(size, offset)
+
+    # if img.dtype != np.uint8:
+    #     img = (img // 255).astype(np.uint8)
+
     if perturbation == 0:
         img = ordered_dither(img, matrix)
     else:
-        img = ordered_dither_p(img, perturbation, matrix)
+        img = ordered_dither_p(img, matrix, perturbation)
     return img
 
 
