@@ -2,7 +2,6 @@ import logging
 
 import numpy as np
 
-# from .numba_ops import levien, nakano, noise_gen
 from hopfer.core.algorithms.cython_ops import levien, nakano, noise_gen
 
 logger = logging.getLogger(__name__)

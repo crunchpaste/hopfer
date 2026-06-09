@@ -1,12 +1,5 @@
 import numpy as np
 
-# from .numba_ops import (
-#     ostromoukhov,
-#     ostromoukhov_s,
-#     zhou_fang_fast,
-#     zhou_fang_fast_s,
-#     zhou_fang_s,
-# )
 from hopfer.core.algorithms.cython_ops import (
     ostromoukhov,
     ostromoukhov_s,

@@ -1,6 +1,5 @@
 import numpy as np
 
-# from .numba_ops import ed, eds, noise_gen
 from hopfer.core.algorithms.cython_ops import ed, eds, noise_gen, sierra24a
 
 
