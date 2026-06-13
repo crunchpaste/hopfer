@@ -4,7 +4,7 @@ import os
 import sys
 from pathlib import Path
 
-from PySide6.QtGui import QFontDatabase, QGuiApplication
+from PySide6.QtGui import QFontDatabase, QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 
 from hopfer import VERSION
@@ -31,6 +31,8 @@ UI_PATH = BASE_DIR / "ui"
 
 ICON_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "MaterialSymbols.ttf")
 UI_FONT_PATH = os.fspath(UI_PATH / "Fonts" / "JetBrainsMono.ttf")
+
+WINDOW_ICON_PATH = os.fspath(UI_PATH / "Assets" / "hopfer.png")
 
 
 def main():
@@ -82,6 +84,8 @@ def main():
     config_obj = Config(config_dict)
 
     app = QGuiApplication(sys.argv)
+
+    app.setIcon(QIcon(WINDOW_ICON_PATH))
 
     app.setDesktopFileName("hopfer")
 
