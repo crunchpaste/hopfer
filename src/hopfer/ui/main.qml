@@ -42,7 +42,7 @@ ApplicationWindow {
     }
 
     // cant be bothered to make the shadows work on windows so non-system frame is disabled permanently
-    property int isNative: (Qt.platform.os === "windows") ? 0 : config.window.native_frame
+    property int isNative: (Qt.platform.os === "windows") ? true : config.window.native_frame
     property bool themeIdx: config.style.theme
 
     // Theme related

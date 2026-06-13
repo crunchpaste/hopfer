@@ -6,9 +6,9 @@ from setuptools import Extension, setup
 
 openmp_arg = "/openmp" if sys.platform.startswith("win") else "-fopenmp"
 opt_args = (
-    ["-O3", "-march=native", "-ffast-math"]
+    ["-O3", "-ffast-math", "-mtune=generic"]
     if not sys.platform.startswith("win")
-    else ["/O2", "/arch:AVX2"]
+    else ["/O2", "/fp:fast"]
 )
 
 ext_modules = [
