@@ -23,8 +23,8 @@ ApplicationWindow {
 
     // cant be bothered to make the shadows work on windows so non-system frame is disabled permanently
     property int isNative: (Qt.platform.os === "windows") ? true : config.window.native_frame
-    
-    flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
+
+    flags: isNative ? Qt.Window : Qt.FramelessWindowHint | Qt.SubWindow
 
     // the following two are just so that the window centers itself the the main window
     function center() {

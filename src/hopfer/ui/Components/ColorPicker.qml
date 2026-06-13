@@ -49,7 +49,7 @@ Window {
     minimumHeight: height
     maximumHeight: height
 
-    flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
+    flags: isNative ? Qt.Window : Qt.FramelessWindowHint | Qt.SubWindow
 
     color: Material.background
 
