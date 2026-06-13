@@ -9,7 +9,7 @@ Item {
   ColumnLayout {
     id: root
 
-    property bool isNative: config.window.native_frame
+    property int isNative: (Qt.platform.os === "windows") ? true : config.window.native_frame
     property bool darkTheme: config.style.theme == 0
 
     spacing: 10

@@ -21,6 +21,9 @@ ApplicationWindow {
     minimumHeight: height
     maximumHeight: height
 
+    // cant be bothered to make the shadows work on windows so non-system frame is disabled permanently
+    property int isNative: (Qt.platform.os === "windows") ? true : config.window.native_frame
+    
     flags: isNative ? Qt.SubWindow : Qt.FramelessWindowHint | Qt.SubWindow
 
     // the following two are just so that the window centers itself the the main window
@@ -36,8 +39,6 @@ ApplicationWindow {
         if (visible) center()
     }
 
-    // cant be bothered to make the shadows work on windows so non-system frame is disabled permanently
-    property int isNative: (Qt.platform.os === "windows") ? false : config.window.native_frame
     property int memThresh: config.options.memory_warning_threshold
     property int pixelW: bridge.width
     property int pixelH: bridge.height

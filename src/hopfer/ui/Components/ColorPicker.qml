@@ -10,7 +10,7 @@ Window {
 
     property color startColor: "ghostwhite"
     property alias currentColor: colorController.current_color
-    property bool isNative: config.window.native_frame
+    property int isNative: (Qt.platform.os === "windows") ? true : config.window.native_frame
 
     signal colorAccepted(color newColor)
 
