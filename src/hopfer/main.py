@@ -85,7 +85,7 @@ def main():
 
     app = QGuiApplication(sys.argv)
 
-    app.setIcon(QIcon(WINDOW_ICON_PATH))
+    app.setWindowIcon(QIcon(WINDOW_ICON_PATH))
 
     app.setDesktopFileName("hopfer")
 
