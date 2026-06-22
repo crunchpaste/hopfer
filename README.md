@@ -90,6 +90,9 @@ The project relies on the following awesome open-source libraries. I extend my t
 * **`numpy`**: [GitHub Link](https://github.com/numpy/numpy)
     > The fundamental package for scientific computing with Python.
 
+* **`Cython`**: [Website](https://cython.org/)
+    > An optimising static compiler for Python.
+
 * **`opencv-python`**: [GitHub Link](https://github.com/opencv/opencv-python)
     > Used for image processing and encoding/decoding.
 
