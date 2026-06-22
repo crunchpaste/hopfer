@@ -13,6 +13,7 @@
 <p align="center">
     <img src="demo.webp" alt="Demo" style="max-width: 100%; height: auto;" />
 </p>
+Note: Version 1.0 is a complete rewrite in QtQuick. An updated demo is coming soon!
 
 
 ## Table of contents
